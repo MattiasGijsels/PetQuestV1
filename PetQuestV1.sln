@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetQuestV1", "PetQuestV1\PetQuestV1\PetQuestV1.csproj", "{CE4DA944-D275-4E19-9FF0-18BC1428D388}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetQuestV1.Client", "PetQuestV1\PetQuestV1.Client\PetQuestV1.Client.csproj", "{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE4DA944-D275-4E19-9FF0-18BC1428D388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4DA944-D275-4E19-9FF0-18BC1428D388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4DA944-D275-4E19-9FF0-18BC1428D388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4DA944-D275-4E19-9FF0-18BC1428D388}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4049435E-91F3-4B39-AE95-6BC0BDFEEA41}
+	EndGlobalSection
+EndGlobal
