@@ -1,0 +1,32 @@
+﻿@page "/virtualpet"
+@inherits VirtualPetBase
+@rendermode InteractiveAuto
+
+<h1>Virtual Pet</h1>
+
+<div id="pet" style="@PetStyle">@PetEmoji</div>
+<div id="status">@StatusMessage</div>
+
+<div id="controls">
+    <button @onclick="FeedPet">Feed</button>
+    <button @onclick="PlayWithPet">Play</button>
+    <button @onclick="PutPetToSleep">Sleep</button>
+</div>
+
+<div class="progress-container">
+    @foreach (var bar in Bars)
+    {
+        <div class="progress-bar-container">
+            <div class="progress-bar-vertical">
+                <div class="progress-vertical" style="height:@bar.Height; background-color:@bar.Color"></div>
+            </div>
+            <div class="progress-label">@bar.Label</div>
+            <div class="progress-score">@bar.Score</div>
+        </div>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(EmojiAnimation))
+{
+    <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
+}
