@@ -2,39 +2,33 @@
 @inherits VirtualPetBase
 @rendermode InteractiveAuto
 
-<h1>Virtual Pet</h1>
+<div class="pet-container">
+    <h1 class="pet-title">Virtual Pet</h1>
 
-<div id="pet" style="@PetStyle">@PetEmoji</div>
-<div id="status">@StatusMessage</div>
+    <div class="pet-emoji">@PetEmoji</div>
+    <div class="status-message">@StatusMessage</div>
 
-<div id="controls">
-    <button @onclick="FeedPet">Feed</button>
-    <button @onclick="PlayWithPet">Play</button>
-    <button @onclick="PutPetToSleep">Sleep</button>
-</div>
+    <div class="button-group">
+        <button class="action-button" @onclick="FeedPet">Feed</button>
+        <button class="action-button" @onclick="PlayWithPet">Play</button>
+        <button class="action-button" @onclick="PutPetToSleep">Sleep</button>
+    </div>
 
-<div class="progress-container">
-    @foreach (var bar in Bars)
-    {
-        <div class="progress-bar-container">
-            <div class="progress-bar-vertical">
-                <div class="progress-vertical" style="height:@bar.Height; background-color:@bar.Color"></div>
+    <div class="progress-container">
+        @foreach (var bar in Bars)
+        {
+            <div class="progress-bar-container">
+                <div class="progress-bar-vertical">
+                    <div class="progress-vertical" style="height:@bar.Height; background-color:@bar.Color"></div>
+                </div>
+                <div class="progress-label">@bar.Label</div>
+                <div class="progress-score">@bar.Score</div>
             </div>
-            <div class="progress-label">@bar.Label</div>
-            <div class="progress-score">@bar.Score</div>
-        </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(EmojiAnimation))
+    {
+        <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
     }
 </div>
-<div class="card">
-    <img src="..." class="card-img-top" alt="...">
-    <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
-    </div>
-</div>
-
-@if (!string.IsNullOrEmpty(EmojiAnimation))
-{
-    <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
-}
