@@ -1,151 +1,77 @@
-﻿body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+﻿.pet-container {
     text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
     padding: 2rem;
-    position: relative;
+    border-radius: 1rem;
+    max-width: 600px;
+    margin: auto;
 }
 
-#pet {
-    font-size: 5rem;
-    transition: transform 0.5s ease-in-out;
-}
-
-#status {
-    margin: 1rem 0;
-    font-weight: bold;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
+.pet-emoji {
+    font-size: 4rem;
     margin-bottom: 1rem;
 }
 
-    #controls button {
-        padding: 1rem;
-        font-size: 1rem;
-        cursor: pointer;
-        width: 120px;
-        border: none;
-        border-radius: 50px;
-        background-color: #007bff;
-        color: white;
-        transition: transform 0.2s ease, background-color 0.2s ease;
-    }
+.status-message {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+}
 
-        #controls button:hover {
-            background-color: #0056b3;
-        }
-
-        #controls button:active {
-            transform: scale(0.95);
-        }
-
-.progress-container {
-    margin-top: 2rem;
+.button-group {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.action-button {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 2rem;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}
+E
+.progress-container {
+    display: flex;
     justify-content: center;
     gap: 2rem;
 }
 
 .progress-bar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center;
 }
 
 .progress-bar-vertical {
     width: 20px;
-    height: 150px;
+    height: 100px;
     background-color: #ccc;
     border-radius: 10px;
-    overflow: hidden;
+    margin: auto;
     position: relative;
-    margin-bottom: 0.5rem;
+    overflow: hidden;
 }
 
 .progress-vertical {
-    width: 100%;
-    height: 0%;
     position: absolute;
     bottom: 0;
-    transition: height 0.3s;
-}
-
-#alertness-bar {
-    background-color: #76c7c0;
-}
-
-#satiety-bar {
-    background-color: #ffa500;
-}
-
-#happiness-bar {
-    background-color: #ff69b4;
+    width: 100%;
 }
 
 .progress-label {
-    text-align: center;
-    font-weight: bold;
+    margin-top: 0.5rem;
 }
 
 .progress-score {
-    margin-top: 0.5rem;
-    font-weight: bold;
-}
-
-.emoji-animation {
-    font-size: 3rem;
-    position: absolute;
-    animation: floatUp 1s ease-in-out;
-    opacity: 0;
-}
-
-@keyframes floatUp {
-    0% {
-        transform: translateY(20px);
-        opacity: 1;
-    }
-
-    100% {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-    #pet {
-        font-size: 4rem;
-    }
-
-    #controls button {
-        width: 100%;
-        padding: 0.75rem;
-        font-size: 0.9rem;
-    }
-
-    .progress-bar-vertical {
-        height: 100px;
-    }
-}
-
-@media (max-width: 470px) {
-    .progress-container {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 1rem;
-    }
-
-    .progress-bar-vertical {
-        height: 80px;
-    }
+    font-size: 0.9rem;
+    color: #333;
 }
