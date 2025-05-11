@@ -15,7 +15,7 @@ public class VirtualPetBase : ComponentBase, IDisposable
     {
         public string Label { get; set; } = "";
         public string Score { get; set; } = "";
-        public string Height { get; set; } = "+%";
+        public string Height { get; set; } = "0%";
         public string Color { get; set; } = "";
     }
 
