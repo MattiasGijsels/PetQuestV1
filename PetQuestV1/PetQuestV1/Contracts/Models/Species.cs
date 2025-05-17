@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PetQuestV1.Contracts.Shared;
 
 namespace PetQuestV1.Contracts.Models
 {
-    public class Species
+    public class Species:ModelBase
     {
         public string Name { get; set; } = default!;
 
