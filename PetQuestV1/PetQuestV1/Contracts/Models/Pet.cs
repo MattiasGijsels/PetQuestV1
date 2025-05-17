@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts.Shared;
+using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 
 namespace PetQuestV1.Contracts.Models
@@ -18,19 +19,23 @@ namespace PetQuestV1.Contracts.Models
         public string PetName { get; set; } = default!;
 
         [Required]
-        [StringLength(50)]
-        public Species Name { get; set; } = new Species();
+        public string SpeciesId { get; set; } // FK to Species
+
+        [ForeignKey("SpeciesId")]
+        public Species Species { get; set; } = default!;
 
         [Required]
         [StringLength(50)]
         public string Breed { get; set; } = default!;
 
         public int Advantage { get; set; } = 5;
-        //number that defines how much advantage a pet has when it enters a minigame, it's the result of Virtual pet score game.
+        //number that defines how much advantage a pet has when it enters a minigame,
+        //it's the result of Virtual pet score game.
 
         public int Age { get; set; }
 
         // Foreign Key to the User
+        [Required]
         public string OwnerId { get; set; }
 
         // Navigation Property to the User
