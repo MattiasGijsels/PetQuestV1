@@ -1,0 +1,54 @@
+﻿@page "/admin-control-panel"
+@inherits PetQuestV1.Components.Pages.AdminControlPanelBase
+
+<h3>Admin Control Panel</h3>
+
+<h4>Pets</h4>
+
+<button @onclick="ShowAddPetForm">Add New Pet</button>
+
+@if (IsPetFormVisible)
+{
+    <EditForm Model="PetFormModel" OnValidSubmit="HandlePetFormSubmit">
+        <InputText @bind-Value="PetFormModel.PetName" placeholder="Name" />
+        <InputText @bind-Value="PetFormModel.SpeciesId" placeholder="Species ID" />
+        <InputText @bind-Value="PetFormModel.OwnerId" placeholder="Owner ID" />
+        <button type="submit">Save</button>
+        <button type="button" @onclick="CancelPetForm">Cancel</button>
+    </EditForm>
+}
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Species</th>
+            <th>Owner</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pet in Pets)
+        {
+            <tr>
+                <td>@pet.PetName</td>
+                <td>@pet.Species?.Name</td>
+                <td>@pet.Owner?.UserName</td>
+                <td>
+                    <button @onclick="() => EditPet(pet)">Edit</button>
+                    <button @onclick="() => DeletePet(pet.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h4>Users</h4>
+<ul>
+    @foreach (var user in Users)
+    {
+        <li>@user.UserName</li>
+    }
+</ul>
