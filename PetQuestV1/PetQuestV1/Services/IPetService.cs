@@ -7,7 +7,7 @@ namespace PetQuestV1.Contracts
     public interface IPetService
     {
         Task<List<Pet>> GetAllAsync();
-        Task<Pet> GetByIdAsync(string id);
+        Task<Pet?> GetByIdAsync(string id);
         Task AddAsync(Pet pet);
         Task UpdateAsync(Pet pet);
         Task DeleteAsync(string id);

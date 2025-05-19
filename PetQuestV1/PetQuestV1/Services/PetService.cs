@@ -1,35 +1,60 @@
-﻿using PetQuestV1.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
+using PetQuestV1.Data;
 
 namespace PetQuestV1.Services
 {
     public class PetService : IPetService
     {
-        private readonly List<Pet> _pets = new();
+        private readonly ApplicationDbContext _context;
 
-        public Task<List<Pet>> GetAllAsync() => Task.FromResult(_pets);
+        public PetService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-        public Task<Pet> GetByIdAsync(string id) =>
-            Task.FromResult(_pets.FirstOrDefault(p => p.Id == id));
+        public async Task<List<Pet>> GetAllAsync()
+        {
+            return await _context.Pets
+                .Include(p => p.Owner)
+                .Include(p => p.Species)
+                .ToListAsync();
+        }
 
-        public Task AddAsync(Pet pet)
+        public async Task<Pet?> GetByIdAsync(string id)
+        {
+            return await _context.Pets
+                .Include(p => p.Owner)
+                .Include(p => p.Species)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task AddAsync(Pet pet)
         {
             pet.Id = Guid.NewGuid().ToString();
-            _pets.Add(pet);
-            return Task.CompletedTask;
+            await _context.Pets.AddAsync(pet);
+            await _context.SaveChangesAsync();
         }
 
-        public Task UpdateAsync(Pet pet)
+        public async Task UpdateAsync(Pet pet)
         {
-            var idx = _pets.FindIndex(p => p.Id == pet.Id);
-            if (idx >= 0) _pets[idx] = pet;
-            return Task.CompletedTask;
+            var existingPet = await _context.Pets.FindAsync(pet.Id);
+            if (existingPet != null)
+            {
+                _context.Entry(existingPet).CurrentValues.SetValues(pet);
+                await _context.SaveChangesAsync();
+            }
         }
 
-        public Task DeleteAsync(string id)
+        public async Task DeleteAsync(string id)
         {
-            _pets.RemoveAll(p => p.Id == id);
-            return Task.CompletedTask;
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet != null)
+            {
+                _context.Pets.Remove(pet);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
