@@ -19,7 +19,7 @@ namespace PetQuestV1.Contracts.Models
         public string PetName { get; set; } = default!;
 
         [Required]
-        public string SpeciesId { get; set; } // FK to Species
+        public string SpeciesId { get; set; } = default!; // FK to Species
 
         [ForeignKey("SpeciesId")]
         public Species Species { get; set; } = default!;
@@ -36,11 +36,11 @@ namespace PetQuestV1.Contracts.Models
 
         // Foreign Key to the User
         [Required]
-        public string OwnerId { get; set; }
+        public string OwnerId { get; set; } = default!;
 
         // Navigation Property to the User
         [ForeignKey("OwnerId")]
-        public ApplicationUser Owner { get; set; } // One to many relation ship, one owner can have many pets
+        public ApplicationUser Owner { get; set; }= default!; // One to many relation ship, one owner can have many pets
 
         public Pet() : base() { }
     }
