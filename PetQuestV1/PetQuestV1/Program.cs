@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Client.Pages;
 using PetQuestV1.Components;
 using PetQuestV1.Components.Account;
+using PetQuestV1.Contracts;
 using PetQuestV1.Data;
+using PetQuestV1.Repositories;
+using PetQuestV1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +32,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddScoped<IPetRepository, PetRepository>();
+builder.Services.AddScoped<IPetService, PetService>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
