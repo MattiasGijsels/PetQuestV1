@@ -18,21 +18,26 @@ namespace PetQuestV1.Components.Pages
         protected List<Pet> Pets { get; set; } = new();
         protected List<ApplicationUser> Users { get; set; } = new();
 
-        // Pagination state
+        // Pagination pets
         protected int PetsCurrentPage { get; set; } = 1;
         protected int PetsPageSize { get; set; } = 10;
         protected int PetsTotalPages => (int)System.Math.Ceiling((double)Pets.Count / PetsPageSize);
         protected IEnumerable<Pet> PagedPets => Pets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
 
+        // Pagination users
         protected int UsersCurrentPage { get; set; } = 1;
         protected int UsersPageSize { get; set; } = 10;
         protected int UsersTotalPages => (int)System.Math.Ceiling((double)Users.Count / UsersPageSize);
         protected IEnumerable<ApplicationUser> PagedUsers => Users.Skip((UsersCurrentPage - 1) * UsersPageSize).Take(UsersPageSize);
 
-        // Form & UI state
+        // Forms & UI state for pets management
         protected Pet PetFormModel { get; set; } = new();
         protected bool IsPetFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
+
+        // Toggling section visibility (initially set to false)
+        protected bool IsPetsSectionVisible { get; set; } = false;
+        protected bool IsUsersSectionVisible { get; set; } = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -44,12 +49,12 @@ namespace PetQuestV1.Components.Pages
             Pets = await PetService.GetAllAsync();
             Users = new List<ApplicationUser>(UserManager.Users);
 
-            // Ensure current pages are in range
+            // Clamp current pages within the available page counts
             PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
             UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
-        // ---------- Pets CRUD ----------
+        // ---------- Pets CRUD Handlers ----------
         protected void ShowAddPetForm()
         {
             PetFormModel = new Pet();
@@ -92,7 +97,7 @@ namespace PetQuestV1.Components.Pages
             await LoadData();
         }
 
-        // ---------- Pagination handlers ----------
+        // ---------- Pagination Handlers ----------
         protected void ChangePetsPage(int page)
         {
             PetsCurrentPage = page < 1 ? 1 : page > PetsTotalPages ? PetsTotalPages : page;
@@ -101,6 +106,17 @@ namespace PetQuestV1.Components.Pages
         protected void ChangeUsersPage(int page)
         {
             UsersCurrentPage = page < 1 ? 1 : page > UsersTotalPages ? UsersTotalPages : page;
+        }
+
+        // ---------- Section Visibility Toggle Methods ----------
+        protected void TogglePetsSection()
+        {
+            IsPetsSectionVisible = !IsPetsSectionVisible;
+        }
+
+        protected void ToggleUsersSection()
+        {
+            IsUsersSectionVisible = !IsUsersSectionVisible;
         }
     }
 }
