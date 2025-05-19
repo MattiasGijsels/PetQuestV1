@@ -68,8 +68,8 @@ namespace PetQuestV1.Components.Pages
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
-                SpeciesId = pet.SpeciesId,
-                OwnerId = pet.OwnerId
+                Species = pet.Species,
+                Owner = pet.Owner
             };
             IsEditing = true;
             IsPetFormVisible = true;

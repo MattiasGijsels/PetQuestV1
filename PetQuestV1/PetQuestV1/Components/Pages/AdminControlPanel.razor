@@ -26,10 +26,10 @@
                             <InputText class="form-control" @bind-Value="PetFormModel.PetName" placeholder="Name" />
                         </div>
                         <div class="col-sm-4">
-                            <InputText class="form-control" @bind-Value="PetFormModel.SpeciesId" placeholder="Species ID" />
+                            <InputText class="form-control" @bind-Value="PetFormModel.Species.Name" placeholder="Species ID" />
                         </div>
                         <div class="col-sm-4">
-                            <InputText class="form-control" @bind-Value="PetFormModel.OwnerId" placeholder="Owner ID" />
+                            <InputText class="form-control" @bind-Value="PetFormModel.Owner.UserName" placeholder="Owner ID" />
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
