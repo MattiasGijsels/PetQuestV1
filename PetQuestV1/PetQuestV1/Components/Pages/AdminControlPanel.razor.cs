@@ -5,6 +5,7 @@ using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Components.Pages
@@ -17,6 +18,18 @@ namespace PetQuestV1.Components.Pages
         protected List<Pet> Pets { get; set; } = new();
         protected List<ApplicationUser> Users { get; set; } = new();
 
+        // Pagination state
+        protected int PetsCurrentPage { get; set; } = 1;
+        protected int PetsPageSize { get; set; } = 10;
+        protected int PetsTotalPages => (int)System.Math.Ceiling((double)Pets.Count / PetsPageSize);
+        protected IEnumerable<Pet> PagedPets => Pets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
+
+        protected int UsersCurrentPage { get; set; } = 1;
+        protected int UsersPageSize { get; set; } = 10;
+        protected int UsersTotalPages => (int)System.Math.Ceiling((double)Users.Count / UsersPageSize);
+        protected IEnumerable<ApplicationUser> PagedUsers => Users.Skip((UsersCurrentPage - 1) * UsersPageSize).Take(UsersPageSize);
+
+        // Form & UI state
         protected Pet PetFormModel { get; set; } = new();
         protected bool IsPetFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
@@ -29,9 +42,14 @@ namespace PetQuestV1.Components.Pages
         private async Task LoadData()
         {
             Pets = await PetService.GetAllAsync();
-            Users = new List<ApplicationUser>(UserManager.Users); // Sync query for demo; better to do async in production
+            Users = new List<ApplicationUser>(UserManager.Users);
+
+            // Ensure current pages are in range
+            PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
+            UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
+        // ---------- Pets CRUD ----------
         protected void ShowAddPetForm()
         {
             PetFormModel = new Pet();
@@ -72,6 +90,17 @@ namespace PetQuestV1.Components.Pages
         {
             await PetService.DeleteAsync(id);
             await LoadData();
+        }
+
+        // ---------- Pagination handlers ----------
+        protected void ChangePetsPage(int page)
+        {
+            PetsCurrentPage = page < 1 ? 1 : page > PetsTotalPages ? PetsTotalPages : page;
+        }
+
+        protected void ChangeUsersPage(int page)
+        {
+            UsersCurrentPage = page < 1 ? 1 : page > UsersTotalPages ? UsersTotalPages : page;
         }
     }
 }
