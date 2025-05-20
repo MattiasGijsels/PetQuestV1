@@ -12,8 +12,8 @@ using PetQuestV1.Data;
 namespace PetQuestV1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250517145135_AddSpeciesToPet")]
-    partial class AddSpeciesToPet
+    [Migration("20250520140652_FinalAttemptAtSchema")]
+    partial class FinalAttemptAtSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,31 @@ namespace PetQuestV1.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PetQuestV1.Contracts.Models.Breed", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("BreedName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SpeciesId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpeciesId");
+
+                    b.ToTable("Breeds");
+                });
+
             modelBuilder.Entity("PetQuestV1.Contracts.Models.Pet", b =>
                 {
                     b.Property<string>("Id")
@@ -167,19 +192,16 @@ namespace PetQuestV1.Migrations
                     b.Property<int>("Advantage")
                         .HasColumnType("int");
 
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
+                    b.Property<double?>("Age")
+                        .HasColumnType("float");
 
-                    b.Property<string>("Breed")
-                        .IsRequired()
-                        .HasMaxLength(50)
+                    b.Property<string>("BreedId")
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("OwnerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PetName")
@@ -188,10 +210,11 @@ namespace PetQuestV1.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("SpeciesId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BreedId");
 
                     b.HasIndex("OwnerId");
 
@@ -209,7 +232,7 @@ namespace PetQuestV1.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("SpeciesName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -288,7 +311,7 @@ namespace PetQuestV1.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -297,7 +320,7 @@ namespace PetQuestV1.Migrations
                     b.HasOne("PetQuestV1.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -306,7 +329,7 @@ namespace PetQuestV1.Migrations
                     b.HasOne("PetQuestV1.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -315,13 +338,13 @@ namespace PetQuestV1.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("PetQuestV1.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -330,27 +353,48 @@ namespace PetQuestV1.Migrations
                     b.HasOne("PetQuestV1.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PetQuestV1.Contracts.Models.Pet", b =>
+            modelBuilder.Entity("PetQuestV1.Contracts.Models.Breed", b =>
                 {
-                    b.HasOne("PetQuestV1.Data.ApplicationUser", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PetQuestV1.Contracts.Models.Species", "Species")
-                        .WithMany()
+                        .WithMany("Breeds")
                         .HasForeignKey("SpeciesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Species");
+                });
+
+            modelBuilder.Entity("PetQuestV1.Contracts.Models.Pet", b =>
+                {
+                    b.HasOne("PetQuestV1.Contracts.Models.Breed", "Breed")
+                        .WithMany()
+                        .HasForeignKey("BreedId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PetQuestV1.Data.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PetQuestV1.Contracts.Models.Species", "Species")
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Breed");
+
                     b.Navigation("Owner");
 
                     b.Navigation("Species");
+                });
+
+            modelBuilder.Entity("PetQuestV1.Contracts.Models.Species", b =>
+                {
+                    b.Navigation("Breeds");
                 });
 #pragma warning restore 612, 618
         }

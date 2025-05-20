@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PetQuestV1.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateIdentitySchema : Migration
+    public partial class FinalAttemptAtSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,6 +51,19 @@ namespace PetQuestV1.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Species",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    SpeciesName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Species", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -67,8 +80,7 @@ namespace PetQuestV1.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -88,8 +100,7 @@ namespace PetQuestV1.Migrations
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -108,8 +119,7 @@ namespace PetQuestV1.Migrations
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -126,14 +136,12 @@ namespace PetQuestV1.Migrations
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -152,8 +160,63 @@ namespace PetQuestV1.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Breeds",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    BreedName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SpeciesId = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Breeds", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Breeds_Species_SpeciesId",
+                        column: x => x.SpeciesId,
+                        principalTable: "Species",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pets",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PetName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SpeciesId = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    BreedId = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    Advantage = table.Column<int>(type: "int", nullable: false),
+                    Age = table.Column<double>(type: "float", nullable: true),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pets_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Pets_Breeds_BreedId",
+                        column: x => x.BreedId,
+                        principalTable: "Breeds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Pets_Species_SpeciesId",
+                        column: x => x.SpeciesId,
+                        principalTable: "Species",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -194,6 +257,26 @@ namespace PetQuestV1.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Breeds_SpeciesId",
+                table: "Breeds",
+                column: "SpeciesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pets_BreedId",
+                table: "Pets",
+                column: "BreedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pets_OwnerId",
+                table: "Pets",
+                column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pets_SpeciesId",
+                table: "Pets",
+                column: "SpeciesId");
         }
 
         /// <inheritdoc />
@@ -215,10 +298,19 @@ namespace PetQuestV1.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Pets");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Breeds");
+
+            migrationBuilder.DropTable(
+                name: "Species");
         }
     }
 }

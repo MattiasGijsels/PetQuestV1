@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿// Components/Pages/AdminControlPanelBase.cs
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts;
@@ -18,6 +19,7 @@ namespace PetQuestV1.Components.Pages
         protected List<Pet> Pets { get; set; } = new();
         protected List<ApplicationUser> Users { get; set; } = new();
         protected List<Species> AvailableSpecies { get; set; } = new(); // To hold all species for dropdown
+        protected List<Breed> AvailableBreeds { get; set; } = new();   // --- NEW: To hold breeds for dependent dropdown ---
         protected List<ApplicationUser> AvailableUsers { get; set; } = new(); // To hold all users for dropdown
 
         // Pagination pets
@@ -59,32 +61,63 @@ namespace PetQuestV1.Components.Pages
 
         private async Task LoadDropdownData()
         {
-            AvailableSpecies = await PetService.GetAllSpeciesAsync(); // New service method
+            AvailableSpecies = await PetService.GetAllSpeciesAsync();
             AvailableUsers = new List<ApplicationUser>(UserManager.Users);
+            // Initially load all breeds or none, depending on preference.
+            // When adding a new pet, we don't have a species selected yet, so load all or empty.
+            // When editing, we'll load based on the existing pet's species.
+            AvailableBreeds = new List<Breed>(); // Start with an empty list for breeds initially
+        }
+
+        // --- NEW: Handle Species Dropdown Change ---
+        protected async Task OnSpeciesChanged(ChangeEventArgs e)
+        {
+            PetFormModel.SpeciesId = e.Value?.ToString(); // Update the SpeciesId in the model
+            PetFormModel.BreedId = null; // Reset BreedId when species changes
+
+            if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
+            {
+                AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+            }
+            else
+            {
+                AvailableBreeds = new List<Breed>(); // Clear breeds if no species is selected
+            }
         }
 
         // ---------- Pets CRUD Handlers ----------
         protected void ShowAddPetForm()
         {
-            PetFormModel = new Pet(); // New pet, IDs will be generated on save if needed
+            PetFormModel = new Pet(); // New pet
             IsEditing = false;
             IsPetFormVisible = true;
+            AvailableBreeds = new List<Breed>(); // Clear breeds for new pet form
         }
 
-        protected void EditPet(Pet pet)
+        protected async Task EditPet(Pet pet) // Changed to async to load breeds
         {
-            // Assign existing values for editing, including Breed and Age
+            // Assign existing values for editing
             PetFormModel = new Pet
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
                 SpeciesId = pet.Species?.Id,
                 OwnerId = pet.Owner?.Id,
-                Breed = pet.Breed, // Added
-                Age = pet.Age      // Added
+                BreedId = pet.Breed?.Id, // --- NEW: Assign BreedId from existing pet ---
+                Age = pet.Age
             };
             IsEditing = true;
             IsPetFormVisible = true;
+
+            // --- NEW: Load breeds based on the existing pet's species for editing ---
+            if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
+            {
+                AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+            }
+            else
+            {
+                AvailableBreeds = new List<Breed>();
+            }
         }
 
         protected async Task HandlePetFormSubmit()
@@ -95,37 +128,23 @@ namespace PetQuestV1.Components.Pages
                 if (existingPet != null)
                 {
                     existingPet.PetName = PetFormModel.PetName;
-                    existingPet.Breed = PetFormModel.Breed; // Added
-                    existingPet.Age = PetFormModel.Age;     // Added
+                    existingPet.Age = PetFormModel.Age;
 
-                    // Update Species based on selected SpeciesId
+                    // Update Species and Breed IDs
                     existingPet.SpeciesId = PetFormModel.SpeciesId;
-                    // No need to set existingPet.Species directly here if PetRepository handles it via FK
-                    // existingPet.Species = PetFormModel.SpeciesId != null
-                    //     ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
-                    //     : null;
-
-                    // Update Owner based on selected OwnerId
+                    existingPet.BreedId = PetFormModel.BreedId; // --- NEW: Assign BreedId ---
                     existingPet.OwnerId = PetFormModel.OwnerId;
-                    // No need to set existingPet.Owner directly here if PetRepository handles it via FK
-                    // existingPet.Owner = PetFormModel.OwnerId != null
-                    //     ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
-                    //     : null;
 
                     await PetService.UpdateAsync(existingPet);
                 }
             }
             else
             {
-                // For adding a new pet, ensure Species and Owner objects are populated
-                // based on the selected IDs from the dropdowns.
-                // The PetRepository.AddAsync will handle populating navigation properties
-                // based on the assigned IDs.
                 await PetService.AddAsync(PetFormModel);
             }
 
             IsPetFormVisible = false;
-            await LoadData();
+            await LoadData(); // Reload all data including updated pet list
         }
 
         protected void CancelPetForm()

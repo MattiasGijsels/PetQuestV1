@@ -1,4 +1,5 @@
-﻿using PetQuestV1.Contracts;
+﻿// Services/PetService.cs
+using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,25 +27,46 @@ namespace PetQuestV1.Services
 
         public Task AddAsync(Pet pet)
         {
+            // You might add business logic here before calling the repository
             return _petRepository.AddAsync(pet);
         }
 
         public Task UpdateAsync(Pet pet)
         {
+            // You might add business logic here before calling the repository
             return _petRepository.UpdateAsync(pet);
         }
 
         public Task DeleteAsync(string id)
         {
+            // You might add business logic here before calling the repository
             return _petRepository.DeleteAsync(id);
         }
-        public Task<Species?> GetSpeciesByNameAsync(string name) // Implement this method
+
+        public Task<Species?> GetSpeciesByNameAsync(string name)
         {
             return _petRepository.GetSpeciesByNameAsync(name);
         }
-        public Task<List<Species>> GetAllSpeciesAsync() // Implement the new method
+
+        public Task<List<Species>> GetAllSpeciesAsync()
         {
             return _petRepository.GetAllSpeciesAsync();
+        }
+
+        // --- NEW: Implement Breed methods ---
+        public Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId)
+        {
+            return _petRepository.GetBreedsBySpeciesIdAsync(speciesId);
+        }
+
+        public Task<List<Breed>> GetAllBreedsAsync()
+        {
+            return _petRepository.GetAllBreedsAsync();
+        }
+
+        public Task<Breed?> GetBreedByIdAsync(string id)
+        {
+            return _petRepository.GetBreedByIdAsync(id);
         }
     }
 }

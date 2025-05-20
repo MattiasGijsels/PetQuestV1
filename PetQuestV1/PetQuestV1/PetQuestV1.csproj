@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+  </ItemGroup>
+
 </Project>

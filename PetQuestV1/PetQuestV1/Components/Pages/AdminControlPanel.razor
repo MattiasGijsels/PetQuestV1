@@ -19,13 +19,14 @@
             @if (IsPetFormVisible)
             {
                 <EditForm Model="PetFormModel" OnValidSubmit="HandlePetFormSubmit" class="p-3 border-bottom">
+                    <DataAnnotationsValidator /> @* Add this for client-side validation *@
                     <div class="row g-2 mb-2">
                         <div class="col-sm-4">
                             <InputText class="form-control" @bind-Value="PetFormModel.PetName" placeholder="Name" />
                             <ValidationMessage For="@(() => PetFormModel.PetName)" />
                         </div>
                         <div class="col-sm-4">
-                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId">
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @onchange="OnSpeciesChanged"> @* ADD @onchange *@
                                 <option value="">Select Species</option>
                                 @foreach (var species in AvailableSpecies)
                                 {
@@ -46,10 +47,19 @@
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
-                        @* Added a new row for Breed and Age inputs *@
                         <div class="col-sm-4">
-                            <InputText class="form-control" @bind-Value="PetFormModel.Breed" placeholder="Breed" />
-                            <ValidationMessage For="@(() => PetFormModel.Breed)" />
+                            @* CHANGED TO InputSelect FOR BREEDS *@
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.BreedId">
+                                <option value="">Select Breed</option>
+                                @if (AvailableBreeds != null) // Ensure AvailableBreeds is not null
+                                {
+                                    @foreach (var breed in AvailableBreeds)
+                                    {
+                                        <option value="@breed.Id">@breed.BreedName</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => PetFormModel.BreedId)" />
                         </div>
                         <div class="col-sm-4">
                             <InputNumber class="form-control" @bind-Value="PetFormModel.Age" placeholder="Please fill in the age" min="0" />
@@ -65,7 +75,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Name</th>
-                        <th>Species</th>                        
+                        <th>Species</th>
                         <th>Breed</th> @* Added Breed header *@
                         <th>Age</th> @* Added Age header *@
                         <th>Owner</th>
@@ -77,9 +87,9 @@
                     {
                         <tr>
                             <td>@pet.PetName</td>
-                            <td>@pet.Species?.SpeciesName</td>                            
-                            <td>@pet.Breed</td> @* Display Breed *@
-                            <td>@pet.Age</td> @* Display Age *@
+                            <td>@pet.Species?.SpeciesName</td>
+                            <td>@pet.Breed?.BreedName</td> @* CHANGED: Display BreedName from the navigation property *@
+                            <td>@pet.Age</td>
                             <td>@pet.Owner?.UserName</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
