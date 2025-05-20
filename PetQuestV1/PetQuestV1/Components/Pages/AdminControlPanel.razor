@@ -19,14 +19,14 @@
             @if (IsPetFormVisible)
             {
                 <EditForm Model="PetFormModel" OnValidSubmit="HandlePetFormSubmit" class="p-3 border-bottom">
-                    <DataAnnotationsValidator /> @* Add this for client-side validation *@
+                    <DataAnnotationsValidator />
                     <div class="row g-2 mb-2">
                         <div class="col-sm-4">
                             <InputText class="form-control" @bind-Value="PetFormModel.PetName" placeholder="Name" />
                             <ValidationMessage For="@(() => PetFormModel.PetName)" />
                         </div>
                         <div class="col-sm-4">
-                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @onchange="OnSpeciesChanged"> @* ADD @onchange *@
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @onchange="OnSpeciesChanged">
                                 <option value="">Select Species</option>
                                 @foreach (var species in AvailableSpecies)
                                 {
@@ -48,17 +48,18 @@
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-sm-4">
-                            @* CHANGED TO InputSelect FOR BREEDS *@
-                            <InputSelect class="form-select" @bind-Value="PetFormModel.BreedId">
+                            @* **CRITICAL CHANGE HERE FOR BREED DROPDOWN** *@
+                            @* Use a standard <select> for more control over initial state and dynamic options *@
+                            <select class="form-select" @bind="PetFormModel.BreedId">
                                 <option value="">Select Breed</option>
-                                @if (AvailableBreeds != null) // Ensure AvailableBreeds is not null
+                                @if (AvailableBreeds != null && AvailableBreeds.Any()) // Ensure AvailableBreeds is not null AND has items
                                 {
                                     @foreach (var breed in AvailableBreeds)
                                     {
                                         <option value="@breed.Id">@breed.BreedName</option>
                                     }
                                 }
-                            </InputSelect>
+                            </select>
                             <ValidationMessage For="@(() => PetFormModel.BreedId)" />
                         </div>
                         <div class="col-sm-4">
@@ -76,8 +77,8 @@
                     <tr>
                         <th>Name</th>
                         <th>Species</th>
-                        <th>Breed</th> @* Added Breed header *@
-                        <th>Age</th> @* Added Age header *@
+                        <th>Breed</th>
+                        <th>Age</th>
                         <th>Owner</th>
                         <th style="width: 120px">Actions</th>
                     </tr>
@@ -88,7 +89,7 @@
                         <tr>
                             <td>@pet.PetName</td>
                             <td>@pet.Species?.SpeciesName</td>
-                            <td>@pet.Breed?.BreedName</td> @* CHANGED: Display BreedName from the navigation property *@
+                            <td>@pet.Breed?.BreedName</td>
                             <td>@pet.Age</td>
                             <td>@pet.Owner?.UserName</td>
                             <td>

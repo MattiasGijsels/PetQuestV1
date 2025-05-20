@@ -1,5 +1,4 @@
-﻿// Components/Pages/AdminControlPanelBase.cs
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts;
@@ -18,9 +17,9 @@ namespace PetQuestV1.Components.Pages
 
         protected List<Pet> Pets { get; set; } = new();
         protected List<ApplicationUser> Users { get; set; } = new();
-        protected List<Species> AvailableSpecies { get; set; } = new(); // To hold all species for dropdown
-        protected List<Breed> AvailableBreeds { get; set; } = new();   // --- NEW: To hold breeds for dependent dropdown ---
-        protected List<ApplicationUser> AvailableUsers { get; set; } = new(); // To hold all users for dropdown
+        protected List<Species> AvailableSpecies { get; set; } = new();
+        protected List<Breed> AvailableBreeds { get; set; } = new(); // Holds breeds for dependent dropdown
+        protected List<ApplicationUser> AvailableUsers { get; set; } = new();
 
         // Pagination pets
         protected int PetsCurrentPage { get; set; } = 1;
@@ -63,10 +62,9 @@ namespace PetQuestV1.Components.Pages
         {
             AvailableSpecies = await PetService.GetAllSpeciesAsync();
             AvailableUsers = new List<ApplicationUser>(UserManager.Users);
-            // Initially load all breeds or none, depending on preference.
-            // When adding a new pet, we don't have a species selected yet, so load all or empty.
-            // When editing, we'll load based on the existing pet's species.
-            AvailableBreeds = new List<Breed>(); // Start with an empty list for breeds initially
+            // AvailableBreeds is intentionally left empty here, it will be populated by OnSpeciesChanged
+            // or by EditPet method when an existing pet is being edited.
+            AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
         }
 
         // --- NEW: Handle Species Dropdown Change ---
@@ -83,6 +81,7 @@ namespace PetQuestV1.Components.Pages
             {
                 AvailableBreeds = new List<Breed>(); // Clear breeds if no species is selected
             }
+            StateHasChanged(); // Force UI update after breeds are loaded
         }
 
         // ---------- Pets CRUD Handlers ----------
@@ -92,9 +91,10 @@ namespace PetQuestV1.Components.Pages
             IsEditing = false;
             IsPetFormVisible = true;
             AvailableBreeds = new List<Breed>(); // Clear breeds for new pet form
+            StateHasChanged(); // Ensure UI updates to clear breed dropdown
         }
 
-        protected async Task EditPet(Pet pet) // Changed to async to load breeds
+        protected async Task EditPet(Pet pet)
         {
             // Assign existing values for editing
             PetFormModel = new Pet
@@ -103,13 +103,13 @@ namespace PetQuestV1.Components.Pages
                 PetName = pet.PetName,
                 SpeciesId = pet.Species?.Id,
                 OwnerId = pet.Owner?.Id,
-                BreedId = pet.Breed?.Id, // --- NEW: Assign BreedId from existing pet ---
+                BreedId = pet.Breed?.Id,
                 Age = pet.Age
             };
             IsEditing = true;
             IsPetFormVisible = true;
 
-            // --- NEW: Load breeds based on the existing pet's species for editing ---
+            // --- CRITICAL FIX: Load breeds based on the existing pet's species for editing ---
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
                 AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
@@ -118,6 +118,7 @@ namespace PetQuestV1.Components.Pages
             {
                 AvailableBreeds = new List<Breed>();
             }
+            StateHasChanged(); // Force UI update after breeds are loaded for editing
         }
 
         protected async Task HandlePetFormSubmit()
@@ -132,7 +133,7 @@ namespace PetQuestV1.Components.Pages
 
                     // Update Species and Breed IDs
                     existingPet.SpeciesId = PetFormModel.SpeciesId;
-                    existingPet.BreedId = PetFormModel.BreedId; // --- NEW: Assign BreedId ---
+                    existingPet.BreedId = PetFormModel.BreedId;
                     existingPet.OwnerId = PetFormModel.OwnerId;
 
                     await PetService.UpdateAsync(existingPet);
@@ -145,39 +146,46 @@ namespace PetQuestV1.Components.Pages
 
             IsPetFormVisible = false;
             await LoadData(); // Reload all data including updated pet list
+            StateHasChanged(); // Ensure UI updates after form submission
         }
 
         protected void CancelPetForm()
         {
             IsPetFormVisible = false;
+            StateHasChanged(); // Ensure UI updates to hide form
         }
 
         protected async Task DeletePet(string id)
         {
             await PetService.DeleteAsync(id);
             await LoadData();
+            StateHasChanged(); // Ensure UI updates after deletion
         }
 
         // ---------- Pagination Handlers ----------
         protected void ChangePetsPage(int page)
         {
             PetsCurrentPage = page < 1 ? 1 : page > PetsTotalPages ? PetsTotalPages : page;
+            StateHasChanged(); // Ensure UI updates for pagination
         }
 
         protected void ChangeUsersPage(int page)
         {
             UsersCurrentPage = page < 1 ? 1 : page > UsersTotalPages ? UsersTotalPages : page;
+            StateHasChanged(); // Ensure UI updates for pagination
         }
 
         // ---------- Section Visibility Toggle Methods ----------
         protected void TogglePetsSection()
         {
             IsPetsSectionVisible = !IsPetsSectionVisible;
+            StateHasChanged(); // Ensure UI updates for section visibility
         }
 
         protected void ToggleUsersSection()
         {
-            IsUsersSectionVisible = !IsPetsSectionVisible;
+            IsUsersSectionVisible = !IsUsersSectionVisible; // Corrected: should be independent of IsPetsSectionVisible
+            StateHasChanged(); // Ensure UI updates for section visibility
         }
     }
 }
