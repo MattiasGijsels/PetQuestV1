@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using PetQuestV1.Contracts.Shared; // Assuming ModelBase is here
-using PetQuestV1.Data; // For ApplicationUser
+using PetQuestV1.Contracts.Shared; 
+using PetQuestV1.Data; 
 
 namespace PetQuestV1.Contracts.Models
 {
@@ -12,11 +12,7 @@ namespace PetQuestV1.Contracts.Models
         [StringLength(100, ErrorMessage = "Pet Name must be less than 100 characters.")]
         public string PetName { get; set; } = default!;
 
-        // Species relationship
-        // Make SpeciesId nullable if a pet might not have a species initially,
-        // or if it can be unset via the dropdown (e.g., "Select Species" option).
-        // If it's [Required], then the dropdown must always have a species selected.
-        [Required(ErrorMessage = "Species is required.")] // Keep this if a pet MUST have a species
+        [Required(ErrorMessage = "Species is required.")] // pet MUST have a species
         public string SpeciesId { get; set; } = default!;
 
         [ForeignKey("SpeciesId")]
@@ -28,14 +24,13 @@ namespace PetQuestV1.Contracts.Models
         [StringLength(50, ErrorMessage = "Breed must be less than 50 characters.")]
         public string Breed { get; set; } = default!;
 
-        // The Advantage property seems fine as is.
         public int Advantage { get; set; } = 5;
 
-        [Range(0, 100, ErrorMessage = "Age must be between 0 and 100.")] // Example validation
+        [Range(0, 100, ErrorMessage = "Age must be between 0 and 100.")] 
         public int Age { get; set; }
 
         // Owner relationship
-        // Make OwnerId nullable if a pet might not have an owner initially,
+        // Make OwnerId nullable if a pet might not have an owner initially,maybe if there is time for adoption module
         // or if it can be unset via the dropdown.
         [Required(ErrorMessage = "Owner is required.")] // Keep this if a pet MUST have an owner
         public string OwnerId { get; set; } = default!;
