@@ -1,43 +1,49 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using PetQuestV1.Contracts.Shared; 
-using PetQuestV1.Data; 
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using PetQuestV1.Contracts.Shared;
+using PetQuestV1.Contracts.Models;
+using PetQuestV1.Data;
 
 namespace PetQuestV1.Contracts.Models
 {
     public class Pet : ModelBase
     {
-        [Required(ErrorMessage = "Pet Name is required.")]
-        [StringLength(100, ErrorMessage = "Pet Name must be less than 100 characters.")]
+        [Required]
+        [StringLength(100)]
         public string PetName { get; set; } = default!;
 
-        [Required(ErrorMessage = "Species is required.")] // pet MUST have a species
-        public string SpeciesId { get; set; } = default!;
+        [Required]
+        public string SpeciesId { get; set; } = default!; // FK to Species
 
         [ForeignKey("SpeciesId")]
-        // Make Species navigation property nullable if SpeciesId can be null.
-        // It's good practice for the navigation property to match the nullability of its FK.
         public Species? Species { get; set; }
-
-        [Required(ErrorMessage = "Breed is required.")]
-        [StringLength(50, ErrorMessage = "Breed must be less than 50 characters.")]
+ 
+        // It's good practice for the navigation property to match the nullability of its FK
+        [Required]
+        [StringLength(50)]
         public string Breed { get; set; } = default!;
 
         public int Advantage { get; set; } = 5;
 
-        [Range(0, 100, ErrorMessage = "Age must be between 0 and 100.")] 
-        public int Age { get; set; }
+        // --- CHANGE THIS LINE ---
+        [Range(0.0, 100.0, ErrorMessage = "Age must be between 0 and 100.")]
+        public double? Age { get; set; } // Changed from double to double? (nullable)
+        // Note: [Required] is intentionally NOT added here if you want the placeholder to show.
+        // If age is mandatory, you'll rely on the [Range] validation.
 
-        // Owner relationship
-        // Make OwnerId nullable if a pet might not have an owner initially,maybe if there is time for adoption module
-        // or if it can be unset via the dropdown.
-        [Required(ErrorMessage = "Owner is required.")] // Keep this if a pet MUST have an owner
+        // Foreign Key to the User
+        [Required]
         public string OwnerId { get; set; } = default!;
 
+        // Navigation Property to the User
         [ForeignKey("OwnerId")]
-        // Make Owner navigation property nullable if OwnerId can be null.
-        public ApplicationUser? Owner { get; set; }
+        public ApplicationUser? Owner { get; set; } // Made nullable as per previous discussion
 
         public Pet() : base() { }
     }
