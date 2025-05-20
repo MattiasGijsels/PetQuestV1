@@ -26,7 +26,7 @@
                             <ValidationMessage For="@(() => PetFormModel.PetName)" />
                         </div>
                         <div class="col-sm-4">
-                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @onchange="OnSpeciesChanged">
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @oninput="OnSpeciesChanged">
                                 <option value="">Select Species</option>
                                 @foreach (var species in AvailableSpecies)
                                 {
