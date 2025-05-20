@@ -73,13 +73,15 @@ namespace PetQuestV1.Components.Pages
 
         protected void EditPet(Pet pet)
         {
-            // Assign existing IDs for dropdown selection
+            // Assign existing values for editing, including Breed and Age
             PetFormModel = new Pet
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
-                SpeciesId = pet.Species?.Id, // Bind to SpeciesId
-                OwnerId = pet.Owner?.Id      // Bind to OwnerId
+                SpeciesId = pet.Species?.Id,
+                OwnerId = pet.Owner?.Id,
+                Breed = pet.Breed, // Added
+                Age = pet.Age      // Added
             };
             IsEditing = true;
             IsPetFormVisible = true;
@@ -89,23 +91,26 @@ namespace PetQuestV1.Components.Pages
         {
             if (IsEditing)
             {
-                // Fetch the existing pet to update its navigation properties
                 var existingPet = await PetService.GetByIdAsync(PetFormModel.Id);
                 if (existingPet != null)
                 {
                     existingPet.PetName = PetFormModel.PetName;
+                    existingPet.Breed = PetFormModel.Breed; // Added
+                    existingPet.Age = PetFormModel.Age;     // Added
 
                     // Update Species based on selected SpeciesId
                     existingPet.SpeciesId = PetFormModel.SpeciesId;
-                    existingPet.Species = PetFormModel.SpeciesId != null
-                        ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
-                        : null;
+                    // No need to set existingPet.Species directly here if PetRepository handles it via FK
+                    // existingPet.Species = PetFormModel.SpeciesId != null
+                    //     ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
+                    //     : null;
 
                     // Update Owner based on selected OwnerId
                     existingPet.OwnerId = PetFormModel.OwnerId;
-                    existingPet.Owner = PetFormModel.OwnerId != null
-                        ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
-                        : null;
+                    // No need to set existingPet.Owner directly here if PetRepository handles it via FK
+                    // existingPet.Owner = PetFormModel.OwnerId != null
+                    //     ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
+                    //     : null;
 
                     await PetService.UpdateAsync(existingPet);
                 }
@@ -114,13 +119,8 @@ namespace PetQuestV1.Components.Pages
             {
                 // For adding a new pet, ensure Species and Owner objects are populated
                 // based on the selected IDs from the dropdowns.
-                PetFormModel.Species = PetFormModel.SpeciesId != null
-                    ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
-                    : null;
-                PetFormModel.Owner = PetFormModel.OwnerId != null
-                    ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
-                    : null;
-
+                // The PetRepository.AddAsync will handle populating navigation properties
+                // based on the assigned IDs.
                 await PetService.AddAsync(PetFormModel);
             }
 
@@ -158,7 +158,7 @@ namespace PetQuestV1.Components.Pages
 
         protected void ToggleUsersSection()
         {
-            IsUsersSectionVisible = !IsUsersSectionVisible;
+            IsUsersSectionVisible = !IsPetsSectionVisible;
         }
     }
 }

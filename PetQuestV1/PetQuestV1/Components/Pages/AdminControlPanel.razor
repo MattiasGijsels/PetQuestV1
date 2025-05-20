@@ -45,6 +45,17 @@
                             <ValidationMessage For="@(() => PetFormModel.OwnerId)" />
                         </div>
                     </div>
+                    <div class="row g-2 mb-2">
+                        @* Added a new row for Breed and Age inputs *@
+                        <div class="col-sm-4">
+                            <InputText class="form-control" @bind-Value="PetFormModel.Breed" placeholder="Breed" />
+                            <ValidationMessage For="@(() => PetFormModel.Breed)" />
+                        </div>
+                        <div class="col-sm-4">
+                            <InputNumber class="form-control" @bind-Value="PetFormModel.Age" placeholder="Please fill in the age" min="0" />
+                            <ValidationMessage For="@(() => PetFormModel.Age)" />
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
                     <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelPetForm">Cancel</button>
                 </EditForm>
@@ -54,7 +65,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Name</th>
-                        <th>Species</th>
+                        <th>Species</th>                        
+                        <th>Breed</th> @* Added Breed header *@
+                        <th>Age</th> @* Added Age header *@
                         <th>Owner</th>
                         <th style="width: 120px">Actions</th>
                     </tr>
@@ -64,7 +77,9 @@
                     {
                         <tr>
                             <td>@pet.PetName</td>
-                            <td>@pet.Species?.SpeciesName</td>
+                            <td>@pet.Species?.SpeciesName</td>                            
+                            <td>@pet.Breed</td> @* Display Breed *@
+                            <td>@pet.Age</td> @* Display Age *@
                             <td>@pet.Owner?.UserName</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
