@@ -11,5 +11,6 @@ namespace PetQuestV1.Contracts
         Task AddAsync(Pet pet);
         Task UpdateAsync(Pet pet);
         Task DeleteAsync(string id);
+        Task<Species?> GetSpeciesByNameAsync(string name);
     }
 }

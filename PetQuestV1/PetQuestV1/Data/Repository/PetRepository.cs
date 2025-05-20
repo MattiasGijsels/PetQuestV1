@@ -59,5 +59,9 @@ namespace PetQuestV1.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<Species?> GetSpeciesByNameAsync(string name)
+        {
+            return await _context.Species.FirstOrDefaultAsync(s => s.Name == name);
+        }
     }
 }

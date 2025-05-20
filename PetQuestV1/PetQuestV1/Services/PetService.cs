@@ -38,5 +38,9 @@ namespace PetQuestV1.Services
         {
             return _petRepository.DeleteAsync(id);
         }
+        public Task<Species?> GetSpeciesByNameAsync(string name) // Implement this method
+        {
+            return _petRepository.GetSpeciesByNameAsync(name);
+        }
     }
 }
