@@ -4,10 +4,8 @@
 
 <h3 class="mb-4">Admin Control Panel</h3>
 
-<!-- ================= Pets section ================ -->
 <div class="card mb-5">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <!-- The header button toggles the Pets section using the code-behind methods -->
         <button class="btn btn-link text-decoration-none" @onclick="TogglePetsSection">
             <strong>Pets</strong>
             <i class="bi @(IsPetsSectionVisible ? "bi-caret-down-fill" : "bi-caret-right-fill")"></i>
@@ -24,12 +22,27 @@
                     <div class="row g-2 mb-2">
                         <div class="col-sm-4">
                             <InputText class="form-control" @bind-Value="PetFormModel.PetName" placeholder="Name" />
+                            <ValidationMessage For="@(() => PetFormModel.PetName)" />
                         </div>
                         <div class="col-sm-4">
-                            <InputText class="form-control" @bind-Value="PetFormModel.Species.Name" placeholder="Species ID" />
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId">
+                                <option value="">Select Species</option>
+                                @foreach (var species in AvailableSpecies)
+                                {
+                                    <option value="@species.Id">@species.SpeciesName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => PetFormModel.SpeciesId)" />
                         </div>
                         <div class="col-sm-4">
-                            <InputText class="form-control" @bind-Value="PetFormModel.Owner.UserName" placeholder="Owner ID" />
+                            <InputSelect class="form-select" @bind-Value="PetFormModel.OwnerId">
+                                <option value="">Select Owner</option>
+                                @foreach (var user in AvailableUsers)
+                                {
+                                    <option value="@user.Id">@user.UserName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => PetFormModel.OwnerId)" />
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
@@ -51,7 +64,7 @@
                     {
                         <tr>
                             <td>@pet.PetName</td>
-                            <td>@pet.Species?.Name</td>
+                            <td>@pet.Species?.SpeciesName</td>
                             <td>@pet.Owner?.UserName</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
@@ -66,7 +79,6 @@
                 </tbody>
             </table>
 
-            <!-- Pets pagination -->
             <nav class="p-2 border-top d-flex justify-content-center">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(PetsCurrentPage == 1 ? "disabled" : string.Empty)">
@@ -87,7 +99,6 @@
     </div>
 </div>
 
-<!-- ================= Users section ================ -->
 <div class="card">
     <div class="card-header">
         <button class="btn btn-link text-decoration-none" @onclick="ToggleUsersSection">
@@ -112,7 +123,6 @@
                             <td>@user.UserName</td>
                             <td>@user.Email</td>
                             <td>
-                                <!-- Placeholder for future user CRUD buttons -->
                                 <button class="btn btn-sm btn-outline-secondary" disabled>
                                     <i class="bi bi-pencil"></i>
                                 </button>
@@ -122,7 +132,6 @@
                 </tbody>
             </table>
 
-            <!-- Users pagination -->
             <nav class="p-2 border-top d-flex justify-content-center">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(UsersCurrentPage == 1 ? "disabled" : string.Empty)">

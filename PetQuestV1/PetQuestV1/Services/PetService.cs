@@ -42,5 +42,9 @@ namespace PetQuestV1.Services
         {
             return _petRepository.GetSpeciesByNameAsync(name);
         }
+        public Task<List<Species>> GetAllSpeciesAsync() // Implement the new method
+        {
+            return _petRepository.GetAllSpeciesAsync();
+        }
     }
 }

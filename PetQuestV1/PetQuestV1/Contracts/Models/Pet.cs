@@ -1,46 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using PetQuestV1.Contracts.Shared;
-using PetQuestV1.Contracts.Models;
-using PetQuestV1.Data;
+using PetQuestV1.Contracts.Shared; // Assuming ModelBase is here
+using PetQuestV1.Data; // For ApplicationUser
 
 namespace PetQuestV1.Contracts.Models
 {
     public class Pet : ModelBase
     {
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "Pet Name is required.")]
+        [StringLength(100, ErrorMessage = "Pet Name must be less than 100 characters.")]
         public string PetName { get; set; } = default!;
 
-        [Required]
-        public string SpeciesId { get; set; } = default!; // FK to Species
+        // Species relationship
+        // Make SpeciesId nullable if a pet might not have a species initially,
+        // or if it can be unset via the dropdown (e.g., "Select Species" option).
+        // If it's [Required], then the dropdown must always have a species selected.
+        [Required(ErrorMessage = "Species is required.")] // Keep this if a pet MUST have a species
+        public string SpeciesId { get; set; } = default!;
 
         [ForeignKey("SpeciesId")]
-        public Species Species { get; set; } = default!;
+        // Make Species navigation property nullable if SpeciesId can be null.
+        // It's good practice for the navigation property to match the nullability of its FK.
+        public Species? Species { get; set; }
 
-        [Required]
-        [StringLength(50)]
+        [Required(ErrorMessage = "Breed is required.")]
+        [StringLength(50, ErrorMessage = "Breed must be less than 50 characters.")]
         public string Breed { get; set; } = default!;
 
+        // The Advantage property seems fine as is.
         public int Advantage { get; set; } = 5;
-        //number that defines how much advantage a pet has when it enters a minigame,
-        //it's the result of Virtual pet score game.
 
+        [Range(0, 100, ErrorMessage = "Age must be between 0 and 100.")] // Example validation
         public int Age { get; set; }
 
-        // Foreign Key to the User
-        [Required]
+        // Owner relationship
+        // Make OwnerId nullable if a pet might not have an owner initially,
+        // or if it can be unset via the dropdown.
+        [Required(ErrorMessage = "Owner is required.")] // Keep this if a pet MUST have an owner
         public string OwnerId { get; set; } = default!;
 
-        // Navigation Property to the User
         [ForeignKey("OwnerId")]
-        public ApplicationUser Owner { get; set; }= default!; // One to many relation ship, one owner can have many pets
+        // Make Owner navigation property nullable if OwnerId can be null.
+        public ApplicationUser? Owner { get; set; }
 
         public Pet() : base() { }
     }

@@ -9,7 +9,7 @@ namespace PetQuestV1.Contracts.Models
 {
     public class Species:ModelBase
     {
-        public string Name { get; set; } = default!;
+        public string SpeciesName { get; set; } = default!;
 
         //add csv reader with species??
         public Species() { }

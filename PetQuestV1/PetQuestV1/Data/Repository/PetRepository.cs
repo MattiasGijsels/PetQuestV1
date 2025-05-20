@@ -61,7 +61,11 @@ namespace PetQuestV1.Repositories
         }
         public async Task<Species?> GetSpeciesByNameAsync(string name)
         {
-            return await _context.Species.FirstOrDefaultAsync(s => s.Name == name);
+            return await _context.Species.FirstOrDefaultAsync(s => s.SpeciesName == name);
+        }
+        public async Task<List<Species>> GetAllSpeciesAsync() // Implement the new method
+        {
+            return await _context.Species.ToListAsync();
         }
     }
 }

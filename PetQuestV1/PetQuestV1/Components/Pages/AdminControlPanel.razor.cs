@@ -17,6 +17,8 @@ namespace PetQuestV1.Components.Pages
 
         protected List<Pet> Pets { get; set; } = new();
         protected List<ApplicationUser> Users { get; set; } = new();
+        protected List<Species> AvailableSpecies { get; set; } = new(); // To hold all species for dropdown
+        protected List<ApplicationUser> AvailableUsers { get; set; } = new(); // To hold all users for dropdown
 
         // Pagination pets
         protected int PetsCurrentPage { get; set; } = 1;
@@ -42,6 +44,7 @@ namespace PetQuestV1.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             await LoadData();
+            await LoadDropdownData(); // Load data for dropdowns
         }
 
         private async Task LoadData()
@@ -54,97 +57,77 @@ namespace PetQuestV1.Components.Pages
             UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
+        private async Task LoadDropdownData()
+        {
+            AvailableSpecies = await PetService.GetAllSpeciesAsync(); // New service method
+            AvailableUsers = new List<ApplicationUser>(UserManager.Users);
+        }
+
         // ---------- Pets CRUD Handlers ----------
         protected void ShowAddPetForm()
         {
-            PetFormModel = new Pet();
+            PetFormModel = new Pet(); // New pet, IDs will be generated on save if needed
             IsEditing = false;
             IsPetFormVisible = true;
         }
 
-        // In PetQuestV1.Components.Pages.AdminControlPanelBase
         protected void EditPet(Pet pet)
         {
-            // Deep copy the pet object to ensure changes in the form
-            // don't directly modify the item in the displayed list before saving.
+            // Assign existing IDs for dropdown selection
             PetFormModel = new Pet
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
-                // Ensure Species and Owner objects are not null and their properties are correctly assigned
-                Species = new Species { Id = pet.Species?.Id, Name = pet.Species?.Name },
-                Owner = new ApplicationUser { Id = pet.Owner?.Id, UserName = pet.Owner?.UserName }
+                SpeciesId = pet.Species?.Id, // Bind to SpeciesId
+                OwnerId = pet.Owner?.Id      // Bind to OwnerId
             };
             IsEditing = true;
             IsPetFormVisible = true;
         }
 
-        // In PetQuestV1.Components.Pages.AdminControlPanelBase
         protected async Task HandlePetFormSubmit()
         {
-            // Handle Species
-            if (!string.IsNullOrWhiteSpace(PetFormModel.Species?.Name))
-            {
-                // Try to find an existing species by name
-                var existingSpecies = await PetService.GetSpeciesByNameAsync(PetFormModel.Species.Name);
-                if (existingSpecies != null)
-                {
-                    PetFormModel.Species = existingSpecies;
-                }
-                else if (string.IsNullOrWhiteSpace(PetFormModel.Species.Id)) // Only add if it's truly new
-                {
-                    // If not found and it's a new pet or a new species for an existing pet, create a new Species object with a new ID
-                    PetFormModel.Species.Id = Guid.NewGuid().ToString(); // Generate a new ID for a new species
-                }
-            }
-            else
-            {
-                PetFormModel.Species = null; // Clear species if no name is provided
-            }
-
-            // Handle Owner
-            if (!string.IsNullOrWhiteSpace(PetFormModel.Owner?.UserName))
-            {
-                // Try to find an existing user by UserName
-                var existingOwner = await UserManager.FindByNameAsync(PetFormModel.Owner.UserName);
-                if (existingOwner != null)
-                {
-                    PetFormModel.Owner = existingOwner;
-                }
-                else
-                {
-                    // If the owner's username is provided but doesn't exist, you might want to show an error
-                    // or handle it differently. For now, setting it to null or the provided username might be an option
-                    // depending on your business logic. For this example, we'll assume it must exist.
-                    PetFormModel.Owner = null; // Or throw an error/validation message
-                }
-            }
-            else
-            {
-                PetFormModel.Owner = null; // Clear owner if no username is provided
-            }
-
             if (IsEditing)
             {
-                // For updating, ensure you fetch the original pet and update its properties
-                // to maintain references if EF Core is tracking them.
-                var originalPet = Pets.FirstOrDefault(p => p.Id == PetFormModel.Id);
-                if (originalPet != null)
+                // Fetch the existing pet to update its navigation properties
+                var existingPet = await PetService.GetByIdAsync(PetFormModel.Id);
+                if (existingPet != null)
                 {
-                    originalPet.PetName = PetFormModel.PetName;
-                    originalPet.Species = PetFormModel.Species;
-                    originalPet.Owner = PetFormModel.Owner;
-                    await PetService.UpdateAsync(originalPet);
+                    existingPet.PetName = PetFormModel.PetName;
+
+                    // Update Species based on selected SpeciesId
+                    existingPet.SpeciesId = PetFormModel.SpeciesId;
+                    existingPet.Species = PetFormModel.SpeciesId != null
+                        ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
+                        : null;
+
+                    // Update Owner based on selected OwnerId
+                    existingPet.OwnerId = PetFormModel.OwnerId;
+                    existingPet.Owner = PetFormModel.OwnerId != null
+                        ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
+                        : null;
+
+                    await PetService.UpdateAsync(existingPet);
                 }
             }
             else
             {
+                // For adding a new pet, ensure Species and Owner objects are populated
+                // based on the selected IDs from the dropdowns.
+                PetFormModel.Species = PetFormModel.SpeciesId != null
+                    ? AvailableSpecies.FirstOrDefault(s => s.Id == PetFormModel.SpeciesId)
+                    : null;
+                PetFormModel.Owner = PetFormModel.OwnerId != null
+                    ? AvailableUsers.FirstOrDefault(u => u.Id == PetFormModel.OwnerId)
+                    : null;
+
                 await PetService.AddAsync(PetFormModel);
             }
 
             IsPetFormVisible = false;
             await LoadData();
         }
+
         protected void CancelPetForm()
         {
             IsPetFormVisible = false;
