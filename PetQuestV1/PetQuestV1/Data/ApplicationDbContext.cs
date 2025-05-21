@@ -68,6 +68,7 @@ namespace PetQuestV1.Data
             // where IsDeleted is true from ALL queries, because Pet inherits IsDeleted
             // from ModelBase.
             builder.Entity<Pet>().HasQueryFilter(p => !p.IsDeleted);
+            builder.Entity<ApplicationUser>().HasQueryFilter(u => !u.IsDeleted);
 
             // If other models like Species or Breed also inherit from ModelBase
             // and you want them soft-deleted, you would add similar lines:
