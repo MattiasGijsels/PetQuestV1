@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿// PetsAdminPanel.razor.cs
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts;
@@ -7,13 +8,19 @@ using PetQuestV1.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection; // REQUIRED for IServiceScopeFactory
+using Microsoft.EntityFrameworkCore; // REQUIRED for ToListAsync() and related EF Core extensions
+using System.ComponentModel.DataAnnotations; // For the PetFormModel, if using it as a separate class
 
 namespace PetQuestV1.Components.Admin
 {
     public partial class PetsAdminPanelBase : ComponentBase
     {
-        [Inject] public IPetService PetService { get; set; } = default!;
-        [Inject] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        // Inject IServiceScopeFactory to create isolated DbContext scopes
+        [Inject]
+        private IServiceScopeFactory ScopeFactory { get; set; } = default!;
+
+        // No direct injection of IPetService or UserManager here anymore
 
         protected List<Pet> Pets { get; set; } = new();
         protected List<Species> AvailableSpecies { get; set; } = new();
@@ -23,36 +30,49 @@ namespace PetQuestV1.Components.Admin
         // Pagination pets
         protected int PetsCurrentPage { get; set; } = 1;
         protected int PetsPageSize { get; set; } = 10;
-        protected int PetsTotalPages => (int)System.Math.Ceiling((double)Pets.Count / PetsPageSize);
+        protected int PetsTotalPages => Pets.Any() ? (int)System.Math.Ceiling((double)Pets.Count / PetsPageSize) : 1;
         protected IEnumerable<Pet> PagedPets => Pets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
 
         // Forms & UI state for pets management
+        // Using Pet as the form model directly. Ensure Pet class has DataAnnotations.
         protected Pet PetFormModel { get; set; } = new();
         protected bool IsPetFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
 
-        // Toggling section visibility
-        protected bool IsPetsSectionVisible { get; set; } = true; // Default to visible when component is separate
+        // Toggling section visibility for "Pets" accordion
+        protected bool IsPetsSectionVisible { get; set; } = false; // Default to false (collapsed)
 
         protected override async Task OnInitializedAsync()
         {
+            // Load initial data for the component
             await LoadData();
             await LoadDropdownData();
+            // The section starts collapsed due to IsPetsSectionVisible = false
         }
 
         private async Task LoadData()
         {
-            Pets = await PetService.GetAllAsync();
-
-            // Clamp current pages within the available page counts
+            using (var scope = ScopeFactory.CreateScope())
+            {
+                var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                Pets = await petService.GetAllAsync();
+            }
             PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
+            StateHasChanged(); // Ensure UI updates after loading data
         }
 
         private async Task LoadDropdownData()
         {
-            AvailableSpecies = await PetService.GetAllSpeciesAsync();
-            AvailableUsers = new List<ApplicationUser>(UserManager.Users);
-            AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
+            using (var scope = ScopeFactory.CreateScope())
+            {
+                var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                AvailableSpecies = await petService.GetAllSpeciesAsync();
+                AvailableUsers = await userManager.Users.ToListAsync(); // Correctly using ToListAsync within scope
+                AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
+            }
+            StateHasChanged(); // Ensure UI updates after loading dropdown data
         }
 
         // Handle Species Dropdown Change
@@ -63,7 +83,11 @@ namespace PetQuestV1.Components.Admin
 
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
-                AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                    AvailableBreeds = await petService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+                }
             }
             else
             {
@@ -79,7 +103,7 @@ namespace PetQuestV1.Components.Admin
             IsEditing = false;
             IsPetFormVisible = true;
             AvailableBreeds = new List<Breed>(); // Clear breeds for new pet form
-            StateHasChanged(); // Ensure UI updates to clear breed dropdown
+            StateHasChanged();
         }
 
         protected async Task EditPet(Pet pet)
@@ -100,7 +124,11 @@ namespace PetQuestV1.Components.Admin
             // Load breeds based on the existing pet's species for editing
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
-                AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                    AvailableBreeds = await petService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
+                }
             }
             else
             {
@@ -111,25 +139,31 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandlePetFormSubmit()
         {
-            if (IsEditing)
+            using (var scope = ScopeFactory.CreateScope())
             {
-                var existingPet = await PetService.GetByIdAsync(PetFormModel.Id);
-                if (existingPet != null)
+                var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+
+                if (IsEditing)
                 {
-                    existingPet.PetName = PetFormModel.PetName;
-                    existingPet.Age = PetFormModel.Age;
+                    var existingPet = await petService.GetByIdAsync(PetFormModel.Id);
+                    if (existingPet != null)
+                    {
+                        // Manually map properties from form model to existing entity
+                        existingPet.PetName = PetFormModel.PetName;
+                        existingPet.Age = PetFormModel.Age;
+                        existingPet.SpeciesId = PetFormModel.SpeciesId;
+                        existingPet.BreedId = PetFormModel.BreedId;
+                        existingPet.OwnerId = PetFormModel.OwnerId;
 
-                    // Update Species and Breed IDs
-                    existingPet.SpeciesId = PetFormModel.SpeciesId;
-                    existingPet.BreedId = PetFormModel.BreedId;
-                    existingPet.OwnerId = PetFormModel.OwnerId;
-
-                    await PetService.UpdateAsync(existingPet);
+                        await petService.UpdateAsync(existingPet);
+                    }
                 }
-            }
-            else
-            {
-                await PetService.AddAsync(PetFormModel);
+                else
+                {
+                    // For new pets, the PetFormModel is already a new Pet object.
+                    // Assuming PetFormModel has properties like Id populated (e.g. by Guid.NewGuid()) or handled by service
+                    await petService.AddAsync(PetFormModel);
+                }
             }
 
             IsPetFormVisible = false;
@@ -140,28 +174,38 @@ namespace PetQuestV1.Components.Admin
         protected void CancelPetForm()
         {
             IsPetFormVisible = false;
-            StateHasChanged(); // Ensure UI updates to hide form
+            PetFormModel = new Pet(); // Clear the form model
+            StateHasChanged();
         }
 
         protected async Task DeletePet(string id)
         {
-            await PetService.DeleteAsync(id);
+            using (var scope = ScopeFactory.CreateScope())
+            {
+                var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                await petService.DeleteAsync(id);
+            }
             await LoadData();
-            StateHasChanged(); // Ensure UI updates after deletion
+            StateHasChanged();
         }
 
         // ---------- Pagination Handlers ----------
         protected void ChangePetsPage(int page)
         {
             PetsCurrentPage = page < 1 ? 1 : page > PetsTotalPages ? PetsTotalPages : page;
-            StateHasChanged(); // Ensure UI updates for pagination
+            StateHasChanged();
         }
 
         // ---------- Section Visibility Toggle Methods ----------
         protected void TogglePetsSection()
         {
             IsPetsSectionVisible = !IsPetsSectionVisible;
-            StateHasChanged(); // Ensure UI updates for section visibility
+            if (!IsPetsSectionVisible) // If we are collapsing the section
+            {
+                IsPetFormVisible = false; // Hide the add/edit form
+                PetFormModel = new Pet(); // Clear the form model
+            }
+            StateHasChanged();
         }
     }
 }
