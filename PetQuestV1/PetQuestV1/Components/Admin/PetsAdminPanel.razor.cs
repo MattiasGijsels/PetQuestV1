@@ -8,17 +8,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PetQuestV1.Components.Pages
+namespace PetQuestV1.Components.Admin
 {
-    public partial class AdminControlPanelBase : ComponentBase
+    public partial class PetsAdminPanelBase : ComponentBase
     {
         [Inject] public IPetService PetService { get; set; } = default!;
         [Inject] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
 
         protected List<Pet> Pets { get; set; } = new();
-        protected List<ApplicationUser> Users { get; set; } = new();
         protected List<Species> AvailableSpecies { get; set; } = new();
-        protected List<Breed> AvailableBreeds { get; set; } = new(); // Holds breeds for dependent dropdown
+        protected List<Breed> AvailableBreeds { get; set; } = new();
         protected List<ApplicationUser> AvailableUsers { get; set; } = new();
 
         // Pagination pets
@@ -27,47 +26,36 @@ namespace PetQuestV1.Components.Pages
         protected int PetsTotalPages => (int)System.Math.Ceiling((double)Pets.Count / PetsPageSize);
         protected IEnumerable<Pet> PagedPets => Pets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
 
-        // Pagination users
-        protected int UsersCurrentPage { get; set; } = 1;
-        protected int UsersPageSize { get; set; } = 10;
-        protected int UsersTotalPages => (int)System.Math.Ceiling((double)Users.Count / UsersPageSize);
-        protected IEnumerable<ApplicationUser> PagedUsers => Users.Skip((UsersCurrentPage - 1) * UsersPageSize).Take(UsersPageSize);
-
         // Forms & UI state for pets management
         protected Pet PetFormModel { get; set; } = new();
         protected bool IsPetFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
 
-        // Toggling section visibility (initially set to false)
-        protected bool IsPetsSectionVisible { get; set; } = false;
-        protected bool IsUsersSectionVisible { get; set; } = false;
+        // Toggling section visibility
+        protected bool IsPetsSectionVisible { get; set; } = true; // Default to visible when component is separate
 
         protected override async Task OnInitializedAsync()
         {
             await LoadData();
-            await LoadDropdownData(); // Load data for dropdowns
+            await LoadDropdownData();
         }
 
         private async Task LoadData()
         {
             Pets = await PetService.GetAllAsync();
-            Users = new List<ApplicationUser>(UserManager.Users);
 
             // Clamp current pages within the available page counts
             PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
-            UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
         private async Task LoadDropdownData()
         {
             AvailableSpecies = await PetService.GetAllSpeciesAsync();
             AvailableUsers = new List<ApplicationUser>(UserManager.Users);
-            // AvailableBreeds is intentionally left empty here, it will be populated by OnSpeciesChanged
-            // or by EditPet method when an existing pet is being edited.
             AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
         }
 
-        // --- NEW: Handle Species Dropdown Change ---
+        // Handle Species Dropdown Change
         protected async Task OnSpeciesChanged(ChangeEventArgs e)
         {
             PetFormModel.SpeciesId = e.Value?.ToString(); // Update the SpeciesId in the model
@@ -109,7 +97,7 @@ namespace PetQuestV1.Components.Pages
             IsEditing = true;
             IsPetFormVisible = true;
 
-            // --- CRITICAL FIX: Load breeds based on the existing pet's species for editing ---
+            // Load breeds based on the existing pet's species for editing
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
                 AvailableBreeds = await PetService.GetBreedsBySpeciesIdAsync(PetFormModel.SpeciesId);
@@ -169,22 +157,10 @@ namespace PetQuestV1.Components.Pages
             StateHasChanged(); // Ensure UI updates for pagination
         }
 
-        protected void ChangeUsersPage(int page)
-        {
-            UsersCurrentPage = page < 1 ? 1 : page > UsersTotalPages ? UsersTotalPages : page;
-            StateHasChanged(); // Ensure UI updates for pagination
-        }
-
         // ---------- Section Visibility Toggle Methods ----------
         protected void TogglePetsSection()
         {
             IsPetsSectionVisible = !IsPetsSectionVisible;
-            StateHasChanged(); // Ensure UI updates for section visibility
-        }
-
-        protected void ToggleUsersSection()
-        {
-            IsUsersSectionVisible = !IsUsersSectionVisible; // Corrected: should be independent of IsPetsSectionVisible
             StateHasChanged(); // Ensure UI updates for section visibility
         }
     }

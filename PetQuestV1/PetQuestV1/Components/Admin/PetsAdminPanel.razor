@@ -1,8 +1,5 @@
-﻿@page "/admin-control-panel"
-@inherits PetQuestV1.Components.Pages.AdminControlPanelBase
-@rendermode InteractiveServer
-
-<h3 class="mb-4">Admin Control Panel</h3>
+﻿@namespace PetQuestV1.Components.Admin
+@inherits PetsAdminPanelBase
 
 <div class="card mb-5">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -48,11 +45,9 @@
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-sm-4">
-                            @* **CRITICAL CHANGE HERE FOR BREED DROPDOWN** *@
-                            @* Use a standard <select> for more control over initial state and dynamic options *@
                             <select class="form-select" @bind="PetFormModel.BreedId">
                                 <option value="">Select Breed</option>
-                                @if (AvailableBreeds != null && AvailableBreeds.Any()) // Ensure AvailableBreeds is not null AND has items
+                                @if (AvailableBreeds != null && AvailableBreeds.Any())
                                 {
                                     @foreach (var breed in AvailableBreeds)
                                     {
@@ -124,66 +119,3 @@
         </div>
     </div>
 </div>
-
-<div class="card">
-    <div class="card-header">
-        <button class="btn btn-link text-decoration-none" @onclick="ToggleUsersSection">
-            <strong>Users</strong>
-            <i class="bi @(IsUsersSectionVisible ? "bi-caret-down-fill" : "bi-caret-right-fill")"></i>
-        </button>
-    </div>
-    <div class="collapse @(IsUsersSectionVisible ? "show" : "")">
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0 admin-table">
-                <thead class="table-light">
-                    <tr>
-                        <th>User Name</th>
-                        <th>Email</th>
-                        <th style="width: 120px">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in PagedUsers)
-                    {
-                        <tr>
-                            <td>@user.UserName</td>
-                            <td>@user.Email</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary" disabled>
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <nav class="p-2 border-top d-flex justify-content-center">
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item @(UsersCurrentPage == 1 ? "disabled" : string.Empty)">
-                        <a class="page-link" @onclick="() => ChangeUsersPage(UsersCurrentPage - 1)">Prev</a>
-                    </li>
-                    @for (int i = 1; i <= UsersTotalPages; i++)
-                    {
-                        <li class="page-item @(UsersCurrentPage == i ? "active" : string.Empty)">
-                            <a class="page-link" @onclick="() => ChangeUsersPage(i)">@i</a>
-                        </li>
-                    }
-                    <li class="page-item @(UsersCurrentPage == UsersTotalPages ? "disabled" : string.Empty)">
-                        <a class="page-link" @onclick="() => ChangeUsersPage(UsersCurrentPage + 1)">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-</div>
-
-<style>
-    .admin-table th {
-        background-color: #f8f9fa;
-    }
-
-    .btn-link {
-        font-size: 1rem;
-    }
-</style>
