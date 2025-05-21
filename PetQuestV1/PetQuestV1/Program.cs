@@ -35,6 +35,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<IPetRepository, PetRepository>();
 builder.Services.AddScoped<IPetService, PetService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()

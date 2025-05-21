@@ -28,9 +28,15 @@
                                 <button class="btn btn-sm btn-outline-secondary" disabled>
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteUser(user.Id)">
-                                    <i class="bi bi-trash"></i>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => SoftDeleteUser(user.Id)">
+                                    <i class="bi bi-trash"></i> Soft
                                 </button>
+                                @if (user.IsDeleted)
+                                {
+                                    <button class="btn btn-sm btn-outline-success" @onclick="() => RestoreUser(user.Id)">
+                                        <i class="bi bi-arrow-clockwise"></i> Restore
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }
