@@ -6,7 +6,7 @@ using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq; // Make sure this is present for LINQ methods
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore; // Needed for ToListAsync() and related EF Core extensions
@@ -42,25 +42,32 @@ namespace PetQuestV1.Components.Admin
             {
                 var query = AllPets.AsQueryable();
 
-                // Apply Search Filter
+                // Apply Search Filter with robust null handling
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     query = query.Where(p =>
                         p.PetName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) ||
-                        (p.Species != null && p.Species.SpeciesName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)) ||
-                        (p.Breed != null && p.Breed.BreedName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)) ||
-                        (p.Owner != null && p.Owner.UserName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase))
+                        (p.Species != null && !string.IsNullOrEmpty(p.Species.SpeciesName) && p.Species.SpeciesName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Breed != null && !string.IsNullOrEmpty(p.Breed.BreedName) && p.Breed.BreedName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Owner != null && !string.IsNullOrEmpty(p.Owner.UserName) && p.Owner.UserName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase))
                     );
                 }
 
-                // Apply Sorting
+                // Apply Sorting with explicit null handling for OrderBy/OrderByDescending
+                // This directly addresses the CS8602 warnings.
                 query = CurrentSortColumn switch
                 {
                     "PetName" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.PetName) : query.OrderByDescending(p => p.PetName),
-                    "Species" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Species.SpeciesName).ThenBy(p => p.PetName) : query.OrderByDescending(p => p.Species.SpeciesName).ThenByDescending(p => p.PetName),
-                    "Breed" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Breed.BreedName) : query.OrderByDescending(p => p.Breed.BreedName),
+                    "Species" => SortDirection == SortDirection.Ascending ?
+                                   query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
+                                   query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
+                    "Breed" => SortDirection == SortDirection.Ascending ?
+                                 query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
+                                 query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
                     "Age" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Age) : query.OrderByDescending(p => p.Age),
-                    "Owner" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Owner.UserName) : query.OrderByDescending(p => p.Owner.UserName),
+                    "Owner" => SortDirection == SortDirection.Ascending ?
+                                 query.OrderBy(p => p.Owner == null ? string.Empty : p.Owner.UserName) :
+                                 query.OrderByDescending(p => p.Owner == null ? string.Empty : p.Owner.UserName),
                     _ => query.OrderBy(p => p.PetName) // Default sort
                 };
 
@@ -107,7 +114,7 @@ namespace PetQuestV1.Components.Admin
 
                 AvailableSpecies = await petService.GetAllSpeciesAsync();
                 AvailableUsers = await userManager.Users.ToListAsync();
-                AvailableBreeds = new List<Breed>();
+                AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
             }
             StateHasChanged();
         }
