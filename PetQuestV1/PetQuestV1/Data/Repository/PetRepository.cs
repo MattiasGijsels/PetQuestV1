@@ -5,7 +5,7 @@ using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq; // Add this for .Where()
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Repositories
@@ -21,28 +21,32 @@ namespace PetQuestV1.Repositories
 
         public async Task<List<Pet>> GetAllAsync()
         {
+            // The global query filter (see ApplicationDbContext) will automatically exclude IsDeleted pets.
             return await _context.Pets
                 .Include(p => p.Owner)
                 .Include(p => p.Species)
-                .Include(p => p.Breed) // --- NEW: Include Breed ---
+                .Include(p => p.Breed)
                 .ToListAsync();
         }
 
         public async Task<Pet?> GetByIdAsync(string id)
         {
+            // The global query filter will automatically exclude IsDeleted pets.
+            // If you needed to retrieve a deleted pet, you'd use .IgnoreQueryFilters() here.
             return await _context.Pets
                 .Include(p => p.Owner)
                 .Include(p => p.Species)
-                .Include(p => p.Breed) // --- NEW: Include Breed ---
+                .Include(p => p.Breed)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task AddAsync(Pet pet)
         {
-            if (string.IsNullOrEmpty(pet.Id)) // Ensure ID is generated if not set
+            if (string.IsNullOrEmpty(pet.Id))
             {
-                pet.Id = Guid.NewGuid().ToString();
+                pet.Id = Guid.NewGuid().ToString("N"); // "N" format for no hyphens
             }
+            pet.IsDeleted = false; // Ensure new pets are not marked as deleted
             await _context.Pets.AddAsync(pet);
             await _context.SaveChangesAsync();
         }
@@ -50,24 +54,23 @@ namespace PetQuestV1.Repositories
         public async Task UpdateAsync(Pet pet)
         {
             // When updating, you generally fetch the entity and then update its scalar properties
-            // or attach it to the context and mark as modified.
-            // Using CurrentValues.SetValues(pet) is an option but might be tricky with navigation properties.
-            // A more explicit way for updating, especially with FKs:
             var existingPet = await _context.Pets.FindAsync(pet.Id);
             if (existingPet != null)
             {
                 existingPet.PetName = pet.PetName;
                 existingPet.SpeciesId = pet.SpeciesId;
-                existingPet.BreedId = pet.BreedId; // --- NEW: Update BreedId ---
+                existingPet.BreedId = pet.BreedId;
                 existingPet.Age = pet.Age;
                 existingPet.OwnerId = pet.OwnerId;
-                // Add any other scalar properties you want to update
+                existingPet.IsDeleted = pet.IsDeleted; // Crucial: Update the IsDeleted flag
 
                 _context.Pets.Update(existingPet); // Mark as modified
                 await _context.SaveChangesAsync();
             }
         }
 
+        // This method will no longer be directly used for soft deletion.
+        // It remains here if you have a separate use case for permanent deletion.
         public async Task DeleteAsync(string id)
         {
             var pet = await _context.Pets.FindAsync(id);
@@ -88,12 +91,11 @@ namespace PetQuestV1.Repositories
             return await _context.Species.ToListAsync();
         }
 
-        // --- NEW: Implement Breed methods ---
         public async Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId)
         {
             if (string.IsNullOrEmpty(speciesId))
             {
-                return new List<Breed>(); // Return empty list if no species ID is provided
+                return new List<Breed>();
             }
             return await _context.Breeds
                                  .Where(b => b.SpeciesId == speciesId)

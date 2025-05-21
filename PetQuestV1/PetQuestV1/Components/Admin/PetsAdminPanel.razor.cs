@@ -40,7 +40,11 @@ namespace PetQuestV1.Components.Admin
         {
             get
             {
-                var query = AllPets.AsQueryable();
+                // **IMPORTANT: Filter out IsDeleted pets first in the UI display**
+                // Even though the DBContext has a global filter, filtering here ensures
+                // the UI correctly reflects soft deletions immediately after action
+                // and in case 'AllPets' was populated with IgnoreQueryFilters() for some reason.
+                var query = AllPets.Where(p => !p.IsDeleted).AsQueryable();
 
                 // Apply Search Filter with robust null handling
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
@@ -54,20 +58,19 @@ namespace PetQuestV1.Components.Admin
                 }
 
                 // Apply Sorting with explicit null handling for OrderBy/OrderByDescending
-                // This directly addresses the CS8602 warnings.
                 query = CurrentSortColumn switch
                 {
                     "PetName" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.PetName) : query.OrderByDescending(p => p.PetName),
                     "Species" => SortDirection == SortDirection.Ascending ?
-                                   query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
-                                   query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
+                                    query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
+                                    query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
                     "Breed" => SortDirection == SortDirection.Ascending ?
-                                 query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
-                                 query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
+                                query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
+                                query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
                     "Age" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Age) : query.OrderByDescending(p => p.Age),
                     "Owner" => SortDirection == SortDirection.Ascending ?
-                                 query.OrderBy(p => p.Owner == null ? string.Empty : p.Owner.UserName) :
-                                 query.OrderByDescending(p => p.Owner == null ? string.Empty : p.Owner.UserName),
+                                query.OrderBy(p => p.Owner == null ? string.Empty : p.Owner.UserName) :
+                                query.OrderByDescending(p => p.Owner == null ? string.Empty : p.Owner.UserName),
                     _ => query.OrderBy(p => p.PetName) // Default sort
                 };
 
@@ -100,7 +103,8 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
-                AllPets = await petService.GetAllAsync(); // Load all pets
+                // The global query filter in DbContext will already exclude IsDeleted pets.
+                AllPets = await petService.GetAllAsync();
             }
             StateHasChanged(); // Refresh UI after loading data
         }
@@ -122,7 +126,7 @@ namespace PetQuestV1.Components.Admin
         protected async Task OnSpeciesChanged(ChangeEventArgs e)
         {
             PetFormModel.SpeciesId = e.Value?.ToString();
-            PetFormModel.BreedId = null;
+            PetFormModel.BreedId = null; // Reset breed when species changes
 
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
@@ -141,7 +145,7 @@ namespace PetQuestV1.Components.Admin
 
         protected void ShowAddPetForm()
         {
-            PetFormModel = new Pet();
+            PetFormModel = new Pet(); // Initialize with a new Pet object
             IsEditing = false;
             IsPetFormVisible = true;
             AvailableBreeds = new List<Breed>();
@@ -150,14 +154,18 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task EditPet(Pet pet)
         {
+            // Populate form model from the selected pet
+            // Note: Since PetFormModel is now of type Pet, direct assignment might be possible
+            // if you don't need distinct validation properties, otherwise keep mapping.
             PetFormModel = new Pet
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
-                SpeciesId = pet.Species?.Id,
-                OwnerId = pet.Owner?.Id,
-                BreedId = pet.Breed?.Id,
-                Age = pet.Age
+                SpeciesId = pet.SpeciesId, // Use direct ID from pet object
+                OwnerId = pet.OwnerId,     // Use direct ID from pet object
+                BreedId = pet.BreedId,
+                Age = pet.Age,
+                IsDeleted = pet.IsDeleted // Keep the IsDeleted state for the form model
             };
             IsEditing = true;
             IsPetFormVisible = true;
@@ -179,57 +187,64 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandlePetFormSubmit()
         {
+            // Perform basic validation before proceeding
+            if (string.IsNullOrWhiteSpace(PetFormModel.PetName) ||
+                string.IsNullOrWhiteSpace(PetFormModel.SpeciesId) ||
+                string.IsNullOrWhiteSpace(PetFormModel.OwnerId))
+            {
+                // You might want to add visual feedback here, e.g., a simple alert or error message
+                // For now, we'll just return.
+                return;
+            }
+
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
 
                 if (IsEditing)
                 {
-                    var existingPet = await petService.GetByIdAsync(PetFormModel.Id);
-                    if (existingPet != null)
-                    {
-                        existingPet.PetName = PetFormModel.PetName;
-                        existingPet.Age = PetFormModel.Age;
-                        existingPet.SpeciesId = PetFormModel.SpeciesId;
-                        existingPet.BreedId = PetFormModel.BreedId;
-                        existingPet.OwnerId = PetFormModel.OwnerId;
-
-                        await petService.UpdateAsync(existingPet);
-                    }
+                    // For update, PetFormModel already contains the ID and existing data.
+                    // The service will find and update it.
+                    await petService.UpdateAsync(PetFormModel);
                 }
                 else
                 {
+                    // For add, ensure a new ID is generated if not already set (ModelBase handles this)
+                    // and ensure IsDeleted is false by default (AddAsync in PetRepository handles this).
                     await petService.AddAsync(PetFormModel);
                 }
             }
 
             IsPetFormVisible = false;
-            await LoadData(); // Reload all data after submit
+            PetFormModel = new Pet(); // Reset form model
+            await LoadData(); // Reload all data after submit to reflect changes
             StateHasChanged();
         }
 
         protected void CancelPetForm()
         {
             IsPetFormVisible = false;
-            PetFormModel = new Pet();
+            PetFormModel = new Pet(); // Clear form
             StateHasChanged();
         }
 
-        protected async Task DeletePet(string id)
+        // --- Renamed from DeletePet to SoftDeletePet ---
+        protected async Task SoftDeletePet(string id)
         {
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
-                await petService.DeleteAsync(id);
+                // Call the SoftDeleteAsync method
+                await petService.SoftDeleteAsync(id);
             }
-            await LoadData(); // Reload all data after deletion
+            await LoadData(); // Reload all data to reflect the soft deletion (pet will disappear due to filter)
             StateHasChanged();
         }
 
         // ---------- Pagination Handlers ----------
         protected void ChangePetsPage(int page)
         {
-            PetsCurrentPage = page < 1 ? 1 : page > PetsTotalPages ? PetsTotalPages : page;
+            PetsCurrentPage = System.Math.Clamp(page, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
             StateHasChanged();
         }
 
@@ -250,12 +265,10 @@ namespace PetQuestV1.Components.Admin
         {
             if (CurrentSortColumn == columnName)
             {
-                // Toggle direction if same column
                 SortDirection = (SortDirection == SortDirection.Ascending) ? SortDirection.Descending : SortDirection.Ascending;
             }
             else
             {
-                // New column, default to ascending
                 CurrentSortColumn = columnName;
                 SortDirection = SortDirection.Ascending;
             }

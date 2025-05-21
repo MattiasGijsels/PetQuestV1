@@ -1,5 +1,6 @@
 ﻿@namespace PetQuestV1.Components.Admin
 @inherits PetsAdminPanelBase
+@* @inject IJSRuntime JSRuntime Remove this line *@
 
 @using System.ComponentModel.DataAnnotations
 
@@ -81,19 +82,19 @@
             <table class="table table-striped table-hover mb-0 admin-table">
                 <thead class="table-light">
                     <tr>
-                        <th @onclick='() => SortBy("PetName")' class="sortable-header"> @* Corrected @onclick syntax *@
+                        <th @onclick='() => SortBy("PetName")' class="sortable-header">
                             Name <i class="bi @GetSortIcon("PetName")"></i>
                         </th>
-                        <th @onclick='() => SortBy("Species")' class="sortable-header"> @* Corrected @onclick syntax *@
+                        <th @onclick='() => SortBy("Species")' class="sortable-header">
                             Species <i class="bi @GetSortIcon("Species")"></i>
                         </th>
-                        <th @onclick='() => SortBy("Breed")' class="sortable-header"> @* Corrected @onclick syntax *@
+                        <th @onclick='() => SortBy("Breed")' class="sortable-header">
                             Breed <i class="bi @GetSortIcon("Breed")"></i>
                         </th>
-                        <th @onclick='() => SortBy("Age")' class="sortable-header"> @* Corrected @onclick syntax *@
+                        <th @onclick='() => SortBy("Age")' class="sortable-header">
                             Age <i class="bi @GetSortIcon("Age")"></i>
                         </th>
-                        <th @onclick='() => SortBy("Owner")' class="sortable-header"> @* Corrected @onclick syntax *@
+                        <th @onclick='() => SortBy("Owner")' class="sortable-header">
                             Owner <i class="bi @GetSortIcon("Owner")"></i>
                         </th>
                         <th style="width: 120px">Actions</th>
@@ -114,7 +115,8 @@
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePet(pet.Id)">
+                                    @* Directly call SoftDeletePet without a pop-up *@
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => SoftDeletePet(pet.Id)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
@@ -154,7 +156,8 @@
     .sortable-header {
         cursor: pointer;
     }
-    .sortable-header:hover {
-        background-color: #f0f0f0; /* Light highlight on hover */
-    }
+
+        .sortable-header:hover {
+            background-color: #f0f0f0; /* Light highlight on hover */
+        }
 </style>

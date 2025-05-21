@@ -43,6 +43,16 @@ namespace PetQuestV1.Services
             return _petRepository.DeleteAsync(id);
         }
 
+        public async Task SoftDeleteAsync(string id)
+        {
+            var pet = await _petRepository.GetByIdAsync(id);
+            if (pet != null)
+            {
+                pet.IsDeleted = true; // Set the IsDeleted flag to true
+                await _petRepository.UpdateAsync(pet); // Update the pet in the database
+            }
+        }
+
         public Task<Species?> GetSpeciesByNameAsync(string name)
         {
             return _petRepository.GetSpeciesByNameAsync(name);
