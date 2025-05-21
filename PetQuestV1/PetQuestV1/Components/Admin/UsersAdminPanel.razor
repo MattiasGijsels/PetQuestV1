@@ -28,6 +28,9 @@
                                 <button class="btn btn-sm btn-outline-secondary" disabled>
                                     <i class="bi bi-pencil"></i>
                                 </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteUser(user.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     }
