@@ -13,9 +13,29 @@
             <table class="table table-striped table-hover mb-0 admin-table">
                 <thead class="table-light">
                     <tr>
-                        <th>User Name</th>
+                        <th @onclick='() => SortUsers("UserName")'>
+                            User Name
+                            @if (UsersSortColumn == "UserName")
+                            {
+                                <i class="bi @(UsersSortDirection == SortDirection.Ascending ? "bi-sort-alpha-down" : "bi-sort-alpha-up")"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-sort-alpha-down-alt"></i> @* Or bi-arrow-down-up, or bi-funnel-fill etc. Choose one that indicates "sortable" *@
+                            }
+                        </th>
                         <th>Email</th>
-                        <th>Pets</th>
+                        <th @onclick='() => SortUsers("PetCount")'>
+                            Pets
+                            @if (UsersSortColumn == "PetCount")
+                            {
+                                <i class="bi @(UsersSortDirection == SortDirection.Ascending ? "bi-sort-numeric-down" : "bi-sort-numeric-up")"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-sort-numeric-down-alt"></i> @* Or bi-arrow-down-up, etc. Choose one that indicates "sortable" *@
+                            }
+                        </th>
                         <th style="width: 120px">Actions</th>
                     </tr>
                 </thead>
