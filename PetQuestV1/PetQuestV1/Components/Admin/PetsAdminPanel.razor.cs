@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
-using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using System.Collections.Generic;
@@ -10,7 +9,8 @@ using System.Linq; // Make sure this is present for LINQ methods
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore; // Needed for ToListAsync() and related EF Core extensions
-using System.ComponentModel.DataAnnotations; // For the PetFormModel, if using it as a separate class
+using System.ComponentModel.DataAnnotations;
+using PetQuestV1.Contracts.Defines; // For the PetFormModel, if using it as a separate class
 
 namespace PetQuestV1.Components.Admin
 {

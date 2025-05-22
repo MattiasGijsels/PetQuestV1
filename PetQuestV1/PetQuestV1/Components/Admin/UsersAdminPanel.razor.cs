@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity; // Still useful for general Identity context, though direct UserManager isn't injected here
 using PetQuestV1.Data; // For ApplicationUser
-using PetQuestV1.Contracts; // For IUserService (NEW!)
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PetQuestV1.Contracts.Defines;
 // Removed Microsoft.Extensions.DependencyInjection as IServiceScopeFactory is no longer directly injected
 // Removed Microsoft.EntityFrameworkCore as ToListAsync() will be handled by UserService.GetAllUsersAsync()
 

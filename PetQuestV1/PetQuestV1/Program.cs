@@ -5,6 +5,7 @@ using PetQuestV1.Client.Pages;
 using PetQuestV1.Components;
 using PetQuestV1.Components.Account;
 using PetQuestV1.Contracts;
+using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Data;
 using PetQuestV1.Repositories;
 using PetQuestV1.Services;

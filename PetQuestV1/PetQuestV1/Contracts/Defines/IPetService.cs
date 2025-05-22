@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Contracts.Models;
 
-namespace PetQuestV1.Contracts
+namespace PetQuestV1.Contracts.Defines
 {
     public interface IPetService
     {

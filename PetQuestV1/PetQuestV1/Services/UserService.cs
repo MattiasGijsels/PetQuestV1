@@ -1,7 +1,7 @@
 ﻿// Services/UserService.cs
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // For ToListAsync() and IgnoreQueryFilters()
-using PetQuestV1.Contracts;
+using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Data; // For ApplicationUser and ApplicationDbContext
 using System.Collections.Generic;
 using System.Linq;

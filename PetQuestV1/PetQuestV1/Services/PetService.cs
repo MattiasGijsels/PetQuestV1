@@ -1,5 +1,6 @@
 ﻿// Services/PetService.cs
 using PetQuestV1.Contracts;
+using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
