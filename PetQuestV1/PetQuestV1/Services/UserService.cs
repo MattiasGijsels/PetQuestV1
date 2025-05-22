@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // For ToListAsync() and IgnoreQueryFilters()
 using PetQuestV1.Contracts.Defines;
+using PetQuestV1.Contracts.DTOs;
 using PetQuestV1.Data; // For ApplicationUser and ApplicationDbContext
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,26 @@ namespace PetQuestV1.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context; // Inject DbContext for specific queries if UserManager doesn't suffice
 
+        public async Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync()
+        {
+            // Use _context.Users directly to leverage EF Core's Include and Select
+            // Ensure the global query filter for ApplicationUser (u => !u.IsDeleted) is applied.
+            // Also apply the global query filter for Pet (p => !p.IsDeleted) to count only active pets.
+            return await _context.Users
+                .AsNoTracking() // Good practice for read-only operations
+                .Where(u => !u.IsDeleted) // Explicitly filter by IsDeleted if your global filter isn't automatically applied to _context.Users directly when projecting
+                                          // or if you want to ensure it for this specific query. UserManager.Users already applies it.
+                .Select(u => new UserListItemDto
+                {
+                    Id = u.Id,
+                    UserName = u.UserName ?? string.Empty, // Null-forgiving for UserName
+                    Email = u.Email ?? string.Empty,       // Null-forgiving for Email
+                    IsDeleted = u.IsDeleted,
+                    // Count only active pets (not soft-deleted)
+                    PetCount = u.Pets.Count(p => !p.IsDeleted)
+                })
+                .ToListAsync();
+        }
         public UserService(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _userManager = userManager;

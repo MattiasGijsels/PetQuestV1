@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Contracts.Models; // Assuming your models are here
-using System.Linq; // Needed for .SelectMany()
+using System.Linq;
 
 namespace PetQuestV1.Data
 {
@@ -31,10 +31,11 @@ namespace PetQuestV1.Data
             // --- Configure Specific Relationships ---
 
             // Configures Pet-Owner relationship
+            // A Pet has one Owner, and an Owner has many Pets.
             // An Owner cannot be deleted if they have any Pets.
             builder.Entity<Pet>()
-                .HasOne(p => p.Owner)
-                .WithMany()
+                .HasOne(p => p.Owner)              // A Pet has one Owner
+                .WithMany(u => u.Pets)             // <--- CHANGE THIS LINE: Explicitly map to ApplicationUser.Pets collection
                 .HasForeignKey(p => p.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 

@@ -1,4 +1,5 @@
 ﻿// Contracts/IUserService.cs
+using PetQuestV1.Contracts.DTOs;
 using PetQuestV1.Data; // For ApplicationUser
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +8,8 @@ namespace PetQuestV1.Contracts.Defines
 {
     public interface IUserService
     {
+        // Change return type to the DTO
+        Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync(); // Renamed for clarity
         Task<List<ApplicationUser>> GetAllUsersAsync();
         Task<ApplicationUser?> GetUserByIdAsync(string userId);
         Task<ApplicationUser?> GetUserByUsernameAsync(string username); // Useful for login/finding

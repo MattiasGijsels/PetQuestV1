@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PetQuestV1.Data;
 
@@ -11,9 +12,11 @@ using PetQuestV1.Data;
 namespace PetQuestV1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522143718_AddPetCollectionToApplicationUser")]
+    partial class AddPetCollectionToApplicationUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,6 +195,9 @@ namespace PetQuestV1.Migrations
                     b.Property<double?>("Age")
                         .HasColumnType("float");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("BreedId")
                         .HasColumnType("nvarchar(50)");
 
@@ -210,6 +216,8 @@ namespace PetQuestV1.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BreedId");
 
@@ -370,13 +378,17 @@ namespace PetQuestV1.Migrations
 
             modelBuilder.Entity("PetQuestV1.Contracts.Models.Pet", b =>
                 {
+                    b.HasOne("PetQuestV1.Data.ApplicationUser", null)
+                        .WithMany("Pets")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("PetQuestV1.Contracts.Models.Breed", "Breed")
                         .WithMany()
                         .HasForeignKey("BreedId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PetQuestV1.Data.ApplicationUser", "Owner")
-                        .WithMany("Pets")
+                        .WithMany()
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
