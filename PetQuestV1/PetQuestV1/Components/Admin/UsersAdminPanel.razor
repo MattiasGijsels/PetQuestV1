@@ -9,14 +9,12 @@
             <strong>Users</strong>
             <i class="bi @(IsUsersSectionVisible ? "bi-caret-down-fill" : "bi-caret-right-fill")"></i>
         </button>
-                @*
         @if (IsUsersSectionVisible && !IsUserFormVisible)
         {
-            <button class="btn btn-sm btn-success" @onclick="ShowAddUserForm"> {{-- You'd need to implement ShowAddUserForm in your base class --}}
+            <button class="btn btn-sm btn-success" @onclick="NavigateToRegisterPage">
                 <i class="bi bi-plus"></i> Add New User
             </button>
         }
-        *@
     </div>
     <div class="collapse @(IsUsersSectionVisible ? "show" : "")">
         <div class="card-body p-0">
@@ -37,7 +35,7 @@
                             <ValidationMessage For="@(() => UserFormModel.Email)" />
                         </div>
                         <div class="col-sm-4">
-                            <label for="petCount" class="form-label">Pet Count:</label>                      
+                            <label for="petCount" class="form-label">Pet Count:</label>
                             <InputNumber id="petCount" class="form-control" @bind-Value="UserFormModel.PetCount" min="0" />
                             <ValidationMessage For="@(() => UserFormModel.PetCount)" />
                         </div>
@@ -117,7 +115,7 @@
                         </li>
                     </ul>
                 </nav>
-            } 
+            }
         </div>
     </div>
 </div>

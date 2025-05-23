@@ -4,14 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
-using System.ComponentModel.DataAnnotations; // Needed for DataAnnotationsValidator in the razor file, best to include it here too for context
-
+using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Components.Admin
 {
-    // If you are using a separate code-behind file, it should look like this:
-    // public partial class UsersAdminPanel : ComponentBase // If UsersAdminPanel.razor.cs
-    // If you are using a base class for inheritance:
     public partial class UsersAdminPanelBase : ComponentBase
     {
         // Enum for sorting direction
@@ -23,6 +19,9 @@ namespace PetQuestV1.Components.Admin
 
         [Inject]
         private IUserService UserService { get; set; } = default!;
+
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = default!; // Inject NavigationManager
 
         protected List<UserListItemDto> Users { get; set; } = new();
 
@@ -77,9 +76,9 @@ namespace PetQuestV1.Components.Admin
                 UsersSortDirection = SortDirection.Ascending;
             }
 
-            ApplySorting();     // Re-apply sorting to the list
+            ApplySorting();        // Re-apply sorting to the list
             ChangeUsersPage(1); // Reset to first page after sorting to see results immediately
-            StateHasChanged();  // Notify Blazor component
+            StateHasChanged();     // Notify Blazor component
         }
 
         // Applies sorting logic to the Users list based on current sort column and direction
@@ -193,6 +192,15 @@ namespace PetQuestV1.Components.Admin
             IsUserFormVisible = false;      // Hide the form
             UserFormModel = new UserFormDto(); // Clear the form model
             StateHasChanged();
+        }
+
+        /// <summary>
+        /// Redirects the user to the registration page.
+        /// </summary>
+        protected void NavigateToRegisterPage()
+        {
+            // CORRECTED PATH: Use the same path as in NavMenu.razor
+            NavigationManager.NavigateTo("/Account/Register");
         }
     }
 }
