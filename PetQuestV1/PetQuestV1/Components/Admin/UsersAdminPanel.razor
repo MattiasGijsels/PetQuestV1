@@ -37,8 +37,7 @@
                             <ValidationMessage For="@(() => UserFormModel.Email)" />
                         </div>
                         <div class="col-sm-4">
-                            <label for="petCount" class="form-label">Pet Count:</label>
-                            {{-- PetCount is usually a derived field, not directly editable. Consider if you really want this here. --}}
+                            <label for="petCount" class="form-label">Pet Count:</label>                      
                             <InputNumber id="petCount" class="form-control" @bind-Value="UserFormModel.PetCount" min="0" />
                             <ValidationMessage For="@(() => UserFormModel.PetCount)" />
                         </div>
@@ -48,9 +47,6 @@
                         <InputCheckbox id="isDeleted" class="form-check-input" @bind-Value="UserFormModel.IsDeleted" />
                         <label class="form-check-label" for="isDeleted">Is Deleted (Soft Delete)</label>
                     </div>
-
-                    {{-- Add more form fields here based on your UserFormDto if needed --}}
-
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
                     <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelUserForm">Cancel</button>
                 </EditForm>
