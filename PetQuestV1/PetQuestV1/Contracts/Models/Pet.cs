@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // Make sure this is present if using [ForeignKey]
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts.Shared;
-using PetQuestV1.Data; // Ensure this is correct for ApplicationUser
+using PetQuestV1.Data;
 
 namespace PetQuestV1.Contracts.Models
 {
@@ -17,14 +17,12 @@ namespace PetQuestV1.Contracts.Models
         [StringLength(100)]
         public string PetName { get; set; } = default!;
 
-        // REMOVE [Required] if you want to use OnDelete(DeleteBehavior.SetNull) for Species
+        // removed all [Required] for Species,Breed and Owner because I wanted to use OnDelete(DeleteBehavior.SetNull) 
         public string? SpeciesId { get; set; } = default!;
 
         [ForeignKey("SpeciesId")]
         public Species? Species { get; set; }
 
-
-        // REMOVE [Required] if you want to use OnDelete(DeleteBehavior.SetNull) for Breed
         public string? BreedId { get; set; } = default!; // FK to Breed
 
         [ForeignKey("BreedId")]
@@ -35,7 +33,6 @@ namespace PetQuestV1.Contracts.Models
         [Range(0.0, 100.0, ErrorMessage = "Age must be between 0 and 100.")]
         public double? Age { get; set; }
 
-        // REMOVE [Required] if you want to use OnDelete(DeleteBehavior.SetNull) for Owner
         public string? OwnerId { get; set; } = default!; // FK to ApplicationUser
 
         [ForeignKey("OwnerId")]
