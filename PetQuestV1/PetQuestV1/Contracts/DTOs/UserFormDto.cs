@@ -1,26 +1,28 @@
-﻿// Example: PetQuestV1.Contracts.DTOs/UserFormDto.cs
+﻿// PetQuestV1/Contracts/DTOs/UserFormDto.cs
 using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Contracts.DTOs
 {
     public class UserFormDto
     {
-        public string? Id { get; set; } // Will be null for new users, populated for existing ones
+        public string? Id { get; set; } // Nullable for new users
 
         [Required(ErrorMessage = "User Name is required.")]
-        [StringLength(50, ErrorMessage = "User Name cannot exceed 50 characters.")]
+        [StringLength(256, ErrorMessage = "User Name cannot exceed 256 characters.")]
         public string UserName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
-        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
+        [StringLength(256, ErrorMessage = "Email cannot exceed 256 characters.")]
         public string Email { get; set; } = string.Empty;
 
-        // Assuming you might want to edit this, otherwise remove
+        // PetCount is usually derived, not directly editable, but kept for consistency with existing form
         public int PetCount { get; set; }
 
         public bool IsDeleted { get; set; }
 
-        // Add any other properties you want to edit on the user
+        // Add this property to hold the selected role ID
+        [Required(ErrorMessage = "Role is required.")]
+        public string SelectedRoleId { get; set; } = string.Empty;
     }
 }

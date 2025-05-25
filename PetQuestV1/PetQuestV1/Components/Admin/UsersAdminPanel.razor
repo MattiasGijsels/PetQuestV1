@@ -3,6 +3,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @using PetQuestV1.Contracts.Enums
+@using Microsoft.AspNetCore.Identity // For IdentityRole, if needed directly in razor (though not strictly for this change)
 
 <div class="card mb-5">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -42,6 +43,21 @@
                         </div>
                     </div>
 
+                    @* New row for Role dropdown *@
+                    <div class="row g-2 mb-2">
+                        <div class="col-sm-4">
+                            <label for="roleSelect" class="form-label">Role:</label>
+                            <InputSelect id="roleSelect" class="form-select" @bind-Value="UserFormModel.SelectedRoleId">
+                                <option value="">-- Select Role --</option>
+                                @foreach (var role in AvailableRoles)
+                                {
+                                    <option value="@role.Id">@role.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => UserFormModel.SelectedRoleId)" />
+                        </div>
+                    </div>
+
                     <div class="form-check mb-3">
                         <InputCheckbox id="isDeleted" class="form-check-input" @bind-Value="UserFormModel.IsDeleted" />
                         <label class="form-check-label" for="isDeleted">Is Deleted (Soft Delete)</label>
@@ -53,7 +69,7 @@
 
             @* --- Search Bar --- *@
             <div class="p-3">
-                <input type="text" class="form-control" placeholder="Search users by name or email"
+                <input type="text" class="form-control" placeholder="Search users by name, email, or role"
                        @bind="SearchTerm" @oninput="OnSearchInput" />
             </div>
 
@@ -63,11 +79,14 @@
                     <thead class="table-light">
                         <tr>
                             <th @onclick='() => SortUsers("UserName")' class="sortable-header">
-                                User Name <i class="bi @(UsersSortColumn == "UserName" ? (UsersSortDirection == SortDirection.Ascending ? "bi-sort-alpha-down" : "bi-sort-alpha-up") : "bi-sort-alpha-down-alt")"></i>
+                                User Name <i class="bi @GetSortIcon("UserName")"></i>
                             </th>
                             <th>Email</th>
                             <th @onclick='() => SortUsers("PetCount")' class="sortable-header">
-                                Pets <i class="bi @(UsersSortColumn == "PetCount" ? (UsersSortDirection == SortDirection.Ascending ? "bi-sort-numeric-down" : "bi-sort-numeric-up") : "bi-sort-numeric-down-alt")"></i>
+                                Pets <i class="bi @GetSortIcon("PetCount")"></i>
+                            </th>
+                            <th @onclick='() => SortUsers("RoleName")' class="sortable-header">
+                                Role <i class="bi @GetSortIcon("RoleName")"></i>
                             </th>
                             <th style="width: 120px">Actions</th>
                         </tr>
@@ -81,6 +100,7 @@
                                     <td>@user.UserName</td>
                                     <td>@user.Email</td>
                                     <td>@user.PetCount</td>
+                                    <td>@user.RoleName</td> @* Display Role Name *@
                                     <td>
                                         <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => EditUser(user.Id)">
                                             <i class="bi bi-pencil"></i>
@@ -101,7 +121,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="6" class="text-center">No users found.</td>
+                                <td colspan="5" class="text-center">No users found.</td> @* Adjusted colspan *@
                             </tr>
                         }
                     </tbody>

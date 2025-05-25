@@ -8,7 +8,7 @@ namespace PetQuestV1.Contracts.DTOs
         public string Email { get; set; } = string.Empty;
         public int PetCount { get; set; } // The number of pets associated with the user
         public bool IsDeleted { get; set; }
-
+        public string SelectedRoleId { get; set; } = string.Empty;
         // Add any other properties from your ApplicationUser that
         // represent the *full* details of a user that you might
         // want to fetch or display, even if not directly editable

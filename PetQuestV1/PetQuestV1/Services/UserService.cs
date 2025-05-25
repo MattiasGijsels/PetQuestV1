@@ -6,120 +6,186 @@ using PetQuestV1.Data.Defines; // For IUserRepository
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-// Removed: using Microsoft.EntityFrameworkCore; // Not needed here anymore
+using Microsoft.AspNetCore.Identity; // For UserManager and RoleManager
+using Microsoft.EntityFrameworkCore; // For ToListAsync etc.
 
 namespace PetQuestV1.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository; // Inject the repository interface
+        private readonly IUserRepository _userRepository; // Keep for non-Identity specific user queries (e.g., GetAllAsync with Pets)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserService(IUserRepository userRepository) // Constructor for DI
+        public UserService(IUserRepository userRepository,
+                           UserManager<ApplicationUser> userManager,
+                           RoleManager<IdentityRole> roleManager)
         {
             _userRepository = userRepository;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync()
         {
-            // Now use the repository to get the data
-            var users = await _userRepository.GetAllAsync();
+            // This method might still use _userRepository if it's optimized for specific includes
+            // that UserManager.Users does not automatically provide (like Pets).
+            // UserManager.Users queryable will likely not eager load Pets without explicit .Include().
+            var users = await _userRepository.GetAllAsync(); // This includes .Include(u => u.Pets)
 
-            return users.Select(u => new UserListItemDto
+            var userListItems = new List<UserListItemDto>();
+            foreach (var user in users)
             {
-                Id = u.Id,
-                UserName = u.UserName ?? string.Empty,
-                Email = u.Email ?? string.Empty,
-                PetCount = u.Pets?.Count() ?? 0, // Utilize the loaded Pets navigation property
-                IsDeleted = u.IsDeleted
-            })
-            .ToList();
+                var roles = await _userManager.GetRolesAsync(user);
+                var roleName = roles.FirstOrDefault() ?? "No Role";
+
+                userListItems.Add(new UserListItemDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PetCount = user.Pets?.Count() ?? 0,
+                    IsDeleted = user.IsDeleted,
+                    RoleName = roleName
+                });
+            }
+            return userListItems;
         }
 
         public async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
-            // Direct pass-through to the repository.
-            // Consider if this method is truly needed on the service layer, or if DTOs are always preferred.
             return await _userRepository.GetAllAsync();
         }
 
         public async Task<UserDetailDto?> GetUserByIdAsync(string userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            // Use UserManager to get the user when doing Identity operations
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return null;
             }
+
+            // Manually load Pets if needed, as FindByIdAsync doesn't include them by default.
+            // This could be done by using _userRepository.GetByIdAsync(userId) instead of _userManager.FindByIdAsync(userId)
+            // if _userRepository.GetByIdAsync already includes Pets and you need it for PetCount.
+            // For now, let's assume PetCount in UserDetailDto isn't directly updated via form,
+            // or we need to ensure Pets are loaded. The easiest way to get PetCount is still from the repository.
+            // Let's refine this to use the repository's get method to ensure Pets are loaded.
+            var userWithPets = await _userRepository.GetByIdAsync(userId);
+            if (userWithPets == null) // This check is redundant if user is already found above
+            {
+                return null;
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var currentRole = roles.FirstOrDefault();
+            var currentRoleEntity = currentRole != null ? await _roleManager.FindByNameAsync(currentRole) : null;
 
             return new UserDetailDto
             {
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
-                PetCount = user.Pets?.Count() ?? 0,
-                IsDeleted = user.IsDeleted
+                PetCount = userWithPets.Pets?.Count() ?? 0, // Use PetCount from userWithPets
+                IsDeleted = user.IsDeleted,
+                SelectedRoleId = currentRoleEntity?.Id ?? string.Empty
             };
         }
 
         public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
         {
-            return await _userRepository.GetByUsernameAsync(username);
+            return await _userRepository.GetByUsernameAsync(username); // Keep this for specific username queries
         }
 
         public async Task SoftDeleteUserAsync(string userId)
         {
-            // The service layer holds the business logic: "soft delete this user".
-            // The repository handles the data access implementation of that logic.
+            // This is a custom property, so UserRepository is appropriate
             await _userRepository.SoftDeleteAsync(userId);
         }
 
         public async Task RestoreUserAsync(string userId)
         {
+            // This is a custom property, so UserRepository is appropriate
             await _userRepository.RestoreAsync(userId);
         }
 
         public async Task HardDeleteUserAsync(string userId)
         {
-            await _userRepository.DeleteAsync(userId);
+            // Hard delete user via UserManager. It handles cascading deletes for Identity tables.
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                var result = await _userManager.DeleteAsync(user);
+                // You might want to check result.Succeeded and handle errors
+            }
+            // If _userRepository.DeleteAsync also handles other associated data (like Pets),
+            // you might need to decide which method is the "master" for hard deletion,
+            // or call both if they handle different aspects. For now, rely on UserManager
+            // for Identity-related deletion.
         }
 
         public async Task UpdateUserAsync(UserFormDto userDto)
         {
-            // Fetch the existing user from the repository
-            var user = await _userRepository.GetByIdAsync(userDto.Id!); // Assuming Id is not null for update
+            // IMPORTANT: Get the user using UserManager.FindByIdAsync to ensure it's tracked
+            // by the same context that UserManager uses.
+            var user = await _userManager.FindByIdAsync(userDto.Id!);
 
             if (user != null)
             {
-                // Update properties of the entity from the DTO
+                // Update basic user properties directly on the tracked entity
                 user.UserName = userDto.UserName;
                 user.Email = userDto.Email;
                 user.IsDeleted = userDto.IsDeleted;
 
-                // PetCount is typically derived, not directly updated here.
-                // If you uncommented this in your original code, make sure you understand the implications.
-                // user.PetCount = userDto.PetCount;
+                // Persist changes to basic user properties using UserManager
+                // This will also save changes to UserName, Email, IsDeleted, etc.
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    // Handle errors, e.g., throw exception or return IdentityResult
+                    throw new InvalidOperationException($"Failed to update user: {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+                }
 
-                // Pass the updated entity to the repository for persistence
-                await _userRepository.UpdateAsync(user);
+                // --- Handle Role Update ---
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                var currentRoleName = currentRoles.FirstOrDefault();
+
+                var newRoleEntity = await _roleManager.FindByIdAsync(userDto.SelectedRoleId);
+                var newRoleName = newRoleEntity?.Name;
+
+                if (currentRoleName != newRoleName)
+                {
+                    // Remove existing roles
+                    if (!string.IsNullOrEmpty(currentRoleName))
+                    {
+                        var removeResult = await _userManager.RemoveFromRoleAsync(user, currentRoleName);
+                        if (!removeResult.Succeeded)
+                        {
+                            throw new InvalidOperationException($"Failed to remove role '{currentRoleName}': {string.Join(", ", removeResult.Errors.Select(e => e.Description))}");
+                        }
+                    }
+
+                    // Add the new role if one is selected
+                    if (!string.IsNullOrEmpty(newRoleName))
+                    {
+                        var addResult = await _userManager.AddToRoleAsync(user, newRoleName);
+                        if (!addResult.Succeeded)
+                        {
+                            throw new InvalidOperationException($"Failed to add role '{newRoleName}': {string.Join(", ", addResult.Errors.Select(e => e.Description))}");
+                        }
+                    }
+                }
             }
-            // You might want to throw an exception or return a status if user is not found
-        }
-
-        // Example of adding a user, if you implement a create endpoint
-        /*
-        public async Task CreateUserAsync(UserFormDto userDto)
-        {
-            var newUser = new ApplicationUser
+            else
             {
-                Id = Guid.NewGuid().ToString(), // Generate a new ID
-                UserName = userDto.UserName,
-                Email = userDto.Email,
-                EmailConfirmed = true, // Or false, depending on your registration flow
-                IsDeleted = false,
-                // Add any other required properties for a new user
-            };
-
-            await _userRepository.AddAsync(newUser);
+                throw new KeyNotFoundException($"User with ID {userDto.Id} not found.");
+            }
         }
-        */
+
+        public async Task<List<IdentityRole>> GetAllRolesAsync()
+        {
+            return await _roleManager.Roles.ToListAsync();
+        }
     }
 }
