@@ -21,7 +21,7 @@ namespace PetQuestV1.Contracts.DTOs
 
         public bool IsDeleted { get; set; }
 
-        // Add this property to hold the selected role ID
+        //this property holds the selected role ID
         [Required(ErrorMessage = "Role is required.")]
         public string SelectedRoleId { get; set; } = string.Empty;
     }

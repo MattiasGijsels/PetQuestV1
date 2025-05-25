@@ -1,5 +1,4 @@
-﻿// PetQuestV1/Contracts/Models/BreedWithSpeciesDto.cs
-namespace PetQuestV1.Contracts.Models
+﻿namespace PetQuestV1.Contracts.Models
 {
     public class BreedWithSpeciesDto
     {

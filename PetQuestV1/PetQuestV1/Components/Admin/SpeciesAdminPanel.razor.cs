@@ -1,14 +1,7 @@
-﻿// PetQuestV1/Components/Admin/SpeciesAdminPanel.razor.cs
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Components;
 using PetQuestV1.Contracts.Defines;
-using PetQuestV1.Contracts.Models; // Ensure Species and SpeciesWithBreedCountDto are available
+using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Enums;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Components.Admin
 {
@@ -17,8 +10,7 @@ namespace PetQuestV1.Components.Admin
         [Inject]
         private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
-        // Change the type of AllSpecies to the new DTO
-        protected List<SpeciesWithBreedCountDto> AllSpecies { get; set; } = new(); // <--- CHANGED TYPE
+        protected List<SpeciesWithBreedCountDto> AllSpecies { get; set; } = new(); 
 
         // --- Sorting Properties ---
         protected string CurrentSortColumn { get; set; } = "SpeciesName"; // Default sort column
@@ -31,8 +23,15 @@ namespace PetQuestV1.Components.Admin
         protected int SpeciesCurrentPage { get; set; } = 1;
         protected int SpeciesPageSize { get; set; } = 10;
 
-        // Computed property for filtered and sorted species
-        // This will now operate on SpeciesWithBreedCountDto
+        // Forms & UI state for species management
+        protected Species SpeciesFormModel { get; set; } = new();
+        protected bool IsSpeciesFormVisible { get; set; } = false;
+        private bool IsEditing { get; set; } = false;
+        protected bool IsSpeciesSectionVisible { get; set; } = false;
+        protected int SpeciesTotalPages => FilteredAndSortedSpecies.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedSpecies.Count() / SpeciesPageSize) : 1;
+        protected IEnumerable<SpeciesWithBreedCountDto> PagedSpecies => FilteredAndSortedSpecies.Skip((SpeciesCurrentPage - 1) * SpeciesPageSize).Take(SpeciesPageSize);
+
+
         protected IEnumerable<SpeciesWithBreedCountDto> FilteredAndSortedSpecies
         {
             get
@@ -59,17 +58,6 @@ namespace PetQuestV1.Components.Admin
                 return query.ToList();
             }
         }
-
-        protected int SpeciesTotalPages => FilteredAndSortedSpecies.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedSpecies.Count() / SpeciesPageSize) : 1;
-        protected IEnumerable<SpeciesWithBreedCountDto> PagedSpecies => FilteredAndSortedSpecies.Skip((SpeciesCurrentPage - 1) * SpeciesPageSize).Take(SpeciesPageSize);
-
-        // Forms & UI state for species management
-        // Keep SpeciesFormModel as Species, as it's used for actual CRUD operations
-        protected Species SpeciesFormModel { get; set; } = new();
-        protected bool IsSpeciesFormVisible { get; set; } = false;
-        private bool IsEditing { get; set; } = false;
-
-        protected bool IsSpeciesSectionVisible { get; set; } = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -102,8 +90,7 @@ namespace PetQuestV1.Components.Admin
             StateHasChanged();
         }
 
-        // Change parameter type to SpeciesWithBreedCountDto for display, then fetch full Species for editing.
-        protected async Task EditSpecies(SpeciesWithBreedCountDto speciesDto) // <--- CHANGED PARAMETER TYPE
+        protected async Task EditSpecies(SpeciesWithBreedCountDto speciesDto) 
         {
             using (var scope = ScopeFactory.CreateScope())
             {
@@ -122,28 +109,39 @@ namespace PetQuestV1.Components.Admin
             // Basic client-side validation for SpeciesName if needed, otherwise rely on DataAnnotationsValidator
             if (string.IsNullOrWhiteSpace(SpeciesFormModel.SpeciesName))
             {
-                // You might want to add a visible error message here
+                Console.WriteLine("Species Name cannot be empty}");
                 return;
             }
 
-            using (var scope = ScopeFactory.CreateScope())
+            try
             {
-                var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
 
-                if (IsEditing)
-                {
-                    await speciesService.UpdateAsync(SpeciesFormModel);
+                    if (IsEditing)
+                    {
+                        await speciesService.UpdateAsync(SpeciesFormModel);
+                    }
+                    else
+                    {
+                        await speciesService.AddAsync(SpeciesFormModel);
+                    }
                 }
-                else
-                {
-                    await speciesService.AddAsync(SpeciesFormModel);
-                }
+
+                IsSpeciesFormVisible = false;
+                SpeciesFormModel = new Species(); // Reset form model for next use
+                await LoadData(); // Reload all data after submit to reflect changes
             }
+            catch (Exception ex)
+            {
 
-            IsSpeciesFormVisible = false;
-            SpeciesFormModel = new Species(); // Reset form model for next use
-            await LoadData(); // Reload all data after submit to reflect changes
-            StateHasChanged();
+                Console.WriteLine($"Error saving species: {ex.Message}");
+            }
+            finally
+            {
+                StateHasChanged(); // Ensure UI updates even if an error occurs
+            }
         }
 
         protected void CancelSpeciesForm()

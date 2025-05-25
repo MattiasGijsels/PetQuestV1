@@ -18,11 +18,8 @@ namespace PetQuestV1.Contracts.DTOs.Pets
         [Required(ErrorMessage = "Owner is required.")]
         public string? OwnerId { get; set; }
 
-        // CHANGE: Age property type changed to double?
-        // Adjust Range to match typical age values for pets, allowing decimals for months/half-years
         [Range(0.0, 30.0, ErrorMessage = "Age must be between 0.0 and 30.0.")]
-        public double? Age { get; set; } // Made nullable if your Pet.Age is also nullable
+        public double? Age { get; set; } // Made nullable because the int would let me display a placeholder in the UI
 
-        // We don't include IsDeleted here, as the form shouldn't directly control this.
     }
 }

@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
-using System.ComponentModel.DataAnnotations;
 using PetQuestV1.Contracts.Enums;
 using Microsoft.AspNetCore.Identity; // For IdentityRole
 
@@ -16,13 +12,20 @@ namespace PetQuestV1.Components.Admin
         private IUserService UserService { get; set; } = default!;
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = default!;
+        private NavigationManager NavigationManager { get; set; } = default!;// used for reroute to Register
 
         protected List<UserListItemDto> AllUsers { get; set; } = new();
-        protected List<IdentityRole> AvailableRoles { get; set; } = new(); // New property for roles dropdown
+        protected List<IdentityRole> AvailableRoles { get; set; } = new();
+        protected UserFormDto UserFormModel { get; set; } = new UserFormDto();
 
+        //For UI & state management 
+        protected int UsersTotalPages => FilteredAndSortedUsers.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedUsers.Count() / UsersPageSize) : 1;
+        protected IEnumerable<UserListItemDto> PagedUsers => FilteredAndSortedUsers .Skip((UsersCurrentPage - 1) * UsersPageSize).Take(UsersPageSize);
+        protected string UsersSortColumn { get; set; } = "UserName";
+        protected SortDirection UsersSortDirection { get; set; } = SortDirection.Ascending;
+        protected bool IsUsersSectionVisible { get; set; } = false;
+        protected bool IsUserFormVisible { get; set; } = false;
         protected string SearchTerm { get; set; } = string.Empty;
-
         protected int UsersCurrentPage { get; set; } = 1;
         protected int UsersPageSize { get; set; } = 10;
 
@@ -37,7 +40,7 @@ namespace PetQuestV1.Components.Admin
                     query = query.Where(u =>
                         u.UserName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) ||
                         u.Email.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) ||
-                        u.RoleName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) // Search by role name too
+                        u.RoleName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) 
                     );
                 }
 
@@ -52,18 +55,6 @@ namespace PetQuestV1.Components.Admin
                 return query.ToList();
             }
         }
-
-        protected int UsersTotalPages => FilteredAndSortedUsers.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedUsers.Count() / UsersPageSize) : 1;
-        protected IEnumerable<UserListItemDto> PagedUsers => FilteredAndSortedUsers
-            .Skip((UsersCurrentPage - 1) * UsersPageSize)
-            .Take(UsersPageSize);
-
-        protected string UsersSortColumn { get; set; } = "UserName";
-        protected SortDirection UsersSortDirection { get; set; } = SortDirection.Ascending;
-
-        protected bool IsUsersSectionVisible { get; set; } = false;
-        protected bool IsUserFormVisible { get; set; } = false;
-        protected UserFormDto UserFormModel { get; set; } = new UserFormDto();
 
         protected override async Task OnInitializedAsync()
         {
@@ -149,7 +140,7 @@ namespace PetQuestV1.Components.Admin
         {
             if (UserFormModel.Id == null)
             {
-                // For adding new users, you'd typically use UserManager.CreateAsync
+                // In the future I might use UserManager.CreateAsync for adding new users, right now I use a redirect to Register.
                 // For now, this panel focuses on editing existing users.
             }
             else

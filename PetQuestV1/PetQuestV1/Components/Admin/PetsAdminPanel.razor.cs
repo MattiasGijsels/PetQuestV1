@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Enums;
 using PetQuestV1.Contracts.DTOs.Pets;
-using System.Linq;
 
 namespace PetQuestV1.Components.Admin
 {
@@ -19,21 +18,16 @@ namespace PetQuestV1.Components.Admin
         protected List<Species> AvailableSpecies { get; set; } = new();
         protected List<Breed> AvailableBreeds { get; set; } = new();
         protected List<ApplicationUser> AvailableUsers { get; set; } = new();
-
         protected string CurrentSortColumn { get; set; } = "PetName";
         protected SortDirection SortDirection { get; set; } = SortDirection.Ascending;
-
         protected string SearchTerm { get; set; } = string.Empty;
-
         protected int PetsCurrentPage { get; set; } = 1;
         protected int PetsPageSize { get; set; } = 10;
-
         protected PetFormDto PetFormModel { get; set; } = new();
         protected bool IsPetFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
-
         protected bool IsPetsSectionVisible { get; set; } = false;
-
+        protected IEnumerable<Pet> PagedPets => FilteredAndSortedPets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
         protected IEnumerable<Pet> FilteredAndSortedPets
         {
             get
@@ -69,7 +63,6 @@ namespace PetQuestV1.Components.Admin
                 return query.ToList();
             }
         }
-
         protected int PetsTotalPages
         {
             get
@@ -82,9 +75,6 @@ namespace PetQuestV1.Components.Admin
                 return (int)System.Math.Ceiling((double)totalPets / PetsPageSize);
             }
         }
-
-        protected IEnumerable<Pet> PagedPets => FilteredAndSortedPets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -174,7 +164,6 @@ namespace PetQuestV1.Components.Admin
             }
             StateHasChanged();
         }
-
         protected async Task HandlePetFormSubmit()
         {
             if (string.IsNullOrWhiteSpace(PetFormModel.PetName) ||

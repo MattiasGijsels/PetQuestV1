@@ -1,7 +1,4 @@
-﻿// PetQuestV1/Contracts/Defines/IBreedService.cs
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using PetQuestV1.Contracts.Models;
+﻿using PetQuestV1.Contracts.Models;
 
 namespace PetQuestV1.Contracts.Defines
 {

@@ -86,7 +86,7 @@
                                     <td>@user.UserName</td>
                                     <td>@user.Email</td>
                                     <td>@user.PetCount</td>
-                                    <td>@user.RoleName</td> @* Display Role Name *@
+                                    <td>@user.RoleName</td> 
                                     <td>
                                         <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => EditUser(user.Id)">
                                             <i class="bi bi-pencil"></i>
@@ -107,7 +107,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5" class="text-center">No users found.</td> @* Adjusted colspan *@
+                                <td colspan="5" class="text-center">No users found.</td> 
                             </tr>
                         }
                     </tbody>

@@ -25,6 +25,14 @@ namespace PetQuestV1.Components.Admin
         protected int BreedCurrentPage { get; set; } = 1;
         protected int BreedPageSize { get; set; } = 10;
 
+        // Forms & UI state for breed management
+        protected Breed BreedFormModel { get; set; } = new();
+        protected bool IsBreedFormVisible { get; set; } = false;
+        private bool IsEditing { get; set; } = false;
+        protected bool IsBreedSectionVisible { get; set; } = false;
+        protected int BreedTotalPages => FilteredAndSortedBreeds.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedBreeds.Count() / BreedPageSize) : 1;
+        protected IEnumerable<BreedWithSpeciesDto> PagedBreeds => FilteredAndSortedBreeds.Skip((BreedCurrentPage - 1) * BreedPageSize).Take(BreedPageSize);
+
         protected IEnumerable<BreedWithSpeciesDto> FilteredAndSortedBreeds
         {
             get
@@ -51,16 +59,6 @@ namespace PetQuestV1.Components.Admin
                 return query.ToList();
             }
         }
-
-        protected int BreedTotalPages => FilteredAndSortedBreeds.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedBreeds.Count() / BreedPageSize) : 1;
-        protected IEnumerable<BreedWithSpeciesDto> PagedBreeds => FilteredAndSortedBreeds.Skip((BreedCurrentPage - 1) * BreedPageSize).Take(BreedPageSize);
-
-        // Forms & UI state for breed management
-        protected Breed BreedFormModel { get; set; } = new();
-        protected bool IsBreedFormVisible { get; set; } = false;
-        private bool IsEditing { get; set; } = false;
-
-        protected bool IsBreedSectionVisible { get; set; } = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -110,34 +108,41 @@ namespace PetQuestV1.Components.Admin
         {
             if (string.IsNullOrWhiteSpace(BreedFormModel.BreedName) || string.IsNullOrWhiteSpace(BreedFormModel.SpeciesId))
             {
-                // Add error handling or display a message to the user
+                System.Diagnostics.Debug.WriteLine("Validation Error: Breed Name or SpeciesId is missing.");
                 return;
             }
 
-            using (var scope = ScopeFactory.CreateScope())
+            try
             {
-                var breedService = scope.ServiceProvider.GetRequiredService<IBreedService>();
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var breedService = scope.ServiceProvider.GetRequiredService<IBreedService>();
 
-                if (IsEditing)
-                {
-                    await breedService.UpdateAsync(BreedFormModel);
+                    if (IsEditing)
+                    {
+                        await breedService.UpdateAsync(BreedFormModel);
+                    }
+                    else
+                    {
+                        await breedService.AddAsync(BreedFormModel);
+                    }
                 }
-                else
-                {
-                    await breedService.AddAsync(BreedFormModel);
-                }
+
+                IsBreedFormVisible = false;
+                BreedFormModel = new Breed(); // Reset form model for next use
+                await LoadData(); // Reload all data after submit to reflect changes
+                StateHasChanged();
             }
-
-            IsBreedFormVisible = false;
-            BreedFormModel = new Breed(); // Reset form model for next use
-            await LoadData(); // Reload all data after submit to reflect changes
-            StateHasChanged();
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"An error occurred while saving the breed: {ex.Message}");
+            }
         }
 
         protected void CancelBreedForm()
         {
             IsBreedFormVisible = false;
-            BreedFormModel = new Breed(); // Clear form
+            BreedFormModel = new Breed(); // Clear the form
             StateHasChanged();
         }
 
