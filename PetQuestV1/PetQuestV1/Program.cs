@@ -12,7 +12,7 @@ using PetQuestV1.Data.Repository; // For SpeciesRepository, PetRepository
 using PetQuestV1.Services;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts;
-using PetQuestV1.Repositories; // Ensure ApplicationUser is accessible
+
 
 var builder = WebApplication.CreateBuilder(args);
 

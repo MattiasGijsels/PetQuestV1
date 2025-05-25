@@ -1,17 +1,11 @@
 ﻿// PetQuestV1/Components/Admin/PetsAdminPanel.razor.cs
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using PetQuestV1.Contracts.Defines; // For the PetFormModel, if using it as a separate class
-using PetQuestV1.Contracts.Enums; // <--- ADD THIS LINE to use your global enum!
+using PetQuestV1.Contracts.Defines;
+using PetQuestV1.Contracts.Enums; 
 
 namespace PetQuestV1.Components.Admin
 {
@@ -27,7 +21,7 @@ namespace PetQuestV1.Components.Admin
 
         // --- Sorting Properties ---
         protected string CurrentSortColumn { get; set; } = "PetName"; // Default sort column
-        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; // This now uses your global enum!
+        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; 
 
         // --- Search Property ---
         protected string SearchTerm { get; set; } = string.Empty;
@@ -43,7 +37,7 @@ namespace PetQuestV1.Components.Admin
             {
                 var query = AllPets.Where(p => !p.IsDeleted).AsQueryable();
 
-                // Apply Search Filter with robust null handling
+                // Apply Search Filter with null handling
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     query = query.Where(p =>

@@ -1,14 +1,8 @@
 ﻿// PetQuestV1/Components/Admin/BreedAdminPanel.razor.cs
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.DependencyInjection;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Enums;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Components.Admin
 {

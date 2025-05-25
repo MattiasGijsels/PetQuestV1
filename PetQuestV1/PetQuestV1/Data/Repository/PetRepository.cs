@@ -8,16 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PetQuestV1.Repositories
+namespace PetQuestV1.Data.Repository
 {
-    public class PetRepository : IPetRepository
+    public class PetRepository(ApplicationDbContext context) : IPetRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public PetRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<List<Pet>> GetAllAsync()
         {
