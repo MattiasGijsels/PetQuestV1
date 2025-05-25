@@ -1,153 +1,124 @@
 ﻿// PetQuestV1.Services/UserService.cs
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
-using PetQuestV1.Data; // Assuming this is where ApplicationUser and ApplicationDbContext reside
+using PetQuestV1.Data; // For ApplicationUser
+using PetQuestV1.Data.Defines; // For IUserRepository
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore; // Needed for ToListAsync, FindAsync, SaveChangesAsync etc.
+// Removed: using Microsoft.EntityFrameworkCore; // Not needed here anymore
 
 namespace PetQuestV1.Services
 {
     public class UserService : IUserService
     {
-        private readonly ApplicationDbContext _dbContext; // Inject your DbContext
+        private readonly IUserRepository _userRepository; // Inject the repository interface
 
-        public UserService(ApplicationDbContext dbContext) // Constructor for DI
+        public UserService(IUserRepository userRepository) // Constructor for DI
         {
-            _dbContext = dbContext;
+            _userRepository = userRepository;
         }
 
-        // Change return type to the DTO
-        public async Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync() // Renamed for clarity
+        public async Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync()
         {
-            // Fetch users and their pet counts from the database
-            // This example assumes a 'Pets' navigation property on ApplicationUser
-            // You might need to adjust this query based on your actual data model
-            return await _dbContext.Users
-                .Select(u => new UserListItemDto
-                {
-                    Id = u.Id,
-                    UserName = u.UserName ?? string.Empty, // Handle potential null UserName
-                    Email = u.Email ?? string.Empty,       // Handle potential null Email
-                    PetCount = u.Pets.Count(), // Assuming 'Pets' is a navigation property or similar relation
-                    IsDeleted = u.IsDeleted // Assuming ApplicationUser has an IsDeleted property
-                })
-                .ToListAsync();
+            // Now use the repository to get the data
+            var users = await _userRepository.GetAllAsync();
+
+            return users.Select(u => new UserListItemDto
+            {
+                Id = u.Id,
+                UserName = u.UserName ?? string.Empty,
+                Email = u.Email ?? string.Empty,
+                PetCount = u.Pets?.Count() ?? 0, // Utilize the loaded Pets navigation property
+                IsDeleted = u.IsDeleted
+            })
+            .ToList();
         }
 
         public async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
-            return await _dbContext.Users.ToListAsync();
+            // Direct pass-through to the repository.
+            // Consider if this method is truly needed on the service layer, or if DTOs are always preferred.
+            return await _userRepository.GetAllAsync();
         }
 
-        // --- MODIFIED: Return UserDetailDto ---
         public async Task<UserDetailDto?> GetUserByIdAsync(string userId)
         {
-            // Find the ApplicationUser entity by ID
-            var user = await _dbContext.Users
-                                       .Where(u => u.Id == userId)
-                                       // .Include(u => u.SomeRelatedData) // Include any related data needed for UserDetailDto
-                                       .FirstOrDefaultAsync();
-
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return null;
             }
 
-            // Map the ApplicationUser entity to the UserDetailDto
             return new UserDetailDto
             {
                 Id = user.Id,
                 UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
-                // Ensure PetCount is correctly populated, if it's not a direct property of ApplicationUser
-                // it might need a separate lookup or a calculated property.
-                // For simplicity, we'll assume it's directly available or can be calculated:
-                PetCount = user.Pets?.Count() ?? 0, // Assuming a 'Pets' navigation property
-                IsDeleted = user.IsDeleted, // Assuming ApplicationUser has an IsDeleted property
-                // Map other properties from ApplicationUser to UserDetailDto
-                // Example: OtherProperty = user.OtherProperty
+                PetCount = user.Pets?.Count() ?? 0,
+                IsDeleted = user.IsDeleted
             };
         }
 
-        public async Task<ApplicationUser?> GetUserByUsernameAsync(string username) // Useful for login/finding
+        public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            return await _userRepository.GetByUsernameAsync(username);
         }
 
         public async Task SoftDeleteUserAsync(string userId)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
-            if (user != null)
-            {
-                user.IsDeleted = true; // Assuming ApplicationUser has an IsDeleted property
-                await _dbContext.SaveChangesAsync();
-            }
+            // The service layer holds the business logic: "soft delete this user".
+            // The repository handles the data access implementation of that logic.
+            await _userRepository.SoftDeleteAsync(userId);
         }
 
-        public async Task RestoreUserAsync(string userId) // To un-delete a user *maybe for future use*
+        public async Task RestoreUserAsync(string userId)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
-            if (user != null)
-            {
-                user.IsDeleted = false; // Assuming ApplicationUser has an IsDeleted property
-                await _dbContext.SaveChangesAsync();
-            }
+            await _userRepository.RestoreAsync(userId);
         }
 
-        public async Task HardDeleteUserAsync(string userId) // For permanent deletion (use with caution)*maybe for future use*
+        public async Task HardDeleteUserAsync(string userId)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
-            if (user != null)
-            {
-                _dbContext.Users.Remove(user);
-                await _dbContext.SaveChangesAsync();
-            }
+            await _userRepository.DeleteAsync(userId);
         }
 
-        // --- MODIFIED: Accept UserFormDto for updating user profile data ---
         public async Task UpdateUserAsync(UserFormDto userDto)
         {
-            var user = await _dbContext.Users.FindAsync(userDto.Id); // Find the entity by ID
+            // Fetch the existing user from the repository
+            var user = await _userRepository.GetByIdAsync(userDto.Id!); // Assuming Id is not null for update
+
             if (user != null)
             {
-                // Update properties of the ApplicationUser entity from the UserFormDto
+                // Update properties of the entity from the DTO
                 user.UserName = userDto.UserName;
                 user.Email = userDto.Email;
                 user.IsDeleted = userDto.IsDeleted;
 
-                // Important: PetCount is usually a calculated field (number of pets linked to a user).
-                // It's generally not directly updated via a user profile edit form.
-                // If you *do* intend to allow direct editing of PetCount here,
-                // you would need to handle the implications (e.g., creating/deleting pets to match the count).
-                // For most cases, you would *not* update PetCount directly from UserFormDto here.
-                // user.PetCount = userDto.PetCount; // <-- Comment this out or remove if PetCount is derived
+                // PetCount is typically derived, not directly updated here.
+                // If you uncommented this in your original code, make sure you understand the implications.
+                // user.PetCount = userDto.PetCount;
 
-                // You might need to update security-related fields carefully if the form allows it.
-                // e.g., if changing email needs re-confirmation, handle that separately.
-                // For security properties, use UserManager methods if applicable.
-
-                _dbContext.Users.Update(user); // Mark the entity as modified
-                await _dbContext.SaveChangesAsync(); // Save changes to the database
+                // Pass the updated entity to the repository for persistence
+                await _userRepository.UpdateAsync(user);
             }
+            // You might want to throw an exception or return a status if user is not found
         }
 
-        // You might add more methods here, e.g., AddUser (if not using built-in registration),
-        // AddUserToRole, RemoveUserFromRole, etc., depending on your needs.
+        // Example of adding a user, if you implement a create endpoint
         /*
-        public async Task AddUserAsync(UserFormDto userDto)
+        public async Task CreateUserAsync(UserFormDto userDto)
         {
             var newUser = new ApplicationUser
             {
                 Id = Guid.NewGuid().ToString(), // Generate a new ID
                 UserName = userDto.UserName,
                 Email = userDto.Email,
-                // Other properties
-                IsDeleted = false // New users are not deleted by default
+                EmailConfirmed = true, // Or false, depending on your registration flow
+                IsDeleted = false,
+                // Add any other required properties for a new user
             };
-            _dbContext.Users.Add(newUser);
-            await _dbContext.SaveChangesAsync();
+
+            await _userRepository.AddAsync(newUser);
         }
         */
     }

@@ -1,6 +1,6 @@
-﻿// Contracts/Defines/IUserService.cs
+﻿// PetQuestV1.Contracts.Defines/IUserService.cs
 using PetQuestV1.Contracts.DTOs;
-using PetQuestV1.Data; // For ApplicationUser
+using PetQuestV1.Data; // For ApplicationUser (if still needed for GetAllUsersAsync)
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,27 +8,18 @@ namespace PetQuestV1.Contracts.Defines
 {
     public interface IUserService
     {
-        // Change return type to the DTO for list view
-        Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync(); // Renamed for clarity
-
+        Task<List<UserListItemDto>> GetAllUsersWithPetCountsAsync();
         // Keep this if other parts of your app still need the raw ApplicationUser list
-        Task<List<ApplicationUser>> GetAllUsersAsync();
+        // If not needed by anything *outside* the service layer, consider removing.
+        Task<List<ApplicationUser>> GetAllUsersAsync(); // This might be removed later
 
-        // --- MODIFIED: Changed return type to UserDetailDto ---
         Task<UserDetailDto?> GetUserByIdAsync(string userId);
-
-        Task<ApplicationUser?> GetUserByUsernameAsync(string username); // Useful for login/finding
+        Task<ApplicationUser?> GetUserByUsernameAsync(string username);
 
         Task SoftDeleteUserAsync(string userId);
-        Task RestoreUserAsync(string userId); // To un-delete a user *maybe for future use*
-        Task HardDeleteUserAsync(string userId); // For permanent deletion (use with caution)*maybe for future use*
+        Task RestoreUserAsync(string userId);
+        Task HardDeleteUserAsync(string userId);
 
-        // --- MODIFIED: Changed parameter type to UserFormDto ---
-        Task UpdateUserAsync(UserFormDto userDto); // For updating user profile data
-
-        // You might add more methods here, e.g., AddUser (if not using built-in registration),
-        // AddUserToRole, RemoveUserFromRole, etc., depending on your needs.
-        // If you plan to add new users via a form:
-        // Task CreateUserAsync(UserFormDto userDto);
+        Task UpdateUserAsync(UserFormDto userDto);
     }
 }
