@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.DependencyInjection;
-using PetQuestV1.Contracts.Defines; // For ISpeciesService
-using PetQuestV1.Contracts.Models; // For Species model
-using PetQuestV1.Contracts.Enums; // <--- NEW: For SortDirection enum
+using PetQuestV1.Contracts.Defines;
+using PetQuestV1.Contracts.Models; // Ensure Species and SpeciesWithBreedCountDto are available
+using PetQuestV1.Contracts.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,11 +17,12 @@ namespace PetQuestV1.Components.Admin
         [Inject]
         private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
-        protected List<Species> AllSpecies { get; set; } = new();
+        // Change the type of AllSpecies to the new DTO
+        protected List<SpeciesWithBreedCountDto> AllSpecies { get; set; } = new(); // <--- CHANGED TYPE
 
         // --- Sorting Properties ---
         protected string CurrentSortColumn { get; set; } = "SpeciesName"; // Default sort column
-        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; // Now uses the global enum
+        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending;
 
         // --- Search Property ---
         protected string SearchTerm { get; set; } = string.Empty;
@@ -31,13 +32,12 @@ namespace PetQuestV1.Components.Admin
         protected int SpeciesPageSize { get; set; } = 10;
 
         // Computed property for filtered and sorted species
-        protected IEnumerable<Species> FilteredAndSortedSpecies
+        // This will now operate on SpeciesWithBreedCountDto
+        protected IEnumerable<SpeciesWithBreedCountDto> FilteredAndSortedSpecies
         {
             get
             {
                 // Filter out IsDeleted species first in the UI display.
-                // The DbContext global filter will also handle this server-side, but this ensures
-                // consistency in UI filtering for existing `AllSpecies` list.
                 var query = AllSpecies.Where(s => !s.IsDeleted).AsQueryable();
 
                 // Apply Search Filter
@@ -52,28 +52,28 @@ namespace PetQuestV1.Components.Admin
                 query = CurrentSortColumn switch
                 {
                     "SpeciesName" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.SpeciesName) : query.OrderByDescending(s => s.SpeciesName),
+                    "BreedCount" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.BreedCount) : query.OrderByDescending(s => s.BreedCount), // <--- NEW SORT OPTION
                     _ => query.OrderBy(s => s.SpeciesName) // Default sort
                 };
 
-                return query.ToList(); // Materialize the filtered and sorted list
+                return query.ToList();
             }
         }
 
         protected int SpeciesTotalPages => FilteredAndSortedSpecies.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedSpecies.Count() / SpeciesPageSize) : 1;
-        protected IEnumerable<Species> PagedSpecies => FilteredAndSortedSpecies.Skip((SpeciesCurrentPage - 1) * SpeciesPageSize).Take(SpeciesPageSize);
+        protected IEnumerable<SpeciesWithBreedCountDto> PagedSpecies => FilteredAndSortedSpecies.Skip((SpeciesCurrentPage - 1) * SpeciesPageSize).Take(SpeciesPageSize);
 
         // Forms & UI state for species management
-        protected Species SpeciesFormModel { get; set; } = new(); // Use Species model directly for the form
+        // Keep SpeciesFormModel as Species, as it's used for actual CRUD operations
+        protected Species SpeciesFormModel { get; set; } = new();
         protected bool IsSpeciesFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
 
-        // Toggling section visibility for "Species" accordion
-        protected bool IsSpeciesSectionVisible { get; set; } = false; // Default to false (collapsed)
+        protected bool IsSpeciesSectionVisible { get; set; } = false;
 
         protected override async Task OnInitializedAsync()
         {
             await LoadData();
-            // Ensure pagination is correct after initial load
             SpeciesCurrentPage = System.Math.Clamp(SpeciesCurrentPage, 1, SpeciesTotalPages == 0 ? 1 : SpeciesTotalPages);
         }
 
@@ -82,9 +82,10 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
-                AllSpecies = await speciesService.GetAllAsync();
+                // Call the new service method
+                AllSpecies = await speciesService.GetAllSpeciesForAdminAsync(); // <--- CALL NEW SERVICE METHOD
             }
-            StateHasChanged(); // Refresh UI after loading data
+            StateHasChanged();
         }
 
         protected void ToggleSpeciesSection()
@@ -95,22 +96,22 @@ namespace PetQuestV1.Components.Admin
 
         protected void ShowAddSpeciesForm()
         {
-            SpeciesFormModel = new Species(); // Initialize with a new Species object
+            SpeciesFormModel = new Species();
             IsEditing = false;
             IsSpeciesFormVisible = true;
             StateHasChanged();
         }
 
-        protected void EditSpecies(Species species)
+        // Change parameter type to SpeciesWithBreedCountDto for display, then fetch full Species for editing.
+        protected async Task EditSpecies(SpeciesWithBreedCountDto speciesDto) // <--- CHANGED PARAMETER TYPE
         {
-            // Create a copy to avoid modifying the list directly until saved
-            // This is good practice to prevent accidental UI updates before a successful save
-            SpeciesFormModel = new Species
+            using (var scope = ScopeFactory.CreateScope())
             {
-                Id = species.Id,
-                SpeciesName = species.SpeciesName,
-                IsDeleted = species.IsDeleted // Retain its current IsDeleted state
-            };
+                var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
+                // Fetch the full Species object by ID for editing
+                SpeciesFormModel = await speciesService.GetByIdAsync(speciesDto.Id) ?? new Species();
+            }
+
             IsEditing = true;
             IsSpeciesFormVisible = true;
             StateHasChanged();
@@ -118,8 +119,12 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandleSpeciesFormSubmit()
         {
-            // DataAnnotationsValidator handles basic validation on the form.
-            // If more complex validation is needed, add it here or in the service layer.
+            // Basic client-side validation for SpeciesName if needed, otherwise rely on DataAnnotationsValidator
+            if (string.IsNullOrWhiteSpace(SpeciesFormModel.SpeciesName))
+            {
+                // You might want to add a visible error message here
+                return;
+            }
 
             using (var scope = ScopeFactory.CreateScope())
             {
@@ -148,6 +153,7 @@ namespace PetQuestV1.Components.Admin
             StateHasChanged();
         }
 
+        // SoftDelete will still use the original ID
         protected async Task SoftDeleteSpecies(string id)
         {
             using (var scope = ScopeFactory.CreateScope())
@@ -197,7 +203,5 @@ namespace PetQuestV1.Components.Admin
             SpeciesCurrentPage = 1; // Reset to first page on search
             StateHasChanged();
         }
-
-        // The enum SortDirection definition has been moved to PetQuestV1/Contracts/Enums/SortDirection.cs
     }
 }

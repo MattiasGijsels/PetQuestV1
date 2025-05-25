@@ -1,7 +1,8 @@
+// PetQuestV1/Data/ApplicationDbContext.cs
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PetQuestV1.Contracts.Models; // Assuming your models are here
+using PetQuestV1.Contracts.Models;
 using System.Linq;
 
 namespace PetQuestV1.Data
@@ -14,44 +15,35 @@ namespace PetQuestV1.Data
 
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Species> Species { get; set; }
-        public DbSet<Breed> Breeds { get; set; }
+        public DbSet<Breed> Breeds { get; set; } // Ensure DbSet for Breed is here
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder); // CALL THIS FIRST FOR IDENTITY TABLES
+            base.OnModelCreating(builder);
 
-            // Important: Disable cascade delete for all relationships by default
-            // This is a common practice to avoid unexpected cascade behavior and resolve cycles
-            // You can then explicitly set Cascade where desired, like Species-Breeds.
             foreach (var relationship in builder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
             {
-                relationship.DeleteBehavior = DeleteBehavior.NoAction; // Or .Restrict
+                relationship.DeleteBehavior = DeleteBehavior.NoAction;
             }
 
-            // --- Configure Specific Relationships ---
-
-            // Configures Pet-Owner relationship
-            // A Pet has one Owner, and an Owner has many Pets.
-            // An Owner cannot be deleted if they have any Pets.
+            // Configure Pet-Owner relationship
             builder.Entity<Pet>()
-                .HasOne(p => p.Owner)              // A Pet has one Owner
-                .WithMany(u => u.Pets)             // <--- CHANGE THIS LINE: Explicitly map to ApplicationUser.Pets collection
+                .HasOne(p => p.Owner)
+                .WithMany(u => u.Pets)
                 .HasForeignKey(p => p.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configures Pet-Species relationship
-            // A Species cannot be deleted if any Pets still reference it.
+            // Configure Pet-Species relationship
             builder.Entity<Pet>()
                 .HasOne(p => p.Species)
-                .WithMany()
+                .WithMany() // A Pet has one Species, a Species has many Pets (implied by this setup)
                 .HasForeignKey(p => p.SpeciesId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configures Pet-Breed relationship
-            // A Breed cannot be deleted if any Pets still reference it.
+            // Configure Pet-Breed relationship
             builder.Entity<Pet>()
                 .HasOne(p => p.Breed)
-                .WithMany()
+                .WithMany() // A Pet has one Breed, a Breed has many Pets (implied by this setup)
                 .HasForeignKey(p => p.BreedId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -65,16 +57,11 @@ namespace PetQuestV1.Data
 
 
             // --- GLOBAL QUERY FILTER FOR SOFT DELETION ---
-            // This is the crucial part. It automatically filters out Pet entities
-            // where IsDeleted is true from ALL queries, because Pet inherits IsDeleted
-            // from ModelBase.
             builder.Entity<Pet>().HasQueryFilter(p => !p.IsDeleted);
             builder.Entity<ApplicationUser>().HasQueryFilter(u => !u.IsDeleted);
-
-            // If other models like Species or Breed also inherit from ModelBase
-            // and you want them soft-deleted, you would add similar lines:
-            // builder.Entity<Species>().HasQueryFilter(s => !s.IsDeleted);
-            // builder.Entity<Breed>().HasQueryFilter(b => !b.IsDeleted);
+            // ADD GLOBAL QUERY FILTER FOR SPECIES AND BREED
+            builder.Entity<Species>().HasQueryFilter(s => !s.IsDeleted); // <--- ADDED
+            builder.Entity<Breed>().HasQueryFilter(b => !b.IsDeleted);   // <--- ADDED
         }
     }
 }

@@ -2,6 +2,9 @@
 @inherits SpeciesAdminPanelBase
 
 @using System.ComponentModel.DataAnnotations
+@using PetQuestV1.Contracts.Enums 
+@using PetQuestV1.Contracts.Models
+
 
 <div class="card mb-5">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -48,16 +51,21 @@
                         <th @onclick='() => SortBy("SpeciesName")' class="sortable-header">
                             Species Name <i class="bi @GetSortIcon("SpeciesName")"></i>
                         </th>
+                        <th @onclick='() => SortBy("BreedCount")' class="sortable-header">
+                            @*<--- NEW SORTABLE HEADER*@
+                            Breeds <i class="bi @GetSortIcon("BreedCount")"></i> @*<--- NEW SORT ICON*@
+                        </th>
                         <th style="width: 120px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (FilteredAndSortedSpecies.Any()) // Use FilteredAndSortedSpecies here
+                    @if (PagedSpecies.Any())
                     {
-                        @foreach (var species in PagedSpecies) // And PagedSpecies here
+                        @foreach (var species in PagedSpecies)
                         {
                             <tr>
                                 <td>@species.SpeciesName</td>
+                                <td>@species.BreedCount</td> @*<--- DISPLAY BREED COUNT*@
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditSpecies(species)">
                                         <i class="bi bi-pencil"></i>
@@ -73,7 +81,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="2" class="text-center">No species found.</td>
+                            <td colspan="3" class="text-center">No species found.</td> @*<--- INCREASE COLSPAN*@
                         </tr>
                     }
                 </tbody>

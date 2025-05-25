@@ -1,8 +1,8 @@
 ﻿// PetQuestV1/Data/Repository/SpeciesRepository.cs
 using Microsoft.EntityFrameworkCore;
-using PetQuestV1.Data.Defines; // For ISpeciesRepository
-using PetQuestV1.Contracts.Models; // For Species model
-using PetQuestV1.Data; // For ApplicationDbContext
+using PetQuestV1.Data.Defines;
+using PetQuestV1.Contracts.Models;
+using PetQuestV1.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +19,16 @@ namespace PetQuestV1.Data.Repository
             _contextFactory = contextFactory;
         }
 
-        public async Task<List<Species>> GetAllAsync()
+        // Renamed/Modified method to include breeds
+        public async Task<List<Species>> GetAllSpeciesWithBreedsAsync() // <--- MODIFIED METHOD NAME
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                // The global query filter in ApplicationDbContext will automatically exclude IsDeleted species.
-                return await _context.Species.ToListAsync();
+                // The global query filter will automatically exclude IsDeleted species AND breeds.
+                // So, s.Breeds will only contain non-deleted breeds.
+                return await _context.Species
+                                     .Include(s => s.Breeds) // Include the navigation property
+                                     .ToListAsync();
             }
         }
 
@@ -32,8 +36,10 @@ namespace PetQuestV1.Data.Repository
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                // The global query filter will automatically exclude IsDeleted species.
-                return await _context.Species.FirstOrDefaultAsync(s => s.Id == id);
+                // Include breeds here too if you need them when fetching a single species
+                return await _context.Species
+                                     .Include(s => s.Breeds) // Include breeds
+                                     .FirstOrDefaultAsync(s => s.Id == id);
             }
         }
 
@@ -43,9 +49,9 @@ namespace PetQuestV1.Data.Repository
             {
                 if (string.IsNullOrEmpty(species.Id))
                 {
-                    species.Id = Guid.NewGuid().ToString("N"); // "N" format for no hyphens
+                    species.Id = Guid.NewGuid().ToString("N");
                 }
-                species.IsDeleted = false; // Ensure new species are not marked as deleted
+                species.IsDeleted = false;
                 await _context.Species.AddAsync(species);
                 await _context.SaveChangesAsync();
             }
@@ -59,13 +65,7 @@ namespace PetQuestV1.Data.Repository
                 if (existingSpecies != null)
                 {
                     existingSpecies.SpeciesName = species.SpeciesName;
-                    // Note: We don't typically update IsDeleted directly via a general Update method
-                    // unless explicitly intended. SoftDeleteAsync handles setting IsDeleted = true.
-                    // If you want to allow "undelete", you'd expose a specific method for it.
-                    // For now, we'll assume Update is for non-deletion fields.
-                    // existingSpecies.IsDeleted = species.IsDeleted; // Keep this line if you want to support undelete via this method.
-
-                    _context.Species.Update(existingSpecies); // Mark as modified
+                    _context.Species.Update(existingSpecies);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -78,8 +78,8 @@ namespace PetQuestV1.Data.Repository
                 var species = await _context.Species.FindAsync(id);
                 if (species != null)
                 {
-                    species.IsDeleted = true; // Set the IsDeleted flag
-                    _context.Species.Update(species); // Mark as modified
+                    species.IsDeleted = true;
+                    _context.Species.Update(species);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -90,7 +90,7 @@ namespace PetQuestV1.Data.Repository
             using (var _context = _contextFactory.CreateDbContext())
             {
                 var species = await _context.Species
-                    .IgnoreQueryFilters() // Important: Ignore soft delete filter to find potentially soft-deleted entities for hard delete
+                    .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(s => s.Id == id);
 
                 if (species != null)
