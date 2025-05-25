@@ -48,10 +48,12 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Register your repositories and services. They will now use the IDbContextFactory.
 builder.Services.AddScoped<IPetRepository, PetRepository>();
 builder.Services.AddScoped<ISpeciesRepository, SpeciesRepository>();
+builder.Services.AddScoped<IBreedRepository, BreedRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<ISpeciesService, SpeciesService>();
+builder.Services.AddScoped<IBreedService, BreedService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 
