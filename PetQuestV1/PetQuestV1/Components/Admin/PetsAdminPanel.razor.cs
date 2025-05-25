@@ -1,11 +1,12 @@
-﻿// PetQuestV1/Components/Admin/PetsAdminPanel.razor.cs
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Contracts.Defines;
-using PetQuestV1.Contracts.Enums; 
+using PetQuestV1.Contracts.Enums;
+using PetQuestV1.Contracts.DTOs.Pets;
+using System.Linq;
 
 namespace PetQuestV1.Components.Admin
 {
@@ -19,25 +20,26 @@ namespace PetQuestV1.Components.Admin
         protected List<Breed> AvailableBreeds { get; set; } = new();
         protected List<ApplicationUser> AvailableUsers { get; set; } = new();
 
-        // --- Sorting Properties ---
-        protected string CurrentSortColumn { get; set; } = "PetName"; // Default sort column
-        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; 
+        protected string CurrentSortColumn { get; set; } = "PetName";
+        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending;
 
-        // --- Search Property ---
         protected string SearchTerm { get; set; } = string.Empty;
 
-        // Pagination properties
         protected int PetsCurrentPage { get; set; } = 1;
         protected int PetsPageSize { get; set; } = 10;
 
-        // Computed property for filtered and sorted pets
+        protected PetFormDto PetFormModel { get; set; } = new();
+        protected bool IsPetFormVisible { get; set; } = false;
+        private bool IsEditing { get; set; } = false;
+
+        protected bool IsPetsSectionVisible { get; set; } = false;
+
         protected IEnumerable<Pet> FilteredAndSortedPets
         {
             get
             {
                 var query = AllPets.Where(p => !p.IsDeleted).AsQueryable();
 
-                // Apply Search Filter with null handling
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     query = query.Where(p =>
@@ -48,13 +50,12 @@ namespace PetQuestV1.Components.Admin
                     );
                 }
 
-                // Apply Sorting with explicit null handling for OrderBy/OrderByDescending
                 query = CurrentSortColumn switch
                 {
                     "PetName" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.PetName) : query.OrderByDescending(p => p.PetName),
                     "Species" => SortDirection == SortDirection.Ascending ?
-                                        query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
-                                        query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
+                                            query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
+                                            query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
                     "Breed" => SortDirection == SortDirection.Ascending ?
                                 query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
                                 query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
@@ -62,31 +63,34 @@ namespace PetQuestV1.Components.Admin
                     "Owner" => SortDirection == SortDirection.Ascending ?
                                 query.OrderBy(p => p.Owner == null ? string.Empty : p.Owner.UserName) :
                                 query.OrderByDescending(p => p.Owner == null ? string.Empty : p.Owner.UserName),
-                    _ => query.OrderBy(p => p.PetName) // Default sort
+                    _ => query.OrderBy(p => p.PetName)
                 };
 
-                return query.ToList(); // Materialize the filtered and sorted list
+                return query.ToList();
             }
         }
 
-        protected int PetsTotalPages => FilteredAndSortedPets.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedPets.Count() / PetsPageSize) : 1;
+        protected int PetsTotalPages
+        {
+            get
+            {
+                int totalPets = FilteredAndSortedPets.Count();
+                if (totalPets == 0)
+                {
+                    return 1;
+                }
+                return (int)System.Math.Ceiling((double)totalPets / PetsPageSize);
+            }
+        }
+
         protected IEnumerable<Pet> PagedPets => FilteredAndSortedPets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
 
-
-        // Forms & UI state for pets management
-        protected Pet PetFormModel { get; set; } = new();
-        protected bool IsPetFormVisible { get; set; } = false;
-        private bool IsEditing { get; set; } = false;
-
-        // Toggling section visibility for "Pets" accordion
-        protected bool IsPetsSectionVisible { get; set; } = false; // Default to false (collapsed)
 
         protected override async Task OnInitializedAsync()
         {
             await LoadData();
             await LoadDropdownData();
-            // Ensure pagination is correct after initial load
-            PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
+            PetsCurrentPage = System.Math.Clamp(PetsCurrentPage, 1, PetsTotalPages);
         }
 
         private async Task LoadData()
@@ -94,10 +98,9 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
-                // The global query filter in DbContext will already exclude IsDeleted pets.
                 AllPets = await petService.GetAllAsync();
             }
-            StateHasChanged(); // Refresh UI after loading data
+            StateHasChanged();
         }
 
         private async Task LoadDropdownData()
@@ -109,7 +112,7 @@ namespace PetQuestV1.Components.Admin
 
                 AvailableSpecies = await petService.GetAllSpeciesAsync();
                 AvailableUsers = await userManager.Users.ToListAsync();
-                AvailableBreeds = new List<Breed>(); // Ensure it's explicitly initialized for safety.
+                AvailableBreeds = new List<Breed>();
             }
             StateHasChanged();
         }
@@ -117,7 +120,7 @@ namespace PetQuestV1.Components.Admin
         protected async Task OnSpeciesChanged(ChangeEventArgs e)
         {
             PetFormModel.SpeciesId = e.Value?.ToString();
-            PetFormModel.BreedId = null; // Reset breed when species changes
+            PetFormModel.BreedId = null;
 
             if (!string.IsNullOrEmpty(PetFormModel.SpeciesId))
             {
@@ -136,7 +139,7 @@ namespace PetQuestV1.Components.Admin
 
         protected void ShowAddPetForm()
         {
-            PetFormModel = new Pet(); // Initialize with a new Pet object
+            PetFormModel = new PetFormDto();
             IsEditing = false;
             IsPetFormVisible = true;
             AvailableBreeds = new List<Breed>();
@@ -145,16 +148,14 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task EditPet(Pet pet)
         {
-            // Populate form model from the selected pet
-            PetFormModel = new Pet
+            PetFormModel = new PetFormDto
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
                 SpeciesId = pet.SpeciesId,
                 OwnerId = pet.OwnerId,
                 BreedId = pet.BreedId,
-                Age = pet.Age,
-                IsDeleted = pet.IsDeleted
+                Age = pet.Age // This line is now correct as PetFormDto.Age is double?
             };
             IsEditing = true;
             IsPetFormVisible = true;
@@ -176,7 +177,6 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandlePetFormSubmit()
         {
-            // Perform basic validation before proceeding
             if (string.IsNullOrWhiteSpace(PetFormModel.PetName) ||
                 string.IsNullOrWhiteSpace(PetFormModel.SpeciesId) ||
                 string.IsNullOrWhiteSpace(PetFormModel.OwnerId))
@@ -190,28 +190,27 @@ namespace PetQuestV1.Components.Admin
 
                 if (IsEditing)
                 {
-                    await petService.UpdateAsync(PetFormModel);
+                    await petService.UpdatePetAsync(PetFormModel);
                 }
                 else
                 {
-                    await petService.AddAsync(PetFormModel);
+                    await petService.AddPetAsync(PetFormModel);
                 }
             }
 
             IsPetFormVisible = false;
-            PetFormModel = new Pet(); // Reset form model
-            await LoadData(); // Reload all data after submit to reflect changes
+            PetFormModel = new PetFormDto();
+            await LoadData();
             StateHasChanged();
         }
 
         protected void CancelPetForm()
         {
             IsPetFormVisible = false;
-            PetFormModel = new Pet(); // Clear form
+            PetFormModel = new PetFormDto();
             StateHasChanged();
         }
 
-        // --- Renamed from DeletePet to SoftDeletePet ---
         protected async Task SoftDeletePet(string id)
         {
             using (var scope = ScopeFactory.CreateScope())
@@ -219,63 +218,56 @@ namespace PetQuestV1.Components.Admin
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 await petService.SoftDeleteAsync(id);
             }
-            await LoadData(); // Reload all data to reflect the soft deletion (pet will disappear due to filter)
+            await LoadData();
             StateHasChanged();
         }
 
-        // ---------- Pagination Handlers ----------
         protected void ChangePetsPage(int page)
         {
-            PetsCurrentPage = System.Math.Clamp(page, 1, PetsTotalPages == 0 ? 1 : PetsTotalPages);
+            PetsCurrentPage = System.Math.Clamp(page, 1, PetsTotalPages);
             StateHasChanged();
         }
 
-        // ---------- Section Visibility Toggle Methods ----------
         protected void TogglePetsSection()
         {
             IsPetsSectionVisible = !IsPetsSectionVisible;
             if (!IsPetsSectionVisible)
             {
                 IsPetFormVisible = false;
-                PetFormModel = new Pet();
+                PetFormModel = new PetFormDto();
             }
             StateHasChanged();
         }
 
-        // --- Sorting Methods ---
         protected void SortBy(string columnName)
         {
             if (CurrentSortColumn == columnName)
             {
-                // Toggle between Ascending and Descending using the enum
                 SortDirection = (SortDirection == SortDirection.Ascending) ? SortDirection.Descending : SortDirection.Ascending;
             }
             else
             {
                 CurrentSortColumn = columnName;
-                SortDirection = SortDirection.Ascending; // Default to Ascending when changing column
+                SortDirection = SortDirection.Ascending;
             }
-            PetsCurrentPage = 1; // Reset to first page on sort
-            StateHasChanged(); // Re-render to apply sort
+            PetsCurrentPage = 1;
+            StateHasChanged();
         }
 
         protected string GetSortIcon(string columnName)
         {
             if (CurrentSortColumn != columnName)
             {
-                return "bi-sort-alpha-down"; // Default neutral sort icon
+                return "bi-sort-alpha-down";
             }
-
-            // Use the enum for comparison
             return SortDirection == SortDirection.Ascending ? "bi-sort-alpha-down" : "bi-sort-alpha-up";
         }
 
-        // --- Search Handler ---
         protected void OnSearchInput(ChangeEventArgs e)
         {
             SearchTerm = e.Value?.ToString() ?? string.Empty;
-            PetsCurrentPage = 1; // Reset to first page on search
-            StateHasChanged(); // Re-render to apply filter
+            PetsCurrentPage = 1;
+            StateHasChanged();
         }
     }
 }

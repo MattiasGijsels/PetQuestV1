@@ -1,7 +1,7 @@
-﻿// Contracts/IPetService.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Contracts.Models;
+using PetQuestV1.Contracts.DTOs.Pets; // Add this using statement
 
 namespace PetQuestV1.Contracts.Defines
 {
@@ -9,17 +9,19 @@ namespace PetQuestV1.Contracts.Defines
     {
         Task<List<Pet>> GetAllAsync();
         Task<Pet?> GetByIdAsync(string id);
-        Task AddAsync(Pet pet);
-        Task UpdateAsync(Pet pet);
+
+        // Updated signatures to use PetFormDto
+        Task AddPetAsync(PetFormDto petDto); // Renamed to avoid confusion with the Model
+        Task UpdatePetAsync(PetFormDto petDto); // Renamed to avoid confusion with the Model
+
         Task DeleteAsync(string id);
         Task SoftDeleteAsync(string id);
 
-        Task<Species?> GetSpeciesByNameAsync(string name); // This method seems to be only used by PetService, not the UI directly
+        Task<Species?> GetSpeciesByNameAsync(string name);
         Task<List<Species>> GetAllSpeciesAsync();
 
-        // --- NEW: Methods for Breed management ---
         Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId);
-        Task<List<Breed>> GetAllBreedsAsync(); // Optional: if you need a list of ALL breeds
-        Task<Breed?> GetBreedByIdAsync(string id); // Optional: if you need to fetch a single breed
+        Task<List<Breed>> GetAllBreedsAsync();
+        Task<Breed?> GetBreedByIdAsync(string id);
     }
 }

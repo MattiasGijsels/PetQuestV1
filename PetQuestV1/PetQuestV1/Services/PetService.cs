@@ -1,7 +1,7 @@
-﻿// Services/PetService.cs
-using PetQuestV1.Contracts;
+﻿using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
+using PetQuestV1.Contracts.DTOs.Pets;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,21 +26,38 @@ namespace PetQuestV1.Services
             return _petRepository.GetByIdAsync(id);
         }
 
-        public Task AddAsync(Pet pet)
+        public async Task AddPetAsync(PetFormDto petDto)
         {
-            // You might add business logic here before calling the repository
-            return _petRepository.AddAsync(pet);
+            var pet = new Pet
+            {
+                PetName = petDto.PetName,
+                SpeciesId = petDto.SpeciesId,
+                BreedId = petDto.BreedId,
+                OwnerId = petDto.OwnerId,
+                Age = petDto.Age, // Direct assignment, types match
+                IsDeleted = false
+            };
+            await _petRepository.AddAsync(pet);
         }
 
-        public Task UpdateAsync(Pet pet)
+        public async Task UpdatePetAsync(PetFormDto petDto)
         {
-            // You might add business logic here before calling the repository
-            return _petRepository.UpdateAsync(pet);
+            var petToUpdate = await _petRepository.GetByIdAsync(petDto.Id!);
+
+            if (petToUpdate != null)
+            {
+                petToUpdate.PetName = petDto.PetName;
+                petToUpdate.SpeciesId = petDto.SpeciesId;
+                petToUpdate.BreedId = petDto.BreedId;
+                petToUpdate.OwnerId = petDto.OwnerId;
+                petToUpdate.Age = petDto.Age; // Direct assignment, types match
+                // Do NOT touch petToUpdate.IsDeleted here
+                await _petRepository.UpdateAsync(petToUpdate);
+            }
         }
 
         public Task DeleteAsync(string id)
         {
-            // You might add business logic here before calling the repository
             return _petRepository.DeleteAsync(id);
         }
 
@@ -49,8 +66,8 @@ namespace PetQuestV1.Services
             var pet = await _petRepository.GetByIdAsync(id);
             if (pet != null)
             {
-                pet.IsDeleted = true; // Set the IsDeleted flag to true
-                await _petRepository.UpdateAsync(pet); // Update the pet in the database
+                pet.IsDeleted = true;
+                await _petRepository.UpdateAsync(pet);
             }
         }
 
@@ -64,7 +81,6 @@ namespace PetQuestV1.Services
             return _petRepository.GetAllSpeciesAsync();
         }
 
-        // --- NEW: Implement Breed methods ---
         public Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId)
         {
             return _petRepository.GetBreedsBySpeciesIdAsync(speciesId);
