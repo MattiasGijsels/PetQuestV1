@@ -5,17 +5,12 @@ using System.Threading.Tasks;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
 using System.ComponentModel.DataAnnotations;
+using PetQuestV1.Contracts.Enums; // <--- Add this using directive
 
 namespace PetQuestV1.Components.Admin
 {
     public partial class UsersAdminPanelBase : ComponentBase
     {
-        // Enum for sorting direction
-        public enum SortDirection
-        {
-            Ascending,
-            Descending
-        }
 
         [Inject]
         private IUserService UserService { get; set; } = default!;
@@ -23,15 +18,52 @@ namespace PetQuestV1.Components.Admin
         [Inject]
         private NavigationManager NavigationManager { get; set; } = default!; // Inject NavigationManager
 
-        protected List<UserListItemDto> Users { get; set; } = new();
+        // Rename Users to AllUsers to be consistent with SpeciesAdminPanel
+        // This will hold the raw data loaded from the service
+        protected List<UserListItemDto> AllUsers { get; set; } = new();
+
+
+        // --- Search Property ---
+        protected string SearchTerm { get; set; } = string.Empty; // Add SearchTerm property
+
 
         // Pagination properties
         protected int UsersCurrentPage { get; set; } = 1;
         protected int UsersPageSize { get; set; } = 10;
+
+        // Computed property for filtered and sorted users
+        protected IEnumerable<UserListItemDto> FilteredAndSortedUsers
+        {
+            get
+            {
+                // Start with all users that are not deleted
+                var query = AllUsers.Where(u => !u.IsDeleted).AsQueryable();
+
+                // Apply Search Filter
+                if (!string.IsNullOrWhiteSpace(SearchTerm))
+                {
+                    query = query.Where(u =>
+                        u.UserName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase) ||
+                        u.Email.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)
+                    );
+                }
+
+                // Apply Sorting
+                query = UsersSortColumn switch
+                {
+                    "UserName" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.UserName) : query.OrderByDescending(u => u.UserName),
+                    "PetCount" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.PetCount) : query.OrderByDescending(u => u.PetCount),
+                    _ => query.OrderBy(u => u.UserName) // Default sort
+                };
+
+                return query.ToList();
+            }
+        }
+
         // Calculates total pages, ensures at least 1 page if no users
-        protected int UsersTotalPages => Users.Any() ? (int)System.Math.Ceiling((double)Users.Count / UsersPageSize) : 1;
+        protected int UsersTotalPages => FilteredAndSortedUsers.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedUsers.Count() / UsersPageSize) : 1;
         // Returns the subset of users for the current page
-        protected IEnumerable<UserListItemDto> PagedUsers => Users
+        protected IEnumerable<UserListItemDto> PagedUsers => FilteredAndSortedUsers
             .Skip((UsersCurrentPage - 1) * UsersPageSize)
             .Take(UsersPageSize);
 
@@ -49,16 +81,16 @@ namespace PetQuestV1.Components.Admin
         protected override async Task OnInitializedAsync()
         {
             await LoadUsers();
+            // Ensure current page is valid after initial load
+            UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
         // Loads users from the service, applies current sorting, and updates pagination
         private async Task LoadUsers()
         {
-            Users = await UserService.GetAllUsersWithPetCountsAsync();
-            ApplySorting(); // Ensure sorting is applied after loading
-            // Adjust current page if the total pages change (e.g., after filter/sort)
-            UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
-            StateHasChanged(); // Notify Blazor component that state has changed
+            AllUsers = await UserService.GetAllUsersWithPetCountsAsync();
+            // No need to call ApplySorting here, as FilteredAndSortedUsers computed property handles it.
+            // Also, no need to call StateHasChanged here, as it's called at the end of OnInitializedAsync or calling methods.
         }
 
         // Method to handle sorting column click
@@ -76,27 +108,9 @@ namespace PetQuestV1.Components.Admin
                 UsersSortDirection = SortDirection.Ascending;
             }
 
-            ApplySorting();        // Re-apply sorting to the list
+            // The FilteredAndSortedUsers computed property will automatically re-evaluate
             ChangeUsersPage(1); // Reset to first page after sorting to see results immediately
-            StateHasChanged();     // Notify Blazor component
-        }
-
-        // Applies sorting logic to the Users list based on current sort column and direction
-        private void ApplySorting()
-        {
-            if (UsersSortColumn == "UserName")
-            {
-                Users = (UsersSortDirection == SortDirection.Ascending)
-                    ? Users.OrderBy(u => u.UserName).ToList()
-                    : Users.OrderByDescending(u => u.UserName).ToList();
-            }
-            else if (UsersSortColumn == "PetCount")
-            {
-                Users = (UsersSortDirection == SortDirection.Ascending)
-                    ? Users.OrderBy(u => u.PetCount).ToList()
-                    : Users.OrderByDescending(u => u.PetCount).ToList();
-            }
-            // Add more sorting logic for other columns if you introduce them
+            StateHasChanged();  // Notify Blazor component
         }
 
         // Pagination Handlers: Changes the current page
@@ -201,6 +215,24 @@ namespace PetQuestV1.Components.Admin
         {
             // CORRECTED PATH: Use the same path as in NavMenu.razor
             NavigationManager.NavigateTo("/Account/Register");
+        }
+
+        // --- Search Handler (New Method) ---
+        protected void OnSearchInput(ChangeEventArgs e)
+        {
+            SearchTerm = e.Value?.ToString() ?? string.Empty;
+            UsersCurrentPage = 1; // Reset to first page on search
+            StateHasChanged(); // Trigger re-render to apply filter
+        }
+
+        // Add this helper method to get the sort icon based on current sort state
+        protected string GetSortIcon(string columnName)
+        {
+            if (UsersSortColumn != columnName)
+            {
+                return "bi-arrows-alt"; // Neutral icon when not sorting by this column
+            }
+            return UsersSortDirection == SortDirection.Ascending ? "bi-caret-up-fill" : "bi-caret-down-fill";
         }
     }
 }
