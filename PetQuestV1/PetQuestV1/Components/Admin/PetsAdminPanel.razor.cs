@@ -1,16 +1,17 @@
-﻿// PetsAdminPanel.razor.cs
+﻿// PetQuestV1/Components/Admin/PetsAdminPanel.razor.cs
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using System.Collections.Generic;
-using System.Linq; // Make sure this is present for LINQ methods
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore; // Needed for ToListAsync() and related EF Core extensions
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using PetQuestV1.Contracts.Defines; // For the PetFormModel, if using it as a separate class
+using PetQuestV1.Contracts.Enums; // <--- ADD THIS LINE to use your global enum!
 
 namespace PetQuestV1.Components.Admin
 {
@@ -19,14 +20,14 @@ namespace PetQuestV1.Components.Admin
         [Inject]
         private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
-        protected List<Pet> AllPets { get; set; } = new(); // Store all pets initially
+        protected List<Pet> AllPets { get; set; } = new();
         protected List<Species> AvailableSpecies { get; set; } = new();
         protected List<Breed> AvailableBreeds { get; set; } = new();
         protected List<ApplicationUser> AvailableUsers { get; set; } = new();
 
         // --- Sorting Properties ---
         protected string CurrentSortColumn { get; set; } = "PetName"; // Default sort column
-        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending;
+        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; // This now uses your global enum!
 
         // --- Search Property ---
         protected string SearchTerm { get; set; } = string.Empty;
@@ -40,10 +41,6 @@ namespace PetQuestV1.Components.Admin
         {
             get
             {
-                // **IMPORTANT: Filter out IsDeleted pets first in the UI display**
-                // Even though the DBContext has a global filter, filtering here ensures
-                // the UI correctly reflects soft deletions immediately after action
-                // and in case 'AllPets' was populated with IgnoreQueryFilters() for some reason.
                 var query = AllPets.Where(p => !p.IsDeleted).AsQueryable();
 
                 // Apply Search Filter with robust null handling
@@ -62,8 +59,8 @@ namespace PetQuestV1.Components.Admin
                 {
                     "PetName" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.PetName) : query.OrderByDescending(p => p.PetName),
                     "Species" => SortDirection == SortDirection.Ascending ?
-                                    query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
-                                    query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
+                                        query.OrderBy(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenBy(p => p.PetName) :
+                                        query.OrderByDescending(p => p.Species == null ? string.Empty : p.Species.SpeciesName).ThenByDescending(p => p.PetName),
                     "Breed" => SortDirection == SortDirection.Ascending ?
                                 query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
                                 query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
@@ -155,17 +152,15 @@ namespace PetQuestV1.Components.Admin
         protected async Task EditPet(Pet pet)
         {
             // Populate form model from the selected pet
-            // Note: Since PetFormModel is now of type Pet, direct assignment might be possible
-            // if you don't need distinct validation properties, otherwise keep mapping.
             PetFormModel = new Pet
             {
                 Id = pet.Id,
                 PetName = pet.PetName,
-                SpeciesId = pet.SpeciesId, // Use direct ID from pet object
-                OwnerId = pet.OwnerId,     // Use direct ID from pet object
+                SpeciesId = pet.SpeciesId,
+                OwnerId = pet.OwnerId,
                 BreedId = pet.BreedId,
                 Age = pet.Age,
-                IsDeleted = pet.IsDeleted // Keep the IsDeleted state for the form model
+                IsDeleted = pet.IsDeleted
             };
             IsEditing = true;
             IsPetFormVisible = true;
@@ -192,8 +187,6 @@ namespace PetQuestV1.Components.Admin
                 string.IsNullOrWhiteSpace(PetFormModel.SpeciesId) ||
                 string.IsNullOrWhiteSpace(PetFormModel.OwnerId))
             {
-                // You might want to add visual feedback here, e.g., a simple alert or error message
-                // For now, we'll just return.
                 return;
             }
 
@@ -203,14 +196,10 @@ namespace PetQuestV1.Components.Admin
 
                 if (IsEditing)
                 {
-                    // For update, PetFormModel already contains the ID and existing data.
-                    // The service will find and update it.
                     await petService.UpdateAsync(PetFormModel);
                 }
                 else
                 {
-                    // For add, ensure a new ID is generated if not already set (ModelBase handles this)
-                    // and ensure IsDeleted is false by default (AddAsync in PetRepository handles this).
                     await petService.AddAsync(PetFormModel);
                 }
             }
@@ -234,7 +223,6 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
-                // Call the SoftDeleteAsync method
                 await petService.SoftDeleteAsync(id);
             }
             await LoadData(); // Reload all data to reflect the soft deletion (pet will disappear due to filter)
@@ -265,12 +253,13 @@ namespace PetQuestV1.Components.Admin
         {
             if (CurrentSortColumn == columnName)
             {
+                // Toggle between Ascending and Descending using the enum
                 SortDirection = (SortDirection == SortDirection.Ascending) ? SortDirection.Descending : SortDirection.Ascending;
             }
             else
             {
                 CurrentSortColumn = columnName;
-                SortDirection = SortDirection.Ascending;
+                SortDirection = SortDirection.Ascending; // Default to Ascending when changing column
             }
             PetsCurrentPage = 1; // Reset to first page on sort
             StateHasChanged(); // Re-render to apply sort
@@ -283,6 +272,7 @@ namespace PetQuestV1.Components.Admin
                 return "bi-sort-alpha-down"; // Default neutral sort icon
             }
 
+            // Use the enum for comparison
             return SortDirection == SortDirection.Ascending ? "bi-sort-alpha-down" : "bi-sort-alpha-up";
         }
 
@@ -293,11 +283,5 @@ namespace PetQuestV1.Components.Admin
             PetsCurrentPage = 1; // Reset to first page on search
             StateHasChanged(); // Re-render to apply filter
         }
-    }
-
-    public enum SortDirection
-    {
-        Ascending,
-        Descending
     }
 }
