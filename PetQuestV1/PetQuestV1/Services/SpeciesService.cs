@@ -1,68 +1,49 @@
-﻿using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts.Services;
+﻿// PetQuestV1/Services/SpeciesService.cs
+using PetQuestV1.Data.Defines; // For ISpeciesRepository
+using PetQuestV1.Contracts.Defines; // For ISpeciesService
+using PetQuestV1.Contracts.Models; // For Species model
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Services
 {
     public class SpeciesService : ISpeciesService
     {
-        // This is a simplified in-memory store for demonstration.
-        // In a real application, you would interact with a database (e.g., Entity Framework Core).
-        private static List<Species> _speciesData = new List<Species>
-        {
-            new Species { Id = Guid.NewGuid().ToString("N"), SpeciesName = "Dog", IsDeleted = false },
-            new Species { Id = Guid.NewGuid().ToString("N"), SpeciesName = "Cat", IsDeleted = false },
-            new Species { Id = Guid.NewGuid().ToString("N"), SpeciesName = "Bird", IsDeleted = false },
-            new Species { Id = Guid.NewGuid().ToString("N"), SpeciesName = "Fish", IsDeleted = false }
-        };
+        private readonly ISpeciesRepository _speciesRepository;
 
-        public Task<IEnumerable<Species>> GetAllSpeciesAsync()
+        public SpeciesService(ISpeciesRepository speciesRepository)
         {
-            return Task.FromResult(_speciesData.Where(s => !s.IsDeleted).AsEnumerable());
+            _speciesRepository = speciesRepository;
         }
 
-        public Task<Species> GetSpeciesByIdAsync(string id)
+        public Task<List<Species>> GetAllAsync()
         {
-            return Task.FromResult(_speciesData.FirstOrDefault(s => s.Id == id));
+            return _speciesRepository.GetAllAsync();
         }
 
-        public Task AddSpeciesAsync(Species species)
+        public Task<Species?> GetByIdAsync(string id)
         {
-            if (string.IsNullOrEmpty(species.Id))
-            {
-                species.Id = Guid.NewGuid().ToString("N");
-            }
-            species.IsDeleted = false;
-            _speciesData.Add(species);
-            return Task.CompletedTask;
+            return _speciesRepository.GetByIdAsync(id);
         }
 
-        public Task UpdateSpeciesAsync(Species species)
+        public Task AddAsync(Species species)
         {
-            var existingSpecies = _speciesData.FirstOrDefault(s => s.Id == species.Id);
-            if (existingSpecies != null)
-            {
-                existingSpecies.SpeciesName = species.SpeciesName;
-                // Update other properties as needed
-            }
-            return Task.CompletedTask;
+            // Add any business logic/validation here before calling the repository
+            return _speciesRepository.AddAsync(species);
         }
 
-        public Task SoftDeleteSpeciesAsync(string id)
+        public Task UpdateAsync(Species species)
         {
-            var speciesToSoftDelete = _speciesData.FirstOrDefault(s => s.Id == id);
-            if (speciesToSoftDelete != null)
-            {
-                speciesToSoftDelete.IsDeleted = true;
-            }
-            return Task.CompletedTask;
+            // Add any business logic/validation here before calling the repository
+            return _speciesRepository.UpdateAsync(species);
         }
 
-        public Task<IEnumerable<Species>> GetAllSpeciesIncludingDeletedAsync()
+        public async Task SoftDeleteAsync(string id)
         {
-            return Task.FromResult(_speciesData.AsEnumerable());
+            // You could fetch the species first to perform additional checks if needed
+            // var species = await _speciesRepository.GetByIdAsync(id);
+            // if (species != null) { ... }
+            await _speciesRepository.SoftDeleteAsync(id);
         }
     }
 }

@@ -22,12 +22,13 @@
             {
                 <EditForm Model="SpeciesFormModel" OnValidSubmit="HandleSpeciesFormSubmit" class="p-3 border-bottom">
                     <DataAnnotationsValidator />
-                    <div class="row g-2 mb-2">
+                    <div class="row g-2 mb-2 align-items-end">
                         <div class="col-sm-6">
-                            <InputText class="form-control" @bind-Value="SpeciesFormModel.SpeciesName" placeholder="Species Name" />
+                            <label for="speciesNameInput" class="form-label visually-hidden">Species Name</label>
+                            <InputText id="speciesNameInput" class="form-control" @bind-Value="SpeciesFormModel.SpeciesName" placeholder="Species Name" />
                             <ValidationMessage For="@(() => SpeciesFormModel.SpeciesName)" />
                         </div>
-                        <div class="col-sm-6 d-flex align-items-end">
+                        <div class="col-sm-6">
                             <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
                             <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelSpeciesForm">Cancel</button>
                         </div>
@@ -51,9 +52,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (PagedSpecies.Any())
+                    @if (FilteredAndSortedSpecies.Any()) // Use FilteredAndSortedSpecies here
                     {
-                        @foreach (var species in PagedSpecies)
+                        @foreach (var species in PagedSpecies) // And PagedSpecies here
                         {
                             <tr>
                                 <td>@species.SpeciesName</td>
@@ -61,6 +62,7 @@
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditSpecies(species)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+                                    @* Directly call SoftDeleteSpecies *@
                                     <button class="btn btn-sm btn-outline-danger" @onclick="() => SoftDeleteSpecies(species.Id)">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -80,16 +82,16 @@
             <nav class="p-2 border-top d-flex justify-content-center">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(SpeciesCurrentPage == 1 ? "disabled" : string.Empty)">
-                        <a class="page-link" @onclick="() => ChangeSpeciesPage(SpeciesCurrentPage - 1)">Prev</a>
+                        <a class="page-link" href="#" @onclick="() => ChangeSpeciesPage(SpeciesCurrentPage - 1)">Prev</a>
                     </li>
                     @for (int i = 1; i <= SpeciesTotalPages; i++)
                     {
                         <li class="page-item @(SpeciesCurrentPage == i ? "active" : string.Empty)">
-                            <a class="page-link" @onclick="() => ChangeSpeciesPage(i)">@i</a>
+                            <a class="page-link" href="#" @onclick="() => ChangeSpeciesPage(i)">@i</a>
                         </li>
                     }
                     <li class="page-item @(SpeciesCurrentPage == SpeciesTotalPages ? "disabled" : string.Empty)">
-                        <a class="page-link" @onclick="() => ChangeSpeciesPage(SpeciesCurrentPage + 1)">Next</a>
+                        <a class="page-link" href="#" @onclick="() => ChangeSpeciesPage(SpeciesCurrentPage + 1)">Next</a>
                     </li>
                 </ul>
             </nav>
@@ -105,4 +107,9 @@
         .sortable-header:hover {
             background-color: #f0f0f0; /* Light highlight on hover */
         }
+
+    /* Basic styling for admin table, adjust as needed */
+    .admin-table th, .admin-table td {
+        vertical-align: middle;
+    }
 </style>

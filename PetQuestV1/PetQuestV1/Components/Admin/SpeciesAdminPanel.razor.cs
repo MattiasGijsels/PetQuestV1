@@ -1,172 +1,203 @@
-﻿using Microsoft.AspNetCore.Components;
-using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts.Services;
+﻿// PetQuestV1/Components/Admin/SpeciesAdminPanel.razor.cs
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.DependencyInjection;
+using PetQuestV1.Contracts.Defines; // For ISpeciesService
+using PetQuestV1.Contracts.Models; // For Species model
+using PetQuestV1.Contracts.Enums; // <--- NEW: For SortDirection enum
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Components.Admin
 {
-    public class SpeciesAdminPanelBase : ComponentBase
+    public partial class SpeciesAdminPanelBase : ComponentBase
     {
         [Inject]
-        public ISpeciesService SpeciesService { get; set; } = default!;
+        private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
-        public bool IsSpeciesSectionVisible { get; set; } = false;
-        public bool IsSpeciesFormVisible { get; set; }
-        public Species SpeciesFormModel { get; set; } = new Species();
+        protected List<Species> AllSpecies { get; set; } = new();
 
-        public List<Species> AllSpecies { get; set; } = new List<Species>();
-        public List<Species> FilteredAndSortedSpecies { get; set; } = new List<Species>();
-        public List<Species> PagedSpecies { get; set; } = new List<Species>();
+        // --- Sorting Properties ---
+        protected string CurrentSortColumn { get; set; } = "SpeciesName"; // Default sort column
+        protected SortDirection SortDirection { get; set; } = SortDirection.Ascending; // Now uses the global enum
 
-        // Pagination
-        public int SpeciesCurrentPage { get; set; } = 1;
-        public int SpeciesPageSize { get; set; } = 10;
-        public int SpeciesTotalPages => (int)Math.Ceiling((double)FilteredAndSortedSpecies.Count / SpeciesPageSize);
+        // --- Search Property ---
+        protected string SearchTerm { get; set; } = string.Empty;
 
-        // Sorting
-        public string CurrentSortColumn { get; set; } = "SpeciesName";
-        public bool IsSortAscending { get; set; } = true;
+        // Pagination properties
+        protected int SpeciesCurrentPage { get; set; } = 1;
+        protected int SpeciesPageSize { get; set; } = 10;
 
-        // Search
-        public string SearchTerm { get; set; } = string.Empty;
+        // Computed property for filtered and sorted species
+        protected IEnumerable<Species> FilteredAndSortedSpecies
+        {
+            get
+            {
+                // Filter out IsDeleted species first in the UI display.
+                // The DbContext global filter will also handle this server-side, but this ensures
+                // consistency in UI filtering for existing `AllSpecies` list.
+                var query = AllSpecies.Where(s => !s.IsDeleted).AsQueryable();
+
+                // Apply Search Filter
+                if (!string.IsNullOrWhiteSpace(SearchTerm))
+                {
+                    query = query.Where(s =>
+                        s.SpeciesName.Contains(SearchTerm, System.StringComparison.OrdinalIgnoreCase)
+                    );
+                }
+
+                // Apply Sorting
+                query = CurrentSortColumn switch
+                {
+                    "SpeciesName" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.SpeciesName) : query.OrderByDescending(s => s.SpeciesName),
+                    _ => query.OrderBy(s => s.SpeciesName) // Default sort
+                };
+
+                return query.ToList(); // Materialize the filtered and sorted list
+            }
+        }
+
+        protected int SpeciesTotalPages => FilteredAndSortedSpecies.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedSpecies.Count() / SpeciesPageSize) : 1;
+        protected IEnumerable<Species> PagedSpecies => FilteredAndSortedSpecies.Skip((SpeciesCurrentPage - 1) * SpeciesPageSize).Take(SpeciesPageSize);
+
+        // Forms & UI state for species management
+        protected Species SpeciesFormModel { get; set; } = new(); // Use Species model directly for the form
+        protected bool IsSpeciesFormVisible { get; set; } = false;
+        private bool IsEditing { get; set; } = false;
+
+        // Toggling section visibility for "Species" accordion
+        protected bool IsSpeciesSectionVisible { get; set; } = false; // Default to false (collapsed)
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadSpecies();
+            await LoadData();
+            // Ensure pagination is correct after initial load
+            SpeciesCurrentPage = System.Math.Clamp(SpeciesCurrentPage, 1, SpeciesTotalPages == 0 ? 1 : SpeciesTotalPages);
         }
 
-        private async Task LoadSpecies()
+        private async Task LoadData()
         {
-            AllSpecies = (await SpeciesService.GetAllSpeciesAsync()).Where(s => !s.IsDeleted).ToList();
-            ApplyFilterAndSort();
-        }
-
-        private void ApplyFilterAndSort()
-        {
-            // Filter
-            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            using (var scope = ScopeFactory.CreateScope())
             {
-                FilteredAndSortedSpecies = AllSpecies
-                    .Where(s => s.SpeciesName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
+                AllSpecies = await speciesService.GetAllAsync();
             }
-            else
-            {
-                FilteredAndSortedSpecies = AllSpecies;
-            }
-
-            // Sort
-            if (CurrentSortColumn == "SpeciesName")
-            {
-                FilteredAndSortedSpecies = IsSortAscending ?
-                    FilteredAndSortedSpecies.OrderBy(s => s.SpeciesName).ToList() :
-                    FilteredAndSortedSpecies.OrderByDescending(s => s.SpeciesName).ToList();
-            }
-            // Add other sorting options here if needed
-
-            ApplyPagination();
-        }
-
-        private void ApplyPagination()
-        {
-            PagedSpecies = FilteredAndSortedSpecies
-                .Skip((SpeciesCurrentPage - 1) * SpeciesPageSize)
-                .Take(SpeciesPageSize)
-                .ToList();
+            StateHasChanged(); // Refresh UI after loading data
         }
 
         protected void ToggleSpeciesSection()
         {
             IsSpeciesSectionVisible = !IsSpeciesSectionVisible;
-            if (IsSpeciesSectionVisible)
-            {
-                // Optionally re-load species if needed when section is shown
-                _ = LoadSpecies();
-            }
-            IsSpeciesFormVisible = false; // Hide form when collapsing section
+            StateHasChanged();
         }
 
         protected void ShowAddSpeciesForm()
         {
-            SpeciesFormModel = new Species(); // Reset form for new species
+            SpeciesFormModel = new Species(); // Initialize with a new Species object
+            IsEditing = false;
             IsSpeciesFormVisible = true;
+            StateHasChanged();
         }
 
         protected void EditSpecies(Species species)
         {
-            SpeciesFormModel = species; // Set form model to the selected species for editing
+            // Create a copy to avoid modifying the list directly until saved
+            // This is good practice to prevent accidental UI updates before a successful save
+            SpeciesFormModel = new Species
+            {
+                Id = species.Id,
+                SpeciesName = species.SpeciesName,
+                IsDeleted = species.IsDeleted // Retain its current IsDeleted state
+            };
+            IsEditing = true;
             IsSpeciesFormVisible = true;
+            StateHasChanged();
         }
 
         protected async Task HandleSpeciesFormSubmit()
         {
-            if (string.IsNullOrEmpty(SpeciesFormModel.Id) || SpeciesFormModel.Id == Guid.Empty.ToString("N"))
+            // DataAnnotationsValidator handles basic validation on the form.
+            // If more complex validation is needed, add it here or in the service layer.
+
+            using (var scope = ScopeFactory.CreateScope())
             {
-                // Add new species
-                await SpeciesService.AddSpeciesAsync(SpeciesFormModel);
+                var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
+
+                if (IsEditing)
+                {
+                    await speciesService.UpdateAsync(SpeciesFormModel);
+                }
+                else
+                {
+                    await speciesService.AddAsync(SpeciesFormModel);
+                }
             }
-            else
-            {
-                // Update existing species
-                await SpeciesService.UpdateSpeciesAsync(SpeciesFormModel);
-            }
+
             IsSpeciesFormVisible = false;
-            await LoadSpecies(); // Refresh list
+            SpeciesFormModel = new Species(); // Reset form model for next use
+            await LoadData(); // Reload all data after submit to reflect changes
             StateHasChanged();
         }
 
         protected void CancelSpeciesForm()
         {
             IsSpeciesFormVisible = false;
-            SpeciesFormModel = new Species(); // Clear the form model
-        }
-
-        protected async Task SoftDeleteSpecies(string speciesId)
-        {
-            await SpeciesService.SoftDeleteSpeciesAsync(speciesId);
-            await LoadSpecies(); // Refresh list
+            SpeciesFormModel = new Species(); // Clear form
             StateHasChanged();
         }
 
-        protected void OnSearchInput(ChangeEventArgs e)
+        protected async Task SoftDeleteSpecies(string id)
         {
-            SearchTerm = e.Value?.ToString() ?? string.Empty;
-            SpeciesCurrentPage = 1; // Reset to first page on search
-            ApplyFilterAndSort();
+            using (var scope = ScopeFactory.CreateScope())
+            {
+                var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
+                await speciesService.SoftDeleteAsync(id);
+            }
+            await LoadData(); // Reload all data to reflect the soft deletion
+            StateHasChanged();
         }
 
+        // ---------- Pagination Handlers ----------
+        protected void ChangeSpeciesPage(int page)
+        {
+            SpeciesCurrentPage = System.Math.Clamp(page, 1, SpeciesTotalPages);
+            StateHasChanged();
+        }
+
+        // ---------- Sorting Handlers ----------
         protected void SortBy(string columnName)
         {
             if (CurrentSortColumn == columnName)
             {
-                IsSortAscending = !IsSortAscending;
+                SortDirection = (SortDirection == SortDirection.Ascending) ? SortDirection.Descending : SortDirection.Ascending;
             }
             else
             {
                 CurrentSortColumn = columnName;
-                IsSortAscending = true;
+                SortDirection = SortDirection.Ascending; // Default to ascending when changing column
             }
-            ApplyFilterAndSort();
+            SpeciesCurrentPage = 1; // Reset to first page on sort change
+            StateHasChanged();
         }
 
         protected string GetSortIcon(string columnName)
         {
             if (CurrentSortColumn != columnName)
             {
-                return "bi-sort"; // Default sort icon
+                return "bi-arrows-alt"; // Neutral icon
             }
-            return IsSortAscending ? "bi-sort-alpha-down" : "bi-sort-alpha-up";
+            return SortDirection == SortDirection.Ascending ? "bi-caret-up-fill" : "bi-caret-down-fill";
         }
 
-        protected void ChangeSpeciesPage(int page)
+        protected void OnSearchInput(ChangeEventArgs e)
         {
-            if (page >= 1 && page <= SpeciesTotalPages)
-            {
-                SpeciesCurrentPage = page;
-                ApplyPagination();
-            }
+            SearchTerm = e.Value?.ToString() ?? string.Empty;
+            SpeciesCurrentPage = 1; // Reset to first page on search
+            StateHasChanged();
         }
+
+        // The enum SortDirection definition has been moved to PetQuestV1/Contracts/Enums/SortDirection.cs
     }
 }
