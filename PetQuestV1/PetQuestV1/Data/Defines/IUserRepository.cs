@@ -1,9 +1,8 @@
-﻿// PetQuestV1.Data.Defines/IUserRepository.cs (or PetQuestV1.Contracts/Repositories/IUserRepository.cs)
-using PetQuestV1.Data; // For ApplicationUser
+﻿using PetQuestV1.Data; // For ApplicationUser
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PetQuestV1.Data.Defines // Or your chosen namespace for repository interfaces
+namespace PetQuestV1.Data.Defines 
 {
     public interface IUserRepository
     {
@@ -15,6 +14,5 @@ namespace PetQuestV1.Data.Defines // Or your chosen namespace for repository int
         Task DeleteAsync(string userId); // For hard delete
         Task SoftDeleteAsync(string userId);
         Task RestoreAsync(string userId);
-        // Add any other core CRUD or specific query methods for ApplicationUser here
     }
 }

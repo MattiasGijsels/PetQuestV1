@@ -11,7 +11,6 @@ using PetQuestV1.Data.Defines; // For ISpeciesRepository, IPetRepository
 using PetQuestV1.Data.Repository; // For SpeciesRepository, PetRepository
 using PetQuestV1.Services;
 using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts;
 
 
 var builder = WebApplication.CreateBuilder(args);

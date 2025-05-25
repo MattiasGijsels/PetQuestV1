@@ -1,8 +1,8 @@
 ﻿// Repositories/PetRepository.cs
 using Microsoft.EntityFrameworkCore;
-using PetQuestV1.Contracts;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
+using PetQuestV1.Data.Defines;
 using System;
 using System.Collections.Generic;
 using System.Linq;

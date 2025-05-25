@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Contracts.Models;
 
-namespace PetQuestV1.Contracts
+namespace PetQuestV1.Data.Defines
 {
     public interface IPetRepository
     {
@@ -12,13 +12,10 @@ namespace PetQuestV1.Contracts
         Task AddAsync(Pet pet);
         Task UpdateAsync(Pet pet);
         Task DeleteAsync(string id);
-
-        Task<Species?> GetSpeciesByNameAsync(string name); // This method seems to be only used by PetService, not the UI directly
+        Task<Species?> GetSpeciesByNameAsync(string name); 
         Task<List<Species>> GetAllSpeciesAsync();
-
-        // --- NEW: Methods for Breed management ---
         Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId);
-        Task<List<Breed>> GetAllBreedsAsync(); // Optional: if you need a list of ALL breeds
-        Task<Breed?> GetBreedByIdAsync(string id); // Optional: if you need to fetch a single breed
+        Task<List<Breed>> GetAllBreedsAsync(); // Optional: if I need a list of ALL breeds
+        Task<Breed?> GetBreedByIdAsync(string id); // Optional: if I need to fetch a single breed
     }
 }

@@ -1,9 +1,9 @@
-﻿using PetQuestV1.Contracts;
-using PetQuestV1.Contracts.Defines;
+﻿using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.DTOs.Pets;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PetQuestV1.Data.Defines;
 
 namespace PetQuestV1.Services
 {
