@@ -46,7 +46,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Register your repositories and services. They will now use the IDbContextFactory.
-builder.Services.AddScoped<IPetRepository,PetRepository>();
+builder.Services.AddScoped<IPetRepository, PetRepository>();
 builder.Services.AddScoped<ISpeciesRepository, SpeciesRepository>();
 
 builder.Services.AddScoped<IPetService, PetService>();
@@ -54,32 +54,15 @@ builder.Services.AddScoped<ISpeciesService, SpeciesService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 
-// --- IDENTITY SETUP (Updated to use IDbContextFactory) ---
-// Instead of AddEntityFrameworkStores<ApplicationDbContext> which requires a scoped DbContext,
-// we'll explicitly provide a factory for Identity.
-// This requires the package: Microsoft.AspNetCore.Identity.EntityFrameworkCore.Design (already installed if you used scaffolds)
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();// This line is sometimes problematic with factories alone.
-                                                     // If you were using `AddDbContext`, it registers DbContext as scoped.
-                                                     // With `AddDbContextFactory`, you typically resolve DbContext from the factory.
-                                                     // The Identity setup needs to be explicitly told to use the factory.
-
-// Correct way to configure Identity to use IDbContextFactory:
-// We typically don't remove AddEntityFrameworkStores, but ensure the DbContext it expects
-// is resolvable. When using AddDbContextFactory alone, the DbContext itself isn't directly scoped.
-// However, Identity *does* need a scoped DbContext to operate.
-// The trick is to also register the ApplicationDbContext as Scoped, but have it use the factory.
-
-// Let's ensure the ApplicationDbContext is registered as Scoped using the factory for Identity's needs
+// --- IDENTITY SETUP ---
+// This ensures ApplicationDbContext is registered as Scoped, using the factory, for Identity's needs.
 builder.Services.AddScoped<ApplicationDbContext>(sp =>
     sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
-
+// This is the SINGLE and COMPLETE IdentityCore registration.
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>() // This will now correctly pick up the Scoped ApplicationDbContext
+    .AddEntityFrameworkStores<ApplicationDbContext>() // This correctly picks up the Scoped ApplicationDbContext
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
