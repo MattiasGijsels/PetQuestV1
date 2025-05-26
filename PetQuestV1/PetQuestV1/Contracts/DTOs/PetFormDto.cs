@@ -14,6 +14,8 @@ namespace PetQuestV1.Contracts.DTOs.Pets
         [Required(ErrorMessage = "Species is required.")]
         public string? SpeciesId { get; set; }
 
+        public int Advantage { get; set; }
+
         public string? BreedId { get; set; }
 
         [Required(ErrorMessage = "Owner is required.")]

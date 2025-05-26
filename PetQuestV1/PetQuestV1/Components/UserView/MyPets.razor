@@ -1,0 +1,42 @@
+﻿@page "/mypets"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using PetQuestV1.Contracts.Models
+@using PetQuestV1.Components.UserView
+@using PetQuestV1.Contracts.Defines
+@using Microsoft.AspNetCore.Components.Forms
+@attribute [Authorize] 
+<PageTitle>My Pets</PageTitle>
+
+<div class="container my-5">
+    <h2 class="mb-4">My Pets</h2>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading pets...</span>
+            </div>
+            <p class="ms-3">Loading your pets...</p>
+        </div>
+    }
+    else if (UserPets == null || !UserPets.Any())
+    {
+        <div class="alert alert-info text-center" role="alert">
+            You don't have any pets registered yet. Time to find a new friend!
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var pet in UserPets)
+            {
+                <div class="col">
+                    <IdentityCard Pet="pet"
+                                  OnImageUploadRequested="HandleImageUploadRequest"
+                                  OnImageDeleteRequested="HandleImageDeleteRequest" />
+                </div>
+            }
+        </div>
+    }
+</div>

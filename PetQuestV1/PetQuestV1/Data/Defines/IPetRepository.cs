@@ -9,6 +9,7 @@ namespace PetQuestV1.Data.Defines
     {
         Task<List<Pet>> GetAllAsync();
         Task<Pet?> GetByIdAsync(string id);
+        Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId);
         Task AddAsync(Pet pet);
         Task UpdateAsync(Pet pet);
         Task DeleteAsync(string id);

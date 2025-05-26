@@ -16,7 +16,6 @@ namespace PetQuestV1.Data.Repository
 
         public async Task<List<Pet>> GetAllAsync()
         {
-            // The global query filter (see ApplicationDbContext) will automatically exclude IsDeleted pets.
             return await _context.Pets
                 .Include(p => p.Owner)
                 .Include(p => p.Species)
@@ -26,8 +25,6 @@ namespace PetQuestV1.Data.Repository
 
         public async Task<Pet?> GetByIdAsync(string id)
         {
-            // The global query filter will automatically exclude IsDeleted pets.
-            // If you needed to retrieve a deleted pet, you'd use .IgnoreQueryFilters() here.
             return await _context.Pets
                 .Include(p => p.Owner)
                 .Include(p => p.Species)
@@ -35,20 +32,32 @@ namespace PetQuestV1.Data.Repository
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        // NEW METHOD IMPLEMENTATION
+        public async Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId)
+        {
+            // Global query filter handles IsDeleted.
+            // Eagerly load related entities for display in IdentityCard.
+            return await _context.Pets
+                .Where(p => p.OwnerId == ownerId)
+                .Include(p => p.Owner)
+                .Include(p => p.Species)
+                .Include(p => p.Breed)
+                .ToListAsync();
+        }
+
         public async Task AddAsync(Pet pet)
         {
             if (string.IsNullOrEmpty(pet.Id))
             {
-                pet.Id = Guid.NewGuid().ToString("N"); // "N" format for no hyphens
+                pet.Id = Guid.NewGuid().ToString("N");
             }
-            pet.IsDeleted = false; // Ensure new pets are not marked as deleted
+            pet.IsDeleted = false;
             await _context.Pets.AddAsync(pet);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Pet pet)
         {
-            // When updating, you generally fetch the entity and then update its scalar properties
             var existingPet = await _context.Pets.FindAsync(pet.Id);
             if (existingPet != null)
             {
@@ -58,15 +67,14 @@ namespace PetQuestV1.Data.Repository
                 existingPet.Age = pet.Age;
                 existingPet.OwnerId = pet.OwnerId;
                 existingPet.ImagePath = pet.ImagePath;
-                existingPet.IsDeleted = pet.IsDeleted; // Crucial: Update the IsDeleted flag
+                existingPet.Advantage = pet.Advantage; // Make sure Advantage is updated
+                existingPet.IsDeleted = pet.IsDeleted;
 
-                _context.Pets.Update(existingPet); // Mark as modified
+                _context.Pets.Update(existingPet);
                 await _context.SaveChangesAsync();
             }
         }
 
-        // This method will no longer be directly used for soft deletion.
-        // It remains here if you have a separate use case for permanent deletion.
         public async Task DeleteAsync(string id)
         {
             var pet = await _context.Pets.FindAsync(id);

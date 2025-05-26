@@ -5,21 +5,22 @@ using PetQuestV1.Contracts.DTOs.Pets;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Data.Defines;
-using Microsoft.AspNetCore.Hosting; // Required for IWebHostEnvironment
-using Microsoft.AspNetCore.Components.Forms; // Required for IBrowserFile
-using System.IO; // Required for Path and Directory operations
-using System; // Required for Guid
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Components.Forms;
+using System.IO;
+using System;
+using System.Linq; // Added for Where if needed, though repository handles it
 
 namespace PetQuestV1.Services
 {
     public class PetService : IPetService
     {
         private readonly IPetRepository _petRepository;
-        private readonly IWebHostEnvironment _env; // Inject IWebHostEnvironment
-        private const string ImagesFolderName = "images"; // Consistent folder name for images in wwwroot
-        private const string PetImagesSubfolderName = "pets"; // Subfolder specific to pet images
+        private readonly IWebHostEnvironment _env;
+        private const string ImagesFolderName = "images";
+        private const string PetImagesSubfolderName = "pets";
 
-        public PetService(IPetRepository petRepository, IWebHostEnvironment env) // Add IWebHostEnvironment to constructor
+        public PetService(IPetRepository petRepository, IWebHostEnvironment env)
         {
             _petRepository = petRepository;
             _env = env;
@@ -35,6 +36,12 @@ namespace PetQuestV1.Services
             return _petRepository.GetByIdAsync(id);
         }
 
+        // NEW METHOD IMPLEMENTATION
+        public Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId)
+        {
+            return _petRepository.GetPetsByOwnerIdAsync(ownerId);
+        }
+
         public async Task AddPetAsync(PetFormDto petDto)
         {
             var pet = new Pet
@@ -44,6 +51,7 @@ namespace PetQuestV1.Services
                 BreedId = petDto.BreedId,
                 OwnerId = petDto.OwnerId,
                 Age = petDto.Age,
+                Advantage = petDto.Advantage, // Ensure Advantage is mapped
                 IsDeleted = false
             };
             await _petRepository.AddAsync(pet);
@@ -60,8 +68,8 @@ namespace PetQuestV1.Services
                 petToUpdate.BreedId = petDto.BreedId;
                 petToUpdate.OwnerId = petDto.OwnerId;
                 petToUpdate.Age = petDto.Age;
-                // Important: The ImagePath is updated via UploadPetImageAsync, not directly from PetFormDto
-                // Do NOT touch petToUpdate.IsDeleted here
+                petToUpdate.Advantage = petDto.Advantage; // Ensure Advantage is updated
+                // petToUpdate.ImagePath is updated via UploadPetImageAsync
                 await _petRepository.UpdateAsync(petToUpdate);
             }
         }
@@ -81,8 +89,6 @@ namespace PetQuestV1.Services
             }
         }
 
-        // --- New Methods for Image Handling ---
-
         public async Task<string?> UploadPetImageAsync(string petId, IBrowserFile imageFile)
         {
             var pet = await _petRepository.GetByIdAsync(petId);
@@ -91,35 +97,28 @@ namespace PetQuestV1.Services
                 return null; // Pet not found
             }
 
-            // Construct the full server path for the pet images directory
             var petImagesDirectoryPath = Path.Combine(_env.WebRootPath, ImagesFolderName, PetImagesSubfolderName);
 
-            // Ensure the directory exists; create it if it doesn't
             if (!Directory.Exists(petImagesDirectoryPath))
             {
                 Directory.CreateDirectory(petImagesDirectoryPath);
             }
 
-            // Generate a unique file name to avoid collisions
             var fileExtension = Path.GetExtension(imageFile.Name);
             var uniqueFileName = $"{Guid.NewGuid().ToString("N")}{fileExtension}";
             var fullFilePath = Path.Combine(petImagesDirectoryPath, uniqueFileName);
 
-            // Set a reasonable maximum file size (e.g., 5 MB)
             const long maxAllowedSize = 5 * 1024 * 1024; // 5 MB
 
             try
             {
-                // Save the file to the server's file system
                 await using FileStream fs = new(fullFilePath, FileMode.Create);
                 await imageFile.OpenReadStream(maxAllowedSize).CopyToAsync(fs);
             }
             catch (IOException ex)
             {
-                // Log the exception for debugging, especially for local setup issues (e.g., permissions)
                 Console.WriteLine($"Error saving file for pet {petId}: {ex.Message}");
-                // In a production app, you'd use a proper logger (e.g., ILogger)
-                return null; // Indicate failure
+                return null;
             }
             catch (Exception ex)
             {
@@ -127,13 +126,11 @@ namespace PetQuestV1.Services
                 return null;
             }
 
-            // Store the public URL/path that the web browser can access
             pet.ImagePath = $"/{ImagesFolderName}/{PetImagesSubfolderName}/{uniqueFileName}";
 
-            // Update the pet's ImagePath in the database
             await _petRepository.UpdateAsync(pet);
 
-            return pet.ImagePath; // Return the path for immediate UI display
+            return pet.ImagePath;
         }
 
         public async Task<bool> DeletePetImageAsync(string petId)
@@ -141,16 +138,14 @@ namespace PetQuestV1.Services
             var pet = await _petRepository.GetByIdAsync(petId);
             if (pet == null || string.IsNullOrEmpty(pet.ImagePath))
             {
-                return false; // Pet not found or no image to delete
+                return false;
             }
 
-            // Convert the public URL back to the full server path
-            var relativePath = pet.ImagePath.TrimStart('/'); // Remove leading '/'
+            var relativePath = pet.ImagePath.TrimStart('/');
             var fullFilePath = Path.Combine(_env.WebRootPath, relativePath);
 
             try
             {
-                // Delete the file from the server's file system if it exists
                 if (File.Exists(fullFilePath))
                 {
                     File.Delete(fullFilePath);
@@ -159,16 +154,14 @@ namespace PetQuestV1.Services
             catch (IOException ex)
             {
                 Console.WriteLine($"Error deleting file for pet {petId} at {fullFilePath}: {ex.Message}");
-                return false; // Indicate deletion failed
+                return false;
             }
 
-            // Clear the ImagePath from the database
             pet.ImagePath = null;
             await _petRepository.UpdateAsync(pet);
-            return true; // Indicate successful deletion
+            return true;
         }
 
-        // --- Existing Methods (unchanged from your provided code) ---
         public Task<Species?> GetSpeciesByNameAsync(string name)
         {
             return _petRepository.GetSpeciesByNameAsync(name);

@@ -17,6 +17,7 @@ namespace PetQuestV1.Contracts.Defines
         Task DeleteAsync(string id);
         Task SoftDeleteAsync(string id);
 
+        Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId); // NEW METHOD
         Task<Species?> GetSpeciesByNameAsync(string name);
         Task<List<Species>> GetAllSpeciesAsync();
         Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId);
