@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Contracts/DTOs/Pets/PetFormDto.cs
+using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Contracts.DTOs.Pets
 {
@@ -21,5 +22,7 @@ namespace PetQuestV1.Contracts.DTOs.Pets
         [Range(0.0, 30.0, ErrorMessage = "Age must be between 0.0 and 30.0.")]
         public double? Age { get; set; } // Made nullable because the int would let me display a placeholder in the UI
 
+        // --- NEW PROPERTY FOR IMAGE PATH ---
+        public string? ImagePath { get; set; } // Stores the public URL of the pet's image
     }
 }

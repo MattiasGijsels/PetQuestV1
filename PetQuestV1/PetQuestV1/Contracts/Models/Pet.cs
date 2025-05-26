@@ -38,6 +38,8 @@ namespace PetQuestV1.Contracts.Models
         [ForeignKey("OwnerId")]
         public ApplicationUser? Owner { get; set; }
 
+        public string? ImagePath { get; set; }  
+
         public Pet() : base() { }
     }
 }

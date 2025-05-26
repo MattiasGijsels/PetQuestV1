@@ -57,6 +57,7 @@ namespace PetQuestV1.Data.Repository
                 existingPet.BreedId = pet.BreedId;
                 existingPet.Age = pet.Age;
                 existingPet.OwnerId = pet.OwnerId;
+                existingPet.ImagePath = pet.ImagePath;
                 existingPet.IsDeleted = pet.IsDeleted; // Crucial: Update the IsDeleted flag
 
                 _context.Pets.Update(existingPet); // Mark as modified

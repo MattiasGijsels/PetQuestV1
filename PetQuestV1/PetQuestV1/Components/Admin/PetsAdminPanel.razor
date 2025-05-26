@@ -3,6 +3,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @using PetQuestV1.Contracts.Enums
+@using Microsoft.AspNetCore.Components.Forms @* Add this using statement *@
 
 <div class="card mb-5">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -67,6 +68,22 @@
                             <InputNumber class="form-control" @bind-Value:get="@PetFormModel.Age" @bind-Value:set="@(value => PetFormModel.Age = (int?)value)" placeholder="Please fill in the age" min="0" />
                             <ValidationMessage For="@(() => PetFormModel.Age)" />
                         </div>
+
+                        @* --- NEW: Image Upload Field and Preview --- *@
+                        <div class="col-sm-4">
+                            <label class="form-label">Pet Image</label>
+                            <InputFile class="form-control" OnChange="OnInputFileChange" />
+                            @if (!string.IsNullOrEmpty(PetFormModel.ImagePath))
+                            {
+                                <div class="mt-2">
+                                    <img src="@PetFormModel.ImagePath" alt="Pet Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-2" @onclick="DeleteImage">
+                                        <i class="bi bi-trash"></i> Delete Image
+                                    </button>
+                                </div>
+                            }
+                            <ValidationMessage For="@(() => PetFormModel.ImagePath)" /> @* Optional: if you add validation for image path *@
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
                     <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelPetForm">Cancel</button>
@@ -84,6 +101,9 @@
                     <tr>
                         <th @onclick='() => SortBy("PetName")' class="sortable-header">
                             Name <i class="bi @GetSortIcon("PetName")"></i>
+                        </th>
+                        <th>
+                            Image
                         </th>
                         <th @onclick='() => SortBy("Species")' class="sortable-header">
                             Species <i class="bi @GetSortIcon("Species")"></i>
@@ -107,6 +127,16 @@
                         {
                             <tr>
                                 <td>@pet.PetName</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(pet.ImagePath))
+                                    {
+                                        <img src="@pet.ImagePath" alt="Pet Image" class="img-thumbnail" style="max-width: 50px; max-height: 50px;" />
+                                    }
+                                    else
+                                    {
+                                        <span>No Image</span>
+                                    }
+                                </td>
                                 <td>@pet.Species?.SpeciesName</td>
                                 <td>@pet.Breed?.BreedName</td>
                                 <td>@pet.Age</td>
@@ -126,7 +156,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center">No pets found.</td>
+                            <td colspan="7" class="text-center">No pets found.</td> @* Adjusted colspan *@
                         </tr>
                     }
                 </tbody>
