@@ -38,7 +38,7 @@ namespace PetQuestV1.Data
                 .HasOne(p => p.Species)
                 .WithMany() // A Pet has one Species, a Species has many Pets (implied by this setup)
                 .HasForeignKey(p => p.SpeciesId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);// cannot delete a Species if any Pet is using it, prevents accidental dataloss
 
             // Configure Pet-Breed relationship
             builder.Entity<Pet>()
@@ -59,9 +59,8 @@ namespace PetQuestV1.Data
             // --- GLOBAL QUERY FILTER FOR SOFT DELETION ---
             builder.Entity<Pet>().HasQueryFilter(p => !p.IsDeleted);
             builder.Entity<ApplicationUser>().HasQueryFilter(u => !u.IsDeleted);
-            // ADD GLOBAL QUERY FILTER FOR SPECIES AND BREED
-            builder.Entity<Species>().HasQueryFilter(s => !s.IsDeleted); // <--- ADDED
-            builder.Entity<Breed>().HasQueryFilter(b => !b.IsDeleted);   // <--- ADDED
+            builder.Entity<Species>().HasQueryFilter(s => !s.IsDeleted);
+            builder.Entity<Breed>().HasQueryFilter(b => !b.IsDeleted);  
         }
     }
 }
