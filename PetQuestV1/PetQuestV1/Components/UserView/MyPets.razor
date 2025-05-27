@@ -5,20 +5,11 @@
 @using PetQuestV1.Components.UserView
 @using PetQuestV1.Contracts.Defines
 @using Microsoft.AspNetCore.Components.Forms
-@attribute [Authorize]
-
-@rendermode InteractiveAuto
+@attribute [Authorize] 
 <PageTitle>My Pets</PageTitle>
 
 <div class="container my-5">
     <h2 class="mb-4">My Pets</h2>
-
-    @if (!string.IsNullOrEmpty(UserActionMessage))
-    {
-        <div class="alert @(IsUserActionSuccess ? "alert-success" : "alert-danger")" role="alert">
-            @UserActionMessage
-        </div>
-    }
 
     @if (isLoading)
     {

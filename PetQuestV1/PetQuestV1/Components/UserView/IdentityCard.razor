@@ -2,30 +2,24 @@
 @using PetQuestV1.Contracts.Models
 @using Microsoft.AspNetCore.Components.Forms
 
-@rendermode InteractiveAuto
-
 <div class="card h-100 shadow-sm border-0">
     <div class="card-img-top-container position-relative">
         @if (!string.IsNullOrEmpty(Pet.ImagePath))
         {
             <img src="@Pet.ImagePath" class="card-img-top pet-card-img" alt="Image of @Pet.PetName">
-            <button class="btn btn-danger btn-sm delete-image-btn" @onclick="DeleteImage" title="Delete Image">
+            <button class="btn btn-danger btn-sm delete-image-btn" @onclick="DeleteImage">
                 <i class="bi bi-trash"></i>
             </button>
-            <label for="@($"file-upload-{Pet.Id}")" class="btn btn-outline-primary btn-sm change-image-btn" title="Change Image">
-                <i class="bi bi-pencil-square"></i>
-            </label>
         }
         else
         {
             <div class="d-flex justify-content-center align-items-center bg-light text-muted pet-card-img no-image-placeholder">
                 <i class="bi bi-image-fill display-4"></i>
             </div>
-            <label for="@($"file-upload-{Pet.Id}")" class="btn btn-primary btn-sm upload-new-image-btn" title="Upload Image">
-                <i class="bi bi-upload"></i> Upload Image
-            </label>
+            <div class="position-absolute bottom-0 end-0 p-2">
+                <InputFile OnChange="OnInputFileChange" class="form-control-sm" accept="image/*" />
+            </div>
         }
-        <InputFile id="@($"file-upload-{Pet.Id}")" OnChange="OnInputFileChange" class="visually-hidden" accept="image/*" />
     </div>
     <div class="card-body">
         <h5 class="card-title text-primary">@Pet.PetName</h5>
@@ -42,71 +36,48 @@
 <style>
     .pet-card-img {
         width: 100%;
-        height: 180px;
-        object-fit: cover;
+        height: 180px; /* Reduced height for consistency */
+        object-fit: cover; /* Covers the area, cropping if necessary */
         border-top-left-radius: var(--bs-card-border-radius);
         border-top-right-radius: var(--bs-card-border-radius);
     }
 
     .card-img-top-container {
-        overflow: hidden;
+        overflow: hidden; /* Hide anything outside the container if object-fit messes up */
     }
 
     .no-image-placeholder {
-        height: 180px;
+        height: 150px; /* Same height as image */
         font-size: 3rem;
-        background-color: #f8f9fa;
-        color: #adb5bd;
+        background-color: #f8f9fa; /* Light gray background */
+        color: #adb5bd; /* Muted icon color */
     }
 
     .delete-image-btn {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 10px;
+        right: 10px;
         z-index: 10;
-        background-color: rgba(220, 53, 69, 0.8);
+        background-color: rgba(220, 53, 69, 0.8); /* Red with transparency */
         border: none;
     }
 
-        .delete-image-btn:hover {
-            background-color: rgba(220, 53, 69, 1);
-        }
-
-    .change-image-btn {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-        z-index: 10;
+    .delete-image-btn:hover {
+        background-color: rgba(220, 53, 69, 1);
     }
 
-    .upload-new-image-btn {
-        position: absolute;
-        bottom: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-    }
-
-    .visually-hidden {
-        position: absolute !important;
-        height: 1px;
-        width: 1px;
-        overflow: hidden;
-        clip: rect(1px, 1px, 1px, 1px);
-        white-space: nowrap;
-    }
-
+    /* New styles for compact card body */
     .card-body .card-title {
-        margin-bottom: 0.5rem;
-        font-size: 1.15rem;
+        margin-bottom: 0.5rem; /* Reduce margin below title */
+        font-size: 1.15rem; /* Slightly smaller title font */
     }
 
     .card-body .list-unstyled {
-        font-size: 0.875rem;
-        line-height: 1.3;
+        font-size: 0.875rem; /* Smaller font for list items */
+        line-height: 1.3; /* Adjust line height for better spacing */
     }
-
-        .card-body .list-unstyled li {
-            margin-bottom: 0.2rem;
-        }
+    
+    .card-body .list-unstyled li {
+        margin-bottom: 0.2rem; /* Reduce space between list items */
+    }
 </style>

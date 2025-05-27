@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts.Defines; // For IPetService
+using PetQuestV1.Contracts.Defines;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
-// using Microsoft.AspNetCore.Identity; // Only if UserManager is directly used here. PetService handles user association.
+using Microsoft.AspNetCore.Identity; // For UserManager
 using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
 using System; // For Console.WriteLine
 
@@ -18,16 +18,12 @@ namespace PetQuestV1.Components.UserView
         private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         [Inject]
-        private IServiceScopeFactory ScopeFactory { get; set; } = default!;
+        private IServiceScopeFactory ScopeFactory { get; set; } = default!; // For scoped services in singleton component
 
         protected List<Pet> UserPets { get; set; } = new List<Pet>();
         protected bool isLoading { get; set; } = true;
+
         private string? _currentUserId;
-
-        // For user feedback
-        protected string? UserActionMessage { get; set; }
-        protected bool IsUserActionSuccess { get; set; }
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -38,6 +34,7 @@ namespace PetQuestV1.Components.UserView
             if (user.Identity?.IsAuthenticated == true)
             {
                 _currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (_currentUserId != null)
                 {
                     await LoadUserPets();
@@ -45,34 +42,26 @@ namespace PetQuestV1.Components.UserView
                 else
                 {
                     Console.WriteLine("User ID not found in claims.");
-                    UserActionMessage = "Could not identify user. Please try logging in again.";
-                    IsUserActionSuccess = false;
                 }
             }
             else
             {
                 Console.WriteLine("User is not authenticated.");
-                UserActionMessage = "You must be logged in to view your pets.";
-                IsUserActionSuccess = false;
             }
             isLoading = false;
         }
 
         private async Task LoadUserPets()
         {
-            UserActionMessage = null; // Clear previous messages
-            if (string.IsNullOrEmpty(_currentUserId)) return;
-
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
-                UserPets = await petService.GetPetsByOwnerIdAsync(_currentUserId);
+                UserPets = await petService.GetPetsByOwnerIdAsync(_currentUserId!);
             }
         }
 
         protected async Task HandleImageUploadRequest((string PetId, IBrowserFile ImageFile) args)
         {
-            UserActionMessage = null; // Clear previous messages
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
@@ -80,49 +69,43 @@ namespace PetQuestV1.Components.UserView
 
                 if (uploadedPath != null)
                 {
+                    // Update the specific pet in the UserPets list
                     var petToUpdate = UserPets.FirstOrDefault(p => p.Id == args.PetId);
                     if (petToUpdate != null)
                     {
                         petToUpdate.ImagePath = uploadedPath;
-                        UserActionMessage = $"Image for {petToUpdate.PetName} uploaded successfully!";
-                        IsUserActionSuccess = true;
-                        StateHasChanged();
+                        StateHasChanged(); // Notify Blazor to re-render the UI
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"MyPets: Image upload failed for pet ID: {args.PetId}. 'uploadedPath' was null.");
-                    UserActionMessage = "Image upload failed. Please check server logs or try a different image.";
-                    IsUserActionSuccess = false;
-                    StateHasChanged();
+                    Console.WriteLine($"Image upload failed for pet ID: {args.PetId}");
+                    // Optionally, add user feedback (e.g., a toast notification)
                 }
             }
         }
 
         protected async Task HandleImageDeleteRequest(string petId)
         {
-            UserActionMessage = null; // Clear previous messages
             using (var scope = ScopeFactory.CreateScope())
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 bool success = await petService.DeletePetImageAsync(petId);
-                var petToUpdate = UserPets.FirstOrDefault(p => p.Id == petId);
 
-
-                if (success && petToUpdate != null)
+                if (success)
                 {
-                    petToUpdate.ImagePath = null;
-                    UserActionMessage = $"Image for {petToUpdate.PetName} deleted successfully.";
-                    IsUserActionSuccess = true;
-                    StateHasChanged();
+                    // Clear the image path for the specific pet in the list
+                    var petToUpdate = UserPets.FirstOrDefault(p => p.Id == petId);
+                    if (petToUpdate != null)
+                    {
+                        petToUpdate.ImagePath = null;
+                        StateHasChanged(); // Notify Blazor to re-render the UI
+                    }
                 }
                 else
                 {
-                    var petName = petToUpdate?.PetName ?? "the selected pet";
-                    Console.WriteLine($"MyPets: Image deletion failed for pet ID: {petId}");
-                    UserActionMessage = $"Failed to delete image for {petName}.";
-                    IsUserActionSuccess = false;
-                    StateHasChanged();
+                    Console.WriteLine($"Image deletion failed for pet ID: {petId}");
+                    // Optionally, add user feedback
                 }
             }
         }
