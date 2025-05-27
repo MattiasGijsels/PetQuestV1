@@ -22,7 +22,7 @@ namespace PetQuestV1.Contracts.DTOs.Pets
         public string? OwnerId { get; set; }
 
         [Range(0.0, 30.0, ErrorMessage = "Age must be between 0.0 and 30.0.")]
-        public double? Age { get; set; } // Made nullable because the int would let me display a placeholder in the UI
+        public double? Age { get; set; } // Made a nullable double because the int would let me display a placeholder in the UI
 
         // --- NEW PROPERTY FOR IMAGE PATH ---
         public string? ImagePath { get; set; } // Stores the public URL of the pet's image
