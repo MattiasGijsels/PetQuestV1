@@ -249,19 +249,7 @@ namespace PetQuestV1.Components.Admin
                 }
                 else // Adding a new pet
                 {
-                    // For Add, we first add the pet to get an ID, then upload the image.
-                    // This means you might need to adjust AddPetAsync in IPetService/PetService
-                    // to return the created Pet object, or add a parameter to AddPetAsync for image.
-                    // A common pattern is:
-                    // 1. Add the pet (without image path initially).
-                    // 2. Get the newly created pet's ID.
-                    // 3. Upload the image using that ID.
-
-                    // Since your existing AddPetAsync doesn't return the Pet object,
-                    // we'll modify it slightly or fetch the pet right after adding.
-                    // Let's assume you'll add a modification to AddPetAsync to return the created pet's ID.
-                    // Or, even simpler for a hosted Blazor WASM, you could fetch it by name/owner,
-                    // but getting the ID back is safer.
+                   
                     // For now, let's keep it simple and assume the PetFormModel.Id will be set after Add.
                     // A better approach for new pets with images is often a dedicated DTO or a sequence of calls.
 
@@ -307,8 +295,7 @@ namespace PetQuestV1.Components.Admin
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 await petService.SoftDeleteAsync(id);
-                // Consider also deleting the image from storage if soft deleting means it's truly gone forever,
-                // or keep it if "deleted" means it might be restored.
+                // Consider also deleting the image from storage if soft deleting means it's truly gone forever
                 // For now, soft delete only marks the DB record. If you want to delete the file:
                 // await petService.DeletePetImageAsync(id); // <--- UNCOMMENT THIS IF YOU WANT PHYSICAL FILE DELETION ON SOFT DELETE
             }
