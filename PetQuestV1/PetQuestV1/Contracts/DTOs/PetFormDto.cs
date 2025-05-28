@@ -14,7 +14,7 @@ namespace PetQuestV1.Contracts.DTOs.Pets
         [Required(ErrorMessage = "Species is required.")]
         public string? SpeciesId { get; set; }
 
-        public int Advantage { get; set; } = 5;
+        public int Advantage { get; set; } = 5;// Every pet starts out with 5 Advantage
 
         public string? BreedId { get; set; }
 

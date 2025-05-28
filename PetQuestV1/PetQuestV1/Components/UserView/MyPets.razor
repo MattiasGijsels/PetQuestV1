@@ -5,14 +5,20 @@
 @using PetQuestV1.Components.UserView
 @using PetQuestV1.Contracts.Defines
 @using Microsoft.AspNetCore.Components.Forms
+@using PetQuestV1.Contracts.DTOs.Pets
 
 @rendermode InteractiveServer
 
-@attribute [Authorize] 
+@attribute [Authorize]
 <PageTitle>My Pets</PageTitle>
 
 <div class="container my-5">
-    <h2 class="mb-4">My Pets</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Pets</h2>
+        <button class="btn btn-primary" @onclick="ShowCreatePetModal">
+            <i class="fas fa-plus me-2"></i>Create New Pet
+        </button>
+    </div>
 
     @if (isLoading)
     {
@@ -26,7 +32,11 @@
     else if (UserPets == null || !UserPets.Any())
     {
         <div class="alert alert-info text-center" role="alert">
-            You don't have any pets registered yet. Time to find a new friend!
+            <h4>No pets yet!</h4>
+            <p>You don't have any pets registered yet. Time to find a new friend!</p>
+            <button class="btn btn-primary" @onclick="ShowCreatePetModal">
+                <i class="fas fa-plus me-2"></i>Create Your First Pet
+            </button>
         </div>
     }
     else
@@ -43,3 +53,110 @@
         </div>
     }
 </div>
+
+<!-- Create Pet Modal -->
+@if (showCreateModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Pet</h5>
+                    <button type="button" class="btn-close" @onclick="HideCreatePetModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isCreating)
+                    {
+                        <div class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
+                            <div class="spinner-border text-primary me-3" role="status"></div>
+                            <span>Creating your new pet...</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="newPetDto" OnValidSubmit="CreateNewPet">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger mb-3" />
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="petName" class="form-label">Pet Name *</label>
+                                    <InputText id="petName" class="form-control" @bind-Value="newPetDto.PetName" placeholder="Enter your pet's name" />
+                                    <ValidationMessage For="@(() => newPetDto.PetName)" />
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label">Age</label>
+                                    <InputNumber id="age" class="form-control" @bind-Value="newPetDto.Age" placeholder="Enter age (optional)" step="0.1" />
+                                    <ValidationMessage For="@(() => newPetDto.Age)" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="species" class="form-label">Species *</label>
+                                    <InputSelect id="species" class="form-select" @bind-Value="newPetDto.SpeciesId" @bind-Value:after="OnSpeciesChangedAsync">
+                                        <option value="">-- Select Species --</option>
+                                        @if (allSpecies != null)
+                                        {
+                                            @foreach (var species in allSpecies)
+                                            {
+                                                <option value="@species.Id">@species.SpeciesName</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => newPetDto.SpeciesId)" />
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="breed" class="form-label">Breed</label>
+                                    <InputSelect id="breed" class="form-select" @bind-Value="newPetDto.BreedId" disabled="@(availableBreeds == null || !availableBreeds.Any())">
+                                        <option value="">-- Select Breed (Optional) --</option>
+                                        @if (availableBreeds != null)
+                                        {
+                                            @foreach (var breed in availableBreeds)
+                                            {
+                                                <option value="@breed.Id">@breed.BreedName</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                </div>
+                            </div>
+
+
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @onclick="HideCreatePetModal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Create Pet
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showSuccessAlert)
+{
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Success!</strong> Your new pet has been created successfully.
+            <button type="button" class="btn-close" @onclick="() => showSuccessAlert = false"></button>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error!</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    </div>
+}

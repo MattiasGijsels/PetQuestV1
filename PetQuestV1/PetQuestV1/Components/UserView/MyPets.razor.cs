@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
+using PetQuestV1.Contracts.DTOs.Pets;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -23,6 +24,16 @@ namespace PetQuestV1.Components.UserView
         protected List<Pet> UserPets { get; set; } = new List<Pet>();
         protected bool isLoading { get; set; } = true;
 
+        // Create Pet Modal properties
+        protected bool showCreateModal { get; set; } = false;
+        protected bool isCreating { get; set; } = false;
+        protected bool showSuccessAlert { get; set; } = false;
+        protected string errorMessage { get; set; } = string.Empty;
+
+        protected PetFormDto newPetDto { get; set; } = new PetFormDto();
+        protected List<Species>? allSpecies { get; set; }
+        protected List<Breed>? availableBreeds { get; set; }
+
         private string? _currentUserId;
 
         protected override async Task OnInitializedAsync()
@@ -38,6 +49,7 @@ namespace PetQuestV1.Components.UserView
                 if (_currentUserId != null)
                 {
                     await LoadUserPets();
+                    await LoadSpeciesData(); // Load species for the create form
                 }
                 else
                 {
@@ -57,6 +69,15 @@ namespace PetQuestV1.Components.UserView
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 UserPets = await petService.GetPetsByOwnerIdAsync(_currentUserId!);
+            }
+        }
+
+        private async Task LoadSpeciesData()
+        {
+            using (var scope = ScopeFactory.CreateScope())
+            {
+                var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                allSpecies = await petService.GetAllSpeciesAsync();
             }
         }
 
@@ -107,6 +128,98 @@ namespace PetQuestV1.Components.UserView
                     Console.WriteLine($"Image deletion failed for pet ID: {petId}");
                     // Optionally, add user feedback
                 }
+            }
+        }
+
+        // Create Pet Modal Methods
+        protected void ShowCreatePetModal()
+        {
+            // Reset the form and state
+            newPetDto = new PetFormDto
+            {
+                OwnerId = _currentUserId
+                // Advantage will default to 5 from the PetFormDto class
+            };
+            availableBreeds = new List<Breed>(); // Reset breeds to empty list (not null)
+            errorMessage = string.Empty;
+            showCreateModal = true;
+        }
+
+        protected void HideCreatePetModal()
+        {
+            showCreateModal = false;
+            newPetDto = new PetFormDto();
+            availableBreeds = null;
+            errorMessage = string.Empty;
+        }
+
+        // New method to handle species change using @bind-Value:after
+        protected async Task OnSpeciesChangedAsync()
+        {
+            var selectedSpeciesId = newPetDto.SpeciesId;
+            newPetDto.BreedId = null; // Reset breed selection
+
+            if (!string.IsNullOrEmpty(selectedSpeciesId))
+            {
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                    availableBreeds = await petService.GetBreedsBySpeciesIdAsync(selectedSpeciesId);
+                }
+            }
+            else
+            {
+                availableBreeds = new List<Breed>(); // Empty list instead of null
+            }
+
+            StateHasChanged();
+        }
+
+        protected async Task CreateNewPet()
+        {
+            if (string.IsNullOrEmpty(_currentUserId))
+            {
+                errorMessage = "User authentication error. Please refresh and try again.";
+                return;
+            }
+
+            isCreating = true;
+            errorMessage = string.Empty;
+
+            try
+            {
+                // Ensure the OwnerId is set
+                newPetDto.OwnerId = _currentUserId;
+
+                using (var scope = ScopeFactory.CreateScope())
+                {
+                    var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
+                    await petService.AddPetAsync(newPetDto);
+                }
+
+                // Reload the pets list to include the new pet
+                await LoadUserPets();
+
+                // Show success and hide modal
+                showSuccessAlert = true;
+                HideCreatePetModal();
+
+                // Auto-hide success alert after 5 seconds
+                _ = Task.Delay(5000).ContinueWith(_ =>
+                {
+                    showSuccessAlert = false;
+                    InvokeAsync(StateHasChanged);
+                });
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to create pet: {ex.Message}";
+                Console.WriteLine($"Error creating pet: {ex}");
+            }
+            finally
+            {
+                isCreating = false;
+                StateHasChanged();
             }
         }
     }
