@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs.Pets;
@@ -7,9 +8,8 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.AspNetCore.Identity; // For UserManager
-using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
-using System; // For Console.WriteLine
+
+using System;
 
 namespace PetQuestV1.Components.UserView
 {
@@ -24,7 +24,7 @@ namespace PetQuestV1.Components.UserView
         protected List<Pet> UserPets { get; set; } = new List<Pet>();
         protected bool isLoading { get; set; } = true;
 
-        // Create Pet Modal properties
+        //Pet Modal properties
         protected bool showCreateModal { get; set; } = false;
         protected bool isCreating { get; set; } = false;
         protected bool showSuccessAlert { get; set; } = false;
@@ -81,7 +81,7 @@ namespace PetQuestV1.Components.UserView
             }
         }
 
-        protected async Task HandleImageUploadRequest((string PetId, IBrowserFile ImageFile) args)
+        protected async Task HandleImageUploadRequest((string PetId, IBrowserFile ImageFile) args)// args = the bundle of PetId and ImageFile
         {
             using (var scope = ScopeFactory.CreateScope())
             {
@@ -95,13 +95,12 @@ namespace PetQuestV1.Components.UserView
                     if (petToUpdate != null)
                     {
                         petToUpdate.ImagePath = uploadedPath;
-                        StateHasChanged(); // Notify Blazor to re-render the UI
+                        StateHasChanged(); 
                     }
                 }
                 else
                 {
                     Console.WriteLine($"Image upload failed for pet ID: {args.PetId}");
-                    // Optionally, add user feedback (e.g., a toast notification)
                 }
             }
         }
@@ -120,18 +119,16 @@ namespace PetQuestV1.Components.UserView
                     if (petToUpdate != null)
                     {
                         petToUpdate.ImagePath = null;
-                        StateHasChanged(); // Notify Blazor to re-render the UI
+                        StateHasChanged(); 
                     }
                 }
                 else
                 {
                     Console.WriteLine($"Image deletion failed for pet ID: {petId}");
-                    // Optionally, add user feedback
                 }
             }
         }
 
-        // Create Pet Modal Methods
         protected void ShowCreatePetModal()
         {
             // Reset the form and state
@@ -152,8 +149,6 @@ namespace PetQuestV1.Components.UserView
             availableBreeds = null;
             errorMessage = string.Empty;
         }
-
-        // New method to handle species change using @bind-Value:after
         protected async Task OnSpeciesChangedAsync()
         {
             var selectedSpeciesId = newPetDto.SpeciesId;

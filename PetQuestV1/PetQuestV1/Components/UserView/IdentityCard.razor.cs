@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Forms;
 using PetQuestV1.Contracts.Models;
 using System.Threading.Tasks;
-using System; // For Console.WriteLine
+using System; 
 
 namespace PetQuestV1.Components.UserView
 {
