@@ -1,7 +1,26 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>PetQuest</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="petquest-container">
+    <img src="HomeImage/PetQuestV1.png" alt="PetQuest" class="petquest-image" />
+</div>
 
-Welcome to your new app.
+<style>
+    .petquest-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 80vh;
+        background-color: #FFFFFF;
+        padding: 2rem;
+        padding-top: 0rem; /* Add some padding to push it down from the very top */
+    }
+
+    .petquest-image {
+        max-width: 150%;
+        height: auto;
+        max-height: 800px;
+    }
+</style>
