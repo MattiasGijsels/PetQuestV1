@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Forms;
 using PetQuestV1.Contracts.Models;
-using PetQuestV1.Data;
-using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Enums;
 using PetQuestV1.Contracts.DTOs.Pets;
-using Microsoft.AspNetCore.Components.Forms; // Add this using statement
+using PetQuestV1.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
-using System.Linq; // Added for .Any() and other LINQ methods
-using System.Collections.Generic; // Added for List<T>
+using System.Linq; 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Components.Admin
@@ -19,10 +19,6 @@ namespace PetQuestV1.Components.Admin
     {
         [Inject]
         private IServiceScopeFactory ScopeFactory { get; set; } = default!;
-
-        // No longer need IWebHostEnvironment directly here, as PetService handles it.
-        // [Inject]
-        // private IWebHostEnvironment Env { get; set; } = default!;
 
         protected List<Pet> AllPets { get; set; } = new();
         protected List<Species> AvailableSpecies { get; set; } = new();
@@ -88,7 +84,7 @@ namespace PetQuestV1.Components.Admin
             }
         }
 
-        // --- NEW: Property to hold the selected file from InputFile ---
+        // --- Property to hold the selected file from InputFile ---
         private IBrowserFile? _selectedFile;
 
         protected override async Task OnInitializedAsync()
@@ -183,17 +179,13 @@ namespace PetQuestV1.Components.Admin
             StateHasChanged();
         }
 
-        // --- NEW: Method to handle file input change ---
+        // --- Method to handle file input change ---
         protected void OnInputFileChange(InputFileChangeEventArgs e)
         {
             _selectedFile = e.File;
-            // Optionally, you can add a temporary client-side preview here
-            // using e.File.OpenReadStream and converting to base64 for PetFormModel.ImagePath
-            // if you want immediate feedback without waiting for server upload.
-            // For now, we'll rely on the server upload to update ImagePath.
         }
 
-        // --- NEW: Method to handle image deletion ---
+        // --- Method to handle image deletion ---
         protected async Task DeleteImage()
         {
             if (PetFormModel.Id != null) // Only delete if it's an existing pet
@@ -210,7 +202,6 @@ namespace PetQuestV1.Components.Admin
                     }
                     else
                     {
-                        // Handle error, e.g., show a toast notification
                         Console.WriteLine("Error deleting pet image.");
                     }
                 }
@@ -223,7 +214,8 @@ namespace PetQuestV1.Components.Admin
                 string.IsNullOrWhiteSpace(PetFormModel.SpeciesId) ||
                 string.IsNullOrWhiteSpace(PetFormModel.OwnerId))
             {
-                // Basic validation, DataAnnotationsValidator handles more
+                // Could maybe use DataAnnotationsValidator cuz it handles more,
+                // for now does not return any value, it simply stops execution 
                 return;
             }
 
@@ -249,15 +241,6 @@ namespace PetQuestV1.Components.Admin
                 }
                 else // Adding a new pet
                 {
-                   
-                    // For now, let's keep it simple and assume the PetFormModel.Id will be set after Add.
-                    // A better approach for new pets with images is often a dedicated DTO or a sequence of calls.
-
-                    // Simplest approach: Add the pet, then fetch it to get its ID, then upload.
-                    // This requires a PetFormDto that can become a Pet, or fetch by properties.
-                    // Given PetFormDto has an Id, we will assume it's assigned after AddAsync
-                    // in the PetRepository if it's null, which it currently is.
-                    // Let's make AddPetAsync in PetService return the created pet's Id.
 
                     await petService.AddPetAsync(PetFormModel); // This will generate an ID if null
 
@@ -295,9 +278,7 @@ namespace PetQuestV1.Components.Admin
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 await petService.SoftDeleteAsync(id);
-                // Consider also deleting the image from storage if soft deleting means it's truly gone forever
-                // For now, soft delete only marks the DB record. If you want to delete the file:
-                // await petService.DeletePetImageAsync(id); // <--- UNCOMMENT THIS IF YOU WANT PHYSICAL FILE DELETION ON SOFT DELETE
+                // Maybe I should add a hard delete in the future if needed..
             }
             await LoadData();
             StateHasChanged();

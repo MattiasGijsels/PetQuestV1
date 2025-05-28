@@ -52,8 +52,7 @@
                             Species Name <i class="bi @GetSortIcon("SpeciesName")"></i>
                         </th>
                         <th @onclick='() => SortBy("BreedCount")' class="sortable-header">
-                            @*<--- NEW SORTABLE HEADER*@
-                            Breeds <i class="bi @GetSortIcon("BreedCount")"></i> @*<--- NEW SORT ICON*@
+                           Breeds <i class="bi @GetSortIcon("BreedCount")"></i> 
                         </th>
                         <th style="width: 120px">Actions</th>
                     </tr>
@@ -65,7 +64,7 @@
                         {
                             <tr>
                                 <td>@species.SpeciesName</td>
-                                <td>@species.BreedCount</td> @*<--- DISPLAY BREED COUNT*@
+                                <td>@species.BreedCount</td> 
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditSpecies(species)">
                                         <i class="bi bi-pencil"></i>
@@ -81,7 +80,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="3" class="text-center">No species found.</td> @*<--- INCREASE COLSPAN*@
+                            <td colspan="3" class="text-center">No species found.</td> 
                         </tr>
                     }
                 </tbody>

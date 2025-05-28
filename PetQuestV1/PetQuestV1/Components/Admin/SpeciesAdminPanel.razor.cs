@@ -70,8 +70,7 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
-                // Call the new service method
-                AllSpecies = await speciesService.GetAllSpeciesForAdminAsync(); // <--- CALL NEW SERVICE METHOD
+                AllSpecies = await speciesService.GetAllSpeciesForAdminAsync(); 
             }
             StateHasChanged();
         }
@@ -106,7 +105,7 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandleSpeciesFormSubmit()
         {
-            // Basic client-side validation for SpeciesName if needed, otherwise rely on DataAnnotationsValidator
+            // Maybe I should use DataAnnotationsValidator in the future?
             if (string.IsNullOrWhiteSpace(SpeciesFormModel.SpeciesName))
             {
                 Console.WriteLine("Species Name cannot be empty}");
@@ -159,7 +158,7 @@ namespace PetQuestV1.Components.Admin
                 var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
                 await speciesService.SoftDeleteAsync(id);
             }
-            await LoadData(); // Reload all data to reflect the soft deletion
+            await LoadData(); 
             StateHasChanged();
         }
 

@@ -7,7 +7,6 @@ namespace PetQuestV1.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            // Any shared initialization can go here, maybe something for future use?
         }
     }
 }

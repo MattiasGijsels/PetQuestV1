@@ -69,7 +69,7 @@
                             <ValidationMessage For="@(() => PetFormModel.Age)" />
                         </div>
 
-                        @* --- NEW: Image Upload Field and Preview --- *@
+                        @* --- Image Upload Field and Preview --- *@
                         <div class="col-sm-4">
                             <label class="form-label">Pet Image</label>
                             <InputFile class="form-control" OnChange="OnInputFileChange" />
@@ -82,7 +82,7 @@
                                     </button>
                                 </div>
                             }
-                            <ValidationMessage For="@(() => PetFormModel.ImagePath)" /> @* Optional: if you add validation for image path *@
+                            <ValidationMessage For="@(() => PetFormModel.ImagePath)" /> @* If I have extra time, more validation? *@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
@@ -156,7 +156,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center">No pets found.</td> @* Adjusted colspan *@
+                            <td colspan="7" class="text-center">No pets found.</td> 
                         </tr>
                     }
                 </tbody>

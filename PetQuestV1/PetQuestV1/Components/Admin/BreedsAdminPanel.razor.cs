@@ -1,5 +1,4 @@
-﻿// PetQuestV1/Components/Admin/BreedAdminPanel.razor.cs
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Enums;
@@ -142,7 +141,7 @@ namespace PetQuestV1.Components.Admin
         protected void CancelBreedForm()
         {
             IsBreedFormVisible = false;
-            BreedFormModel = new Breed(); // Clear the form
+            BreedFormModel = new Breed(); // Clears the form
             StateHasChanged();
         }
 
@@ -187,6 +186,7 @@ namespace PetQuestV1.Components.Admin
                 return "bi-arrows-alt"; // Neutral icon
             }
             return SortDirection == SortDirection.Ascending ? "bi-caret-up-fill" : "bi-caret-down-fill";
+            //selects an icon based on the sorting direction
         }
 
         protected void OnSearchInput(ChangeEventArgs e)
