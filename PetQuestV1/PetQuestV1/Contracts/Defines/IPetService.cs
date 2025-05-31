@@ -29,5 +29,8 @@ namespace PetQuestV1.Contracts.Defines
 
         // Handles deleting a pet's image. Returns true if successful.
         Task<bool> DeletePetImageAsync(string petId);
+        Task<List<PetFormDto>> GetAllPetsFormDtoAsync();
+        Task<PetFormDto?> GetPetFormDtoByIdAsync(string id);
+
     }
 }

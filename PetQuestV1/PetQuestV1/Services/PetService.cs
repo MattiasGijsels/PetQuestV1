@@ -162,6 +162,41 @@ namespace PetQuestV1.Services
             return true;
         }
 
+        public async Task<List<PetFormDto>> GetAllPetsFormDtoAsync()
+        {
+            var pets = await _petRepository.GetAllPetsWithDetailsAsync(); // Call the new repository method
+            return pets.Select(p => new PetFormDto
+            {
+                Id = p.Id,
+                PetName = p.PetName,
+                SpeciesId = p.SpeciesId,
+                BreedId = p.BreedId,
+                OwnerId = p.OwnerId,
+                Age = p.Age,
+                Advantage = p.Advantage,
+                ImagePath = p.ImagePath
+            }).ToList();
+        }
+        public async Task<PetFormDto?> GetPetFormDtoByIdAsync(string id)
+        {
+            var pet = await _petRepository.GetPetWithDetailsByIdAsync(id); // Call the new repository method
+            if (pet == null)
+            {
+                return null;
+            }
+
+            return new PetFormDto
+            {
+                Id = pet.Id,
+                PetName = pet.PetName,
+                SpeciesId = pet.SpeciesId,
+                BreedId = pet.BreedId,
+                OwnerId = pet.OwnerId,
+                Age = pet.Age,
+                Advantage = pet.Advantage,
+                ImagePath = pet.ImagePath
+            };
+        }
         public Task<Species?> GetSpeciesByNameAsync(string name)
         {
             return _petRepository.GetSpeciesByNameAsync(name);

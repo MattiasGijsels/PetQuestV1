@@ -18,5 +18,7 @@ namespace PetQuestV1.Data.Defines
         Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId);
         Task<List<Breed>> GetAllBreedsAsync(); // Optional: if I need a list of ALL breeds
         Task<Breed?> GetBreedByIdAsync(string id); // Optional: if I need to fetch a single breed
+        Task<List<Pet>> GetAllPetsWithDetailsAsync();
+        Task<Pet?> GetPetWithDetailsByIdAsync(string id);
     }
 }

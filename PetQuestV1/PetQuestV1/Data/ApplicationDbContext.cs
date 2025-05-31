@@ -44,7 +44,7 @@ namespace PetQuestV1.Data
             builder.Entity<Species>()
                 .HasMany(s => s.Breeds)
                 .WithOne(b => b.Species)
-                .HasForeignKey(b => b.SpeciesId)
+                .HasForeignKey(b => b.SpeciesId) //check if this is correct?
                 .OnDelete(DeleteBehavior.Cascade);// Deleting a Species will delete all its associated Breeds.
 
 

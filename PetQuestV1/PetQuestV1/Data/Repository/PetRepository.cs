@@ -116,5 +116,22 @@ namespace PetQuestV1.Data.Repository
         {
             return await _context.Breeds.FirstOrDefaultAsync(b => b.Id == id);
         }
+        public async Task<List<Pet>> GetAllPetsWithDetailsAsync()
+        {
+            // Include Species and Breed if you need this data for display in my DTO later
+            // Otherwise, just .Where(p => !p.IsDeleted).ToListAsync(); is sufficient.
+            return await _context.Pets
+                                 .Include(p => p.Species) // Assuming you have navigation properties
+                                 .Include(p => p.Breed)   // Assuming you have navigation properties
+                                 .Where(p => !p.IsDeleted)
+                                 .ToListAsync();
+        }
+        public async Task<Pet?> GetPetWithDetailsByIdAsync(string id)
+        {
+            return await _context.Pets
+                                 .Include(p => p.Species)
+                                 .Include(p => p.Breed)
+                                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
+        }
     }
 }

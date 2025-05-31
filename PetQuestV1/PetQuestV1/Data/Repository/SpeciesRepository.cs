@@ -38,7 +38,7 @@ namespace PetQuestV1.Data.Repository
             {
                 // Include breeds here too if you need them when fetching a single species
                 return await _context.Species
-                                     .Include(s => s.Breeds) // Include breeds
+                                     //.Include(s => s.Breeds) // Include breeds
                                      .FirstOrDefaultAsync(s => s.Id == id);
             }
         }

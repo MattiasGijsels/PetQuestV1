@@ -36,7 +36,7 @@ namespace PetQuestV1.Data.Repository
             using (var _context = _contextFactory.CreateDbContext())
             {
                 return await _context.Breeds
-                                     .Include(b => b.Species) // Include Species when fetching by ID for potential display/editing
+                                     //.Include(b => b.Species) // Include Species when fetching by ID for potential display/editing
                                      .FirstOrDefaultAsync(b => b.Id == id);
             }
         }
