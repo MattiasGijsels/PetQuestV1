@@ -1,9 +1,17 @@
 ﻿@page "/pong"
-@inherits PongBase
+@using Microsoft.AspNetCore.Components.Web
+@using PetQuestV1.Components.Pong
 @rendermode InteractiveServer
+@inherits PongBase
 
-<div class="pong-container">
-    <h1 class="pong-title">Pet Pong Game</h1>
+<div class="game-container" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @onkeyup="HandleKeyUp" @onkeyup:preventDefault="true" @ref="gameContainer">
+    <div class="game-header">
+        <h1>Pong Game</h1>
+        <div class="score">
+            <span>Player: @PlayerScore</span>
+            <span>Computer: @ComputerScore</span>
+        </div>
+    </div>
 
     @if (UserPets?.Any() == true)
     {
@@ -17,60 +25,61 @@
                 }
             </select>
         </div>
-    }
 
-    @if (SelectedPet != null)
-    {
-        <div class="score-display">
-            Player: @PlayerScore - Computer: @ComputerScore
-        </div>
-
-        <div class="game-area" @onkeydown="HandleKeyDown" tabindex="0">
-            <div class="paddle player-paddle" style="height: @PlayerPaddleHeight px; top: @PlayerPaddleY px;"></div>
-            <div class="paddle computer-paddle" style="height: @ComputerPaddleHeight px; top: @ComputerPaddleY px;"></div>
-            <div class="ball" style="left: @BallX px; top: @BallY px;"></div>
-        </div>
-
-        <div class="game-controls">
-            @if (!GameStarted)
-            {
-                <button class="start-button" @onclick="StartGame">Start Game</button>
-            }
-            else
-            {
-                <p>Use ↑↓ arrow keys to move your paddle!</p>
-            }
-        </div>
-
-        @if (!string.IsNullOrEmpty(GameMessage))
+        @if (SelectedPet != null)
         {
-            <div class="game-message">@GameMessage</div>
-        }
-
-        @if (!string.IsNullOrEmpty(SelectedPet.ImagePath))
-        {
-            <div class="pet-image">
-                <img src="@SelectedPet.ImagePath" alt="@SelectedPet.PetName" />
-                <p>Playing with @SelectedPet.PetName (Advantage: @SelectedPet.Advantage)</p>
-            </div>
-        }
-        else
-        {
-            <div class="pet-info">
-                <p>Playing with @SelectedPet.PetName (Advantage: @SelectedPet.Advantage)</p>
+            <div class="selected-pet-info">
+                <p><strong>Playing with:</strong> @SelectedPet.PetName</p>
+                <p><strong>Advantage:</strong> @SelectedPet.Advantage</p>
+                <p><strong>Paddle Size:</strong> @GetPaddleSizeText()</p>
             </div>
         }
     }
-    else if (UserPets?.Any() != true)
+    else
     {
         <div class="no-pets-message">
             <p>You don't have any pets yet! Please add a pet first to play Pong.</p>
         </div>
     }
-    else
+
+    @if (SelectedPet != null)
     {
-        <div class="select-pet-message">
-            <p>Select a pet to start playing Pong!</p>
+        <div class="game-area" @ref="gameArea">
+            <!-- Player Paddle -->
+            <div class="paddle player-paddle" style="top: @(PlayerPaddleY)px; height: @(PlayerPaddleHeight)px;"></div>
+
+            <!-- Computer Paddle -->
+            <div class="paddle computer-paddle" style="top: @(ComputerPaddleY)px;"></div>
+
+            <!-- Ball -->
+            <div class="ball" style="left: @(BallX)px; top: @(BallY)px;"></div>
+
+            <!-- Game Over Screen -->
+            @if (GameOver)
+            {
+                <div class="game-over">
+                    <h2>Game Over!</h2>
+                    <p>@(PlayerScore > ComputerScore ? "You and " + SelectedPet.PetName + " Win!" : "Computer Wins!")</p>
+                    <button @onclick="RestartGame" class="restart-btn">Play Again</button>
+                </div>
+            }
+
+            <!-- Start Screen -->
+            @if (!GameStarted && !GameOver)
+            {
+                <div class="start-screen">
+                    <h2>Pong with @SelectedPet.PetName</h2>
+                    <p>Use Arrow Keys to move your paddle</p>
+                    <p><strong>Your paddle advantage:</strong> @GetPaddleSizeText()</p>
+                    <p><small>Click here first, then press Start Game</small></p>
+                    <button @onclick="StartGame" class="start-btn">Start Game</button>
+                </div>
+            }
+        </div>
+
+        <div class="controls">
+            <p><strong>Controls:</strong> ↑ Arrow Key = Up, ↓ Arrow Key = Down</p>
+            <p><small>Make sure to click on the game area to enable keyboard controls</small></p>
         </div>
     }
 </div>
