@@ -1,0 +1,76 @@
+﻿@page "/pong"
+@inherits PongBase
+@rendermode InteractiveServer
+
+<div class="pong-container">
+    <h1 class="pong-title">Pet Pong Game</h1>
+
+    @if (UserPets?.Any() == true)
+    {
+        <div class="pet-selection">
+            <label for="petSelect">Choose your pet:</label>
+            <select id="petSelect" @onchange="OnPetSelected" class="pet-dropdown">
+                <option value="">Select a pet...</option>
+                @foreach (var pet in UserPets)
+                {
+                    <option value="@pet.Id">@pet.PetName (@pet.Species?.SpeciesName) - Advantage: @pet.Advantage</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (SelectedPet != null)
+    {
+        <div class="score-display">
+            Player: @PlayerScore - Computer: @ComputerScore
+        </div>
+
+        <div class="game-area" @onkeydown="HandleKeyDown" tabindex="0">
+            <div class="paddle player-paddle" style="height: @PlayerPaddleHeight px; top: @PlayerPaddleY px;"></div>
+            <div class="paddle computer-paddle" style="height: @ComputerPaddleHeight px; top: @ComputerPaddleY px;"></div>
+            <div class="ball" style="left: @BallX px; top: @BallY px;"></div>
+        </div>
+
+        <div class="game-controls">
+            @if (!GameStarted)
+            {
+                <button class="start-button" @onclick="StartGame">Start Game</button>
+            }
+            else
+            {
+                <p>Use ↑↓ arrow keys to move your paddle!</p>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(GameMessage))
+        {
+            <div class="game-message">@GameMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(SelectedPet.ImagePath))
+        {
+            <div class="pet-image">
+                <img src="@SelectedPet.ImagePath" alt="@SelectedPet.PetName" />
+                <p>Playing with @SelectedPet.PetName (Advantage: @SelectedPet.Advantage)</p>
+            </div>
+        }
+        else
+        {
+            <div class="pet-info">
+                <p>Playing with @SelectedPet.PetName (Advantage: @SelectedPet.Advantage)</p>
+            </div>
+        }
+    }
+    else if (UserPets?.Any() != true)
+    {
+        <div class="no-pets-message">
+            <p>You don't have any pets yet! Please add a pet first to play Pong.</p>
+        </div>
+    }
+    else
+    {
+        <div class="select-pet-message">
+            <p>Select a pet to start playing Pong!</p>
+        </div>
+    }
+</div>
