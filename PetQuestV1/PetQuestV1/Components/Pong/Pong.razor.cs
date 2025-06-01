@@ -172,10 +172,14 @@ namespace PetQuestV1.Components.Pong
             ComputerScore = 0;
             ResetGamePositions();
             GameOver = false;
+            GameStarted = true; // Add this line to set game as started
             ResetBall();
 
             // Ensure focus is on the game container
             await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[tabindex=\"0\"]').focus()");
+
+            // Start the game timer
+            gameTimer?.Start();
         }
 
         private void ResetBall()
