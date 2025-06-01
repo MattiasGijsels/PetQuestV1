@@ -25,11 +25,11 @@
                 <EditForm Model="PetFormModel" OnValidSubmit="HandlePetFormSubmit" class="p-3 border-bottom">
                     <DataAnnotationsValidator />
                     <div class="row g-2 mb-2">
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <InputText class="form-control" @bind-Value="PetFormModel.PetName" placeholder="Name" />
                             <ValidationMessage For="@(() => PetFormModel.PetName)" />
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <InputSelect class="form-select" @bind-Value="PetFormModel.SpeciesId" @oninput="OnSpeciesChanged">
                                 <option value="">Select Species</option>
                                 @foreach (var species in AvailableSpecies)
@@ -39,7 +39,7 @@
                             </InputSelect>
                             <ValidationMessage For="@(() => PetFormModel.SpeciesId)" />
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <InputSelect class="form-select" @bind-Value="PetFormModel.OwnerId">
                                 <option value="">Select Owner</option>
                                 @foreach (var user in AvailableUsers)
@@ -49,9 +49,7 @@
                             </InputSelect>
                             <ValidationMessage For="@(() => PetFormModel.OwnerId)" />
                         </div>
-                    </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <select class="form-select" @bind="PetFormModel.BreedId">
                                 <option value="">Select Breed</option>
                                 @if (AvailableBreeds != null && AvailableBreeds.Any())
@@ -64,13 +62,19 @@
                             </select>
                             <ValidationMessage For="@(() => PetFormModel.BreedId)" />
                         </div>
-                        <div class="col-sm-4">
-                            <InputNumber class="form-control" @bind-Value:get="@PetFormModel.Age" @bind-Value:set="@(value => PetFormModel.Age = (int?)value)" placeholder="Please fill in the age" min="0" />
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-sm-3">
+                            <InputNumber class="form-control" @bind-Value:get="@PetFormModel.Age" @bind-Value:set="@(value => PetFormModel.Age = (double?)value)" placeholder="Age" min="0" />
                             <ValidationMessage For="@(() => PetFormModel.Age)" />
+                        </div>
+                        <div class="col-sm-3">
+                            <InputNumber class="form-control" @bind-Value="PetFormModel.Advantage" placeholder="Advantage" min="0" />
+                            <ValidationMessage For="@(() => PetFormModel.Advantage)" />
                         </div>
 
                         @* --- Image Upload Field and Preview --- *@
-                        <div class="col-sm-4">
+                        <div class="col-sm-6">
                             <label class="form-label">Pet Image</label>
                             <InputFile class="form-control" OnChange="OnInputFileChange" />
                             @if (!string.IsNullOrEmpty(PetFormModel.ImagePath))
@@ -114,6 +118,9 @@
                         <th @onclick='() => SortBy("Age")' class="sortable-header">
                             Age <i class="bi @GetSortIcon("Age")"></i>
                         </th>
+                        <th @onclick='() => SortBy("Advantage")' class="sortable-header">
+                            Advantage <i class="bi @GetSortIcon("Advantage")"></i>
+                        </th>
                         <th @onclick='() => SortBy("Owner")' class="sortable-header">
                             Owner <i class="bi @GetSortIcon("Owner")"></i>
                         </th>
@@ -140,6 +147,7 @@
                                 <td>@pet.Species?.SpeciesName</td>
                                 <td>@pet.Breed?.BreedName</td>
                                 <td>@pet.Age</td>
+                                <td>@pet.Advantage</td>
                                 <td>@pet.Owner?.UserName</td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
@@ -156,7 +164,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center">No pets found.</td> 
+                            <td colspan="8" class="text-center">No pets found.</td>
                         </tr>
                     }
                 </tbody>

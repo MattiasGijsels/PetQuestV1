@@ -9,7 +9,7 @@ using PetQuestV1.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
-using System.Linq; 
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -62,6 +62,7 @@ namespace PetQuestV1.Components.Admin
                                         query.OrderBy(p => p.Breed == null ? string.Empty : p.Breed.BreedName) :
                                         query.OrderByDescending(p => p.Breed == null ? string.Empty : p.Breed.BreedName),
                     "Age" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Age) : query.OrderByDescending(p => p.Age),
+                    "Advantage" => SortDirection == SortDirection.Ascending ? query.OrderBy(p => p.Advantage) : query.OrderByDescending(p => p.Advantage),
                     "Owner" => SortDirection == SortDirection.Ascending ?
                                                         query.OrderBy(p => p.Owner == null ? string.Empty : p.Owner.UserName) :
                                                         query.OrderByDescending(p => p.Owner == null ? string.Empty : p.Owner.UserName),
@@ -158,6 +159,7 @@ namespace PetQuestV1.Components.Admin
                 OwnerId = pet.OwnerId,
                 BreedId = pet.BreedId,
                 Age = pet.Age,
+                Advantage = pet.Advantage, // Added Advantage to the edit form
                 ImagePath = pet.ImagePath // Load the existing image path from the pet model
             };
             IsEditing = true;
