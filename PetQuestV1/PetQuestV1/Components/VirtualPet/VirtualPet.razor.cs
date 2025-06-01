@@ -1,13 +1,26 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using PetQuestV1.Contracts.Models;
+using PetQuestV1.Contracts.Defines;
+using PetQuestV1.Contracts.DTOs.Pets;
+using System.Security.Claims;
 
 public class VirtualPetBase : ComponentBase, IDisposable
 {
+    [Inject] public IPetService PetService { get; set; } = default!;
+    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
     protected string PetEmoji = "🐶";
-    protected string StatusMessage = "Your pet is happy!";
+    protected string StatusMessage = "Select a pet to start playing!";
     protected string PetStyle = "font-size: 5rem;";
     protected string EmojiAnimation = "";
     protected string EmojiLeft = "0px";
     protected string EmojiTop = "0px";
+
+    protected List<Pet>? UserPets;
+    protected Pet? SelectedPet;
+    protected bool ShowSuccessModal = false;
+    protected bool IsGameDisabled = false;
 
     protected class StatBar
     {
@@ -29,24 +42,94 @@ public class VirtualPetBase : ComponentBase, IDisposable
     protected int Alertness = 5;
 
     private System.Timers.Timer? decayTimer;
+    private string? currentUserId;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        UpdatePet();
+        await GetCurrentUser();
+        await LoadUserPets();
+        UpdateGameDisplay();
+    }
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+    }
+
+    private async Task LoadUserPets()
+    {
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            UserPets = await PetService.GetPetsByOwnerIdAsync(currentUserId);
+        }
+    }
+
+    protected async Task OnPetSelected(ChangeEventArgs e)
+    {
+        var selectedPetId = e.Value?.ToString();
+
+        if (string.IsNullOrEmpty(selectedPetId))
+        {
+            SelectedPet = null;
+            StopDecayTimer();
+            ResetGameStats();
+            return;
+        }
+
+        SelectedPet = UserPets?.FirstOrDefault(p => p.Id == selectedPetId);
+
+        if (SelectedPet != null)
+        {
+            ResetGameStats();
+            StartDecayTimer();
+            StatusMessage = $"Playing with {SelectedPet.PetName}! Keep them happy and healthy!";
+        }
+
+        UpdateGameDisplay();
+    }
+
+    private void ResetGameStats()
+    {
+        Satiety = 5;
+        Happiness = 5;
+        Alertness = 5;
+        ShowSuccessModal = false;
+        IsGameDisabled = false;
+    }
+
+    private void StartDecayTimer()
+    {
+        StopDecayTimer();
 
         decayTimer = new System.Timers.Timer(5000);
         decayTimer.Elapsed += (_, _) =>
         {
-            Satiety = Math.Max(Satiety - 1, 0);
-            Happiness = Math.Max(Happiness - 1, 0);
-            Alertness = Math.Max(Alertness - 1, 0);
-            InvokeAsync(UpdatePet);
+            if (!ShowSuccessModal && !IsGameDisabled)
+            {
+                Satiety = Math.Max(Satiety - 1, 0);
+                Happiness = Math.Max(Happiness - 1, 0);
+                Alertness = Math.Max(Alertness - 1, 0);
+                InvokeAsync(UpdateGameDisplay);
+            }
         };
         decayTimer.Start();
     }
 
+    private void StopDecayTimer()
+    {
+        decayTimer?.Stop();
+        decayTimer?.Dispose();
+        decayTimer = null;
+    }
+
     protected void FeedPet()
     {
+        if (SelectedPet == null || IsGameDisabled) return;
+
         if (Alertness > 2)
         {
             Happiness = Math.Min(Happiness + 1, 10);
@@ -58,11 +141,14 @@ public class VirtualPetBase : ComponentBase, IDisposable
         {
             StatusMessage = "Your pet is too sleepy to eat! Put it to sleep first.";
         }
-        UpdatePet();
+        UpdateGameDisplay();
+        CheckForAdvantageGain();
     }
 
     protected void PlayWithPet()
     {
+        if (SelectedPet == null || IsGameDisabled) return;
+
         if (Alertness > 2 && Satiety > 2)
         {
             Happiness = Math.Min(Happiness + 3, 10);
@@ -78,20 +164,92 @@ public class VirtualPetBase : ComponentBase, IDisposable
         {
             StatusMessage = "Your pet is too hungry to play! Feed it first.";
         }
-        UpdatePet();
+        UpdateGameDisplay();
+        CheckForAdvantageGain();
     }
 
     protected void PutPetToSleep()
     {
+        if (SelectedPet == null || IsGameDisabled) return;
+
         Happiness = Math.Max(Happiness - 1, 0);
         Alertness = Math.Min(Alertness + 5, 10);
         Satiety = Math.Max(Satiety - 2, 0);
         AnimateEmoji("💤");
-        UpdatePet();
+        UpdateGameDisplay();
+        CheckForAdvantageGain();
     }
 
-    protected void UpdatePet()
+    private void CheckForAdvantageGain()
     {
+        if (GetTotalStats() > 25 && !ShowSuccessModal)
+        {
+            ShowSuccessModal = true;
+            IsGameDisabled = true;
+            StopDecayTimer();
+            StateHasChanged();
+        }
+    }
+
+    protected int GetTotalStats()
+    {
+        return Satiety + Happiness + Alertness;
+    }
+
+    protected async Task SaveProgress()
+    {
+        if (SelectedPet == null) return;
+
+        try
+        {
+            // Create a DTO with updated advantage
+            var petDto = new PetFormDto
+            {
+                Id = SelectedPet.Id,
+                PetName = SelectedPet.PetName,
+                SpeciesId = SelectedPet.SpeciesId,
+                BreedId = SelectedPet.BreedId,
+                OwnerId = SelectedPet.OwnerId,
+                Age = SelectedPet.Age,
+                Advantage = SelectedPet.Advantage + 1,
+                ImagePath = SelectedPet.ImagePath
+            };
+
+            await PetService.UpdatePetAsync(petDto);
+
+            // Update local pet object
+            SelectedPet.Advantage += 1;
+
+            ShowSuccessModal = false;
+            ResetGameStats();
+            StatusMessage = $"Great job! {SelectedPet.PetName} gained +1 Advantage! Current Advantage: {SelectedPet.Advantage}";
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Error saving progress. Please try again.";
+            Console.WriteLine($"Error updating pet advantage: {ex.Message}");
+        }
+    }
+
+    protected void CancelSave()
+    {
+        ShowSuccessModal = false;
+        IsGameDisabled = false;
+        StartDecayTimer();
+        StatusMessage = $"Continuing to play with {SelectedPet?.PetName}!";
+        StateHasChanged();
+    }
+
+    protected void UpdateGameDisplay()
+    {
+        if (SelectedPet == null)
+        {
+            StatusMessage = "Select a pet to start playing!";
+            return;
+        }
+
         Bars[0].Score = $"Satiety: {Satiety}/10";
         Bars[0].Height = $"{Satiety * 10}%";
         Bars[1].Score = $"Happiness: {Happiness}/10";
@@ -99,47 +257,46 @@ public class VirtualPetBase : ComponentBase, IDisposable
         Bars[2].Score = $"Alertness: {Alertness}/10";
         Bars[2].Height = $"{Alertness * 10}%";
 
-        if (Satiety < 3)
+        if (ShowSuccessModal)
         {
-            //PetStyle = "transform: scale(0.8) rotate(-10deg); font-size: 5rem;";
+            StatusMessage = $"🎉 {SelectedPet.PetName} is ready for an Advantage boost! 🎉";
+        }
+        else if (Satiety < 3)
+        {
             StatusMessage = "I'm so hungry... please feed me!";
         }
         else if (Satiety <= 5)
         {
-            //PetStyle = "transform: scale(0.9); font-size: 5rem;";
             StatusMessage = "I'm a bit hungry... could you give me something to eat?";
         }
         else if (Alertness < 3)
         {
-            //PetStyle = "transform: scale(0.8) rotate(10deg); font-size: 5rem;";
             StatusMessage = "I'm so sleepy... I need some rest.";
         }
         else if (Alertness <= 5)
         {
-            //PetStyle = "transform: scale(0.9); font-size: 5rem;";
             StatusMessage = "I'm feeling a little drowsy...";
         }
         else if (Happiness >= 8)
         {
-            //PetStyle = "transform: scale(1.2); font-size: 5rem;";
             StatusMessage = "I'm so happy! You're the best!";
         }
         else if (Happiness >= 5)
         {
-            //PetStyle = "transform: scale(1); font-size: 5rem;";
             StatusMessage = "I'm happy! Let's keep having fun!";
         }
         else
         {
-            //PetStyle = "transform: scale(0.8) rotate(-5deg); font-size: 5rem;";
             StatusMessage = "I'm feeling sad... could you cheer me up?";
         }
+
+        StateHasChanged();
     }
 
     protected void AnimateEmoji(string emoji)
     {
         EmojiAnimation = emoji;
-        EmojiLeft = "50%"; // Simple centering approximation
+        EmojiLeft = "50%";
         EmojiTop = "150px";
 
         _ = Task.Delay(1000).ContinueWith(_ =>
@@ -153,7 +310,6 @@ public class VirtualPetBase : ComponentBase, IDisposable
 
     public void Dispose()
     {
-        decayTimer?.Stop();
-        decayTimer?.Dispose();
+        StopDecayTimer();
     }
 }

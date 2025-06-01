@@ -5,30 +5,79 @@
 <div class="pet-container">
     <h1 class="pet-title">Virtual Pet</h1>
 
-    <div class="pet-emoji">@PetEmoji</div>
-    <div class="status-message">@StatusMessage</div>
-
-    <div class="button-group">
-        <button class="action-button" @onclick="FeedPet">Feed</button>
-        <button class="action-button" @onclick="PlayWithPet">Play</button>
-        <button class="action-button" @onclick="PutPetToSleep">Sleep</button>
-    </div>
-
-    <div class="progress-container">
-        @foreach (var bar in Bars)
-        {
-            <div class="progress-bar-container">
-                <div class="progress-bar-vertical">
-                    <div class="progress-vertical" style="height:@bar.Height; background-color:@bar.Color"></div>
-                </div>
-                <div class="progress-label">@bar.Label</div>
-                <div class="progress-score">@bar.Score</div>
-            </div>
-        }
-    </div>
-
-    @if (!string.IsNullOrEmpty(EmojiAnimation))
+    @if (UserPets?.Any() == true)
     {
-        <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
+        <div class="pet-selection">
+            <label for="petSelect">Choose your pet:</label>
+            <select id="petSelect" @onchange="OnPetSelected" class="pet-dropdown">
+                <option value="">Select a pet...</option>
+                @foreach (var pet in UserPets)
+                {
+                    <option value="@pet.Id">@pet.PetName (@pet.Species?.SpeciesName)</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (SelectedPet != null)
+    {
+        <div class="pet-display">
+            <div class="pet-emoji">@PetEmoji</div>
+            <div class="pet-info">
+                <h3>@SelectedPet.PetName</h3>
+                <p>Advantage: @SelectedPet.Advantage</p>
+            </div>
+            <div class="status-message">@StatusMessage</div>
+
+            <div class="button-group">
+                <button class="action-button" @onclick="FeedPet" disabled="@IsGameDisabled">Feed</button>
+                <button class="action-button" @onclick="PlayWithPet" disabled="@IsGameDisabled">Play</button>
+                <button class="action-button" @onclick="PutPetToSleep" disabled="@IsGameDisabled">Sleep</button>
+            </div>
+
+            <div class="progress-container">
+                @foreach (var bar in Bars)
+                {
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-vertical">
+                            <div class="progress-vertical" style="height:@bar.Height; background-color:@bar.Color"></div>
+                        </div>
+                        <div class="progress-label">@bar.Label</div>
+                        <div class="progress-score">@bar.Score</div>
+                    </div>
+                }
+            </div>
+
+            <div class="total-stats">
+                <strong>Total Stats: @GetTotalStats()</strong>
+            </div>
+
+            @if (!string.IsNullOrEmpty(EmojiAnimation))
+            {
+                <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
+            }
+        </div>
+    }
+    else if (UserPets?.Any() != true)
+    {
+        <div class="no-pets-message">
+            <p>You don't have any pets yet! Please add a pet first to play the virtual pet game.</p>
+        </div>
+    }
+
+    <!-- Success Modal -->
+    @if (ShowSuccessModal)
+    {
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h3>🎉 Congratulations! 🎉</h3>
+                <p>Your pet <strong>@SelectedPet?.PetName</strong> has reached over 25 total stats!</p>
+                <p>They will gain +1 Advantage point.</p>
+                <div class="modal-buttons">
+                    <button class="save-button" @onclick="SaveProgress">Save Progress</button>
+                    <button class="cancel-button" @onclick="CancelSave">Continue Playing</button>
+                </div>
+            </div>
+        </div>
     }
 </div>

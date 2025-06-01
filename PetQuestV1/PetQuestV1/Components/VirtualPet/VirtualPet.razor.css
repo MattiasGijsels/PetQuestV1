@@ -1,5 +1,4 @@
-﻿﻿
-.pet-container {
+﻿.pet-container {
     text-align: center;
     font-family: Arial, sans-serif;
     background-color: #f2f2f2;
@@ -9,15 +8,54 @@
     margin: auto;
 }
 
+.pet-title {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.pet-selection {
+    margin-bottom: 2rem;
+}
+
+.pet-dropdown {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #007bff;
+    border-radius: 0.5rem;
+    background-color: white;
+    min-width: 200px;
+    margin-left: 0.5rem;
+}
+
+.pet-display {
+    margin-top: 1rem;
+}
+
 .pet-emoji {
     font-size: 4rem;
     margin-bottom: 1rem;
 }
 
+.pet-info {
+    margin-bottom: 1rem;
+}
+
+    .pet-info h3 {
+        margin: 0.5rem 0;
+        color: #333;
+    }
+
+    .pet-info p {
+        margin: 0.25rem 0;
+        font-weight: bold;
+        color: #666;
+    }
+
 .status-message {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
     font-weight: bold;
+    min-height: 2rem;
 }
 
 .button-group {
@@ -38,14 +76,20 @@
     transition: background-color 0.2s;
 }
 
-    .action-button:hover {
+    .action-button:hover:not(:disabled) {
         background-color: #0056b3;
+    }
+
+    .action-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
     }
 
 .progress-container {
     display: flex;
     justify-content: center;
     gap: 2rem;
+    margin-bottom: 1rem;
 }
 
 .progress-bar-container {
@@ -70,15 +114,118 @@
 
 .progress-label {
     margin-top: 0.5rem;
+    font-weight: bold;
 }
 
 .progress-score {
     font-size: 0.9rem;
     color: #333;
+    margin-top: 0.25rem;
 }
 
-/* New style for the header to ensure it's centered within the container */
-.pet-title {
+.total-stats {
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background-color: #e9ecef;
+    border-radius: 0.5rem;
+}
+
+.no-pets-message {
     text-align: center;
-    margin-bottom: 1rem; /* Add some space below the header */
+    padding: 2rem;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    max-width: 400px;
+    margin: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .modal-content h3 {
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .modal-content p {
+        margin: 0.5rem 0;
+        color: #333;
+    }
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.save-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .save-button:hover {
+        background-color: #218838;
+    }
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .cancel-button:hover {
+        background-color: #5a6268;
+    }
+
+.emoji-animation {
+    position: absolute;
+    font-size: 2rem;
+    animation: bounce 1s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes bounce {
+    0% {
+        transform: translateY(0px) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.2);
+    }
+
+    100% {
+        transform: translateY(0px) scale(1);
+    }
 }
