@@ -2,23 +2,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    font-family: 'Courier New', monospace;
-    background-color: #000;
-    color: #fff;
-    min-height: 100vh;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    border-radius: 1rem;
+    max-width: 900px;
+    margin: auto;
     outline: none;
+    color: #333;
 }
 
 .game-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
 }
 
     .game-header h1 {
-        margin: 0 0 10px 0;
+        margin: 0 0 1rem 0;
         font-size: 2.5em;
-        color: #fff;
+        color: #333;
     }
 
 .score {
@@ -27,11 +29,12 @@
     width: 300px;
     font-size: 1.2em;
     font-weight: bold;
+    color: #666;
 }
 
-/* Pet Selection Styles */
+/* Pet Selection Styles - Matching VirtualPet */
 .pet-selection {
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     text-align: center;
 }
 
@@ -47,58 +50,69 @@
 }
 
 .selected-pet-info {
-    background-color: #333;
+    background-color: white;
     border: 2px solid #007bff;
     border-radius: 0.5rem;
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
     .selected-pet-info p {
         margin: 0.25rem 0;
         font-size: 1rem;
+        color: #333;
+    }
+
+    .selected-pet-info strong {
+        color: #666;
     }
 
 .no-pets-message {
     text-align: center;
     padding: 2rem;
-    color: #ccc;
+    color: #666;
     font-size: 1.1rem;
-    background-color: #333;
+    background-color: white;
     border-radius: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .game-area {
     position: relative;
     width: 800px;
     height: 400px;
-    background-color: #111;
-    border: 3px solid #fff;
+    background-color: #ffffff;
+    border: 3px solid #007bff;
+    border-radius: 0.5rem;
     overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .paddle {
     position: absolute;
     width: 15px;
     height: 80px; /* Default height, will be overridden by inline styles for player paddle */
-    background-color: #fff;
+    border-radius: 4px;
 }
 
 .player-paddle {
     left: 0;
+    background-color: #ffa500; /* Orange for user paddle */
 }
 
 .computer-paddle {
     right: 0;
+    background-color: #ff69b4; /* Pink for computer paddle */
 }
 
 .ball {
     position: absolute;
     width: 15px;
     height: 15px;
-    background-color: #fff;
+    background-color: #76c7c0; /* Teal for ball */
     border-radius: 50%;
 }
 
@@ -108,53 +122,71 @@
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 30px;
-    border-radius: 10px;
-    border: 2px solid #fff;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 2px solid #007bff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
     .game-over h2, .start-screen h2 {
-        margin: 0 0 15px 0;
+        margin: 0 0 1rem 0;
         font-size: 2em;
-        color: #fff;
+        color: #333;
     }
 
     .game-over p, .start-screen p {
-        margin: 0 0 20px 0;
+        margin: 0 0 1rem 0;
         font-size: 1.2em;
-        color: #ccc;
+        color: #666;
     }
 
+        .start-screen p:last-of-type {
+            margin-bottom: 1.5rem;
+        }
+
+/* Button Styling - Matching VirtualPet */
 .restart-btn, .start-btn {
-    padding: 10px 20px;
-    font-size: 1em;
-    background-color: #fff;
-    color: #000;
+    padding: 0.6rem 1.2rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 2rem;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    transition: background-color 0.2s;
 }
 
     .restart-btn:hover, .start-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .restart-btn:disabled, .start-btn:disabled {
         background-color: #ccc;
+        cursor: not-allowed;
     }
 
 .controls {
-    margin-top: 20px;
+    margin-top: 2rem;
     text-align: center;
-    color: #ccc;
+    color: #666;
 }
 
     .controls p {
-        margin: 0;
+        margin: 0.5rem 0;
         font-size: 1em;
     }
 
 /* Responsive design for smaller screens */
 @media (max-width: 850px) {
+    .game-container {
+        max-width: 650px;
+        padding: 1.5rem;
+    }
+
     .game-area {
         width: 600px;
         height: 300px;
@@ -176,6 +208,11 @@
 }
 
 @media (max-width: 650px) {
+    .game-container {
+        max-width: 450px;
+        padding: 1rem;
+    }
+
     .game-area {
         width: 400px;
         height: 200px;
@@ -208,5 +245,13 @@
     .selected-pet-info {
         padding: 0.5rem;
         font-size: 0.9rem;
+    }
+
+    .game-over, .start-screen {
+        padding: 1.5rem;
+    }
+
+    .controls {
+        margin-top: 1.5rem;
     }
 }
