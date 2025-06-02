@@ -1,0 +1,44 @@
+﻿@page "/ranking"
+@using PetQuestV1.Contracts.DTOs.Pets
+@using PetQuestV1.Contracts.Models
+@inject PetQuestV1.Contracts.Defines.IPetService PetService 
+
+<h3>Pet Rankings by Advantage</h3>
+
+@if (RankedPets == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!RankedPets.Any())
+{
+    <p>No pets to display.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Pet Name</th>
+                <th>Species</th>
+                <th>Breed</th>
+                <th>Age</th>
+                <th>Advantage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < RankedPets.Count; i++)
+            {
+                var pet = RankedPets[i];
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@pet.PetName</td>
+                    <td>@pet.Species?.SpeciesName</td>
+                    <td>@pet.Breed?.BreedName</td>
+                    <td>@(pet.Age.HasValue? pet.Age.Value.ToString("F1") : "N/A")</td>
+                    <td>@pet.Advantage</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
