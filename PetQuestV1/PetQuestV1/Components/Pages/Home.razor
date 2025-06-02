@@ -4,6 +4,11 @@
 
 <div class="petquest-container">
     <img src="HomeImage/PetQuestLogoOnly.jpg" alt="PetQuest" class="petquest-image" />
+
+    <div class="button-container">
+        <a href="Account/Register" class="pet-button">Register</a>
+        <a href="Account/Login" class="pet-button">Log In</a>
+    </div>
 </div>
 
 <style>
@@ -11,16 +16,46 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
-        min-height: 80vh;
+        justify-content: center; /* Center vertically instead of flex-start */
+        min-height: 60vh; /* Reduced height to move content up */
         background-color: #FFFFFF;
         padding: 2rem;
-        padding-top: 0rem; /* Add some padding to push it down from the very top */
+        margin-top: -3rem; /* Move entire container up */
     }
 
     .petquest-image {
-        max-width: 150%;
+        max-width: 180%;
         height: auto;
         max-height: 800px;
     }
+
+    .button-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: -3rem; /* Reduced from 2rem to move buttons up */
+    }
+
+    .pet-button {
+        background-color: #1f5d9f;
+        color: white;
+        padding: 0.9rem 1.8rem; /* Increased by 20% (0.75*1.2 = 0.9, 1.5*1.2 = 1.8) */
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1.1rem; /* Slightly larger text to match bigger buttons */
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+        .pet-button:hover {
+            background-color: #174a82;
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .pet-button:active {
+            transform: translateY(0);
+        }
 </style>
