@@ -1,0 +1,107 @@
+﻿/* Components/Pages/Ranking.razor.css */
+
+.ranking-container {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2; /* Similar to .pet-container background */
+    padding: 2rem;
+    border-radius: 1rem;
+    max-width: 800px; /* Adjusted for wider table */
+    margin: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added for a subtle lift */
+}
+
+.ranking-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333; /* Darker color for headings */
+    font-size: 2rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    background-color: white; /* Table background */
+    border-radius: 0.5rem; /* Rounded corners for the table */
+    overflow: hidden; /* Ensures rounded corners apply to content */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow for the table */
+}
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-top: 1px solid #dee2e6; /* Light border between rows */
+    }
+
+    .table thead th {
+        background-color: #e9ecef; /* Header background, similar to .total-stats */
+        color: #495057;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #f8f9fa; /* Zebra striping */
+    }
+
+    .table tbody tr:hover {
+        background-color: #e2e6ea; /* Hover effect */
+    }
+
+/* Pagination Styles - adapted from VirtualPet action/modal buttons */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* Space between pagination items */
+    margin-top: 1.5rem;
+    padding: 0;
+    list-style: none; /* Remove default list styling */
+}
+
+.page-item {
+    display: inline-block; /* For side-by-side display */
+}
+
+.page-link {
+    padding: 0.6rem 1.2rem;
+    border: none; /* Remove default button border */
+    border-radius: 2rem; /* Rounded like action buttons */
+    background-color: #007bff; /* Primary button color */
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none; /* For when it's rendered as a link */
+    display: block; /* Make the whole button clickable area */
+}
+
+    .page-link:hover:not(:disabled) {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+.page-item.active .page-link {
+    background-color: #28a745; /* Green for active page, similar to save-button */
+    font-weight: bold;
+}
+
+.page-item.disabled .page-link {
+    background-color: #ccc; /* Grey for disabled buttons */
+    cursor: not-allowed;
+    color: #666;
+}
+
+/* Using a status bar color for the Advantage column */
+.advantage-score {
+    font-weight: bold;
+    /* Example: Color based on the 'Satiety' bar's color, which is orange */
+    color: #ffa500;
+}
+
+.no-pets-message {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.1rem;
+}

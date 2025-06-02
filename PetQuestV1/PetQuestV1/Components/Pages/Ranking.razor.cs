@@ -2,29 +2,67 @@
 using Microsoft.AspNetCore.Components;
 using PetQuestV1.Contracts.Defines; // Keep this for IPetService
 using PetQuestV1.Contracts.Models; // Keep this for Pet
+using System; // Added for Math.Ceiling
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PetQuestV1.Components.Pages // Ensure this namespace matches your project structure
-{
+namespace PetQuestV1.Components.Pages
+{   
     public partial class Ranking : ComponentBase
     {
-        // REMOVE THE [Inject] AND THE PROPERTY DECLARATION FROM HERE
-        // The @inject in Ranking.razor handles this.
-        // public IPetService PetService { get; set; } = default!; // DELETE OR COMMENT OUT THIS LINE
 
-        // You still need to access PetService, but it's now implicitly created by the @inject directive.
-        // If you need to refer to it in this code-behind, you can directly use 'PetService' as it's defined by the Razor file.
+        private List<Pet>? _allPets; // Store all pets initially
+        public List<Pet>? DisplayedPets { get; set; } // Pets for the current page
 
-
-        public List<Pet>? RankedPets { get; set; }
+        public int CurrentPage { get; set; } = 1;
+        private const int PageSize = 15; // Number of pets per page
+        public int TotalPages { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            // 'PetService' is available here because it's injected in Ranking.razor
-            var allPets = await PetService.GetAllAsync(); //
-            RankedPets = allPets.OrderByDescending(p => p.Advantage).ToList();
+            // PetService is directly accessible here without explicit declaration in this file
+            _allPets = await PetService.GetAllAsync();
+            _allPets = _allPets.OrderByDescending(p => p.Advantage).ToList();
+
+            CalculateTotalPages();
+            LoadPage();
+        }
+
+        private void CalculateTotalPages()
+        {
+            if (_allPets != null)
+            {
+                TotalPages = (int)Math.Ceiling(_allPets.Count / (double)PageSize);
+            }
+            else
+            {
+                TotalPages = 0;
+            }
+        }
+
+        private void LoadPage()
+        {
+            if (_allPets == null)
+            {
+                DisplayedPets = new List<Pet>();
+                return;
+            }
+
+            var skip = (CurrentPage - 1) * PageSize;
+            DisplayedPets = _allPets.Skip(skip).Take(PageSize).ToList();
+        }
+
+        public void ChangePage(int pageNumber)
+        {
+            if (pageNumber < 1)
+                CurrentPage = 1;
+            else if (pageNumber > TotalPages)
+                CurrentPage = TotalPages;
+            else
+                CurrentPage = pageNumber;
+
+            LoadPage();
         }
     }
 }

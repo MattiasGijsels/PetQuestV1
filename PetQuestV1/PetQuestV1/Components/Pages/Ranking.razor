@@ -1,44 +1,68 @@
 ﻿@page "/ranking"
 @using PetQuestV1.Contracts.DTOs.Pets
 @using PetQuestV1.Contracts.Models
-@inject PetQuestV1.Contracts.Defines.IPetService PetService 
+@inject PetQuestV1.Contracts.Defines.IPetService PetService
+@rendermode InteractiveServer
 
-<h3>Pet Rankings by Advantage</h3>
+<div class="ranking-container">
+    @* New container for overall styling *@
+    <h3 class="ranking-title">Pet Rankings by Advantage</h3> @* Applied title style *@
 
-@if (RankedPets == null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!RankedPets.Any())
-{
-    <p>No pets to display.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Pet Name</th>
-                <th>Species</th>
-                <th>Breed</th>
-                <th>Age</th>
-                <th>Advantage</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < RankedPets.Count; i++)
-            {
-                var pet = RankedPets[i];
+    @if (DisplayedPets == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (!DisplayedPets.Any())
+    {
+        <div class="no-pets-message">No pets to display.</div> @* Used existing style for no pets *@
+    }
+    else
+    {
+        <table class="table table-striped">
+            @* Used table classes for styling *@
+            <thead>
                 <tr>
-                    <td>@(i + 1)</td>
-                    <td>@pet.PetName</td>
-                    <td>@pet.Species?.SpeciesName</td>
-                    <td>@pet.Breed?.BreedName</td>
-                    <td>@(pet.Age.HasValue? pet.Age.Value.ToString("F1") : "N/A")</td>
-                    <td>@pet.Advantage</td>
+                    <th>Rank</th>
+                    <th>Pet Name</th>
+                    <th>Species</th>
+                    <th>Breed</th>
+                    <th>Age</th>
+                    <th>Advantage</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var pet in DisplayedPets)
+                {
+                    var rank = _allPets?.IndexOf(pet) + 1;
+                    <tr>
+                        <td>@(rank)</td>
+                        <td>@pet.PetName</td>
+                        <td>@pet.Species?.SpeciesName</td>
+                        <td>@pet.Breed?.BreedName</td>
+                        <td>@(pet.Age.HasValue? pet.Age.Value.ToString("F1") : "N/A")</td>
+                        <td class="advantage-score">@pet.Advantage</td> @* Applied new class for Advantage color *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @* Pagination Controls - classes updated to match VirtualPet button styles *@
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Previous</button>
+                </li>
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    var pageNumber = i;
+                    <li class="page-item @(CurrentPage == pageNumber ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                    </li>
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
