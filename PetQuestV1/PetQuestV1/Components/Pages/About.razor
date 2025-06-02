@@ -1,0 +1,215 @@
+﻿@page "/about"
+@using Microsoft.AspNetCore.Components
+
+<PageTitle>About PetQuest</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-3">About PetQuest</h1>
+                <p class="lead text-muted">A Modern Blazor Web Application for Virtual Pet Gaming</p>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Project Overview
+                    </h2>
+                    <p class="card-text">
+                        PetQuest is a comprehensive Blazor web application that combines virtual pet care with interactive gaming experiences.
+                        Users can create and customize virtual pets, play mini-games, and compete on global leaderboards. The project demonstrates
+                        advanced web development concepts including real-time interactivity, complex database relationships, and role-based security.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-gear me-2"></i>Technical Stack & Architecture
+                    </h2>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-secondary mb-3">Core Technologies:</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i><strong>ASP.NET Core & Blazor Server</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i><strong>Entity Framework Core & SQL Server</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i><strong>ASP.NET Identity</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i><strong>JavaScript Interop & Bootstrap</strong></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-secondary mb-3">Key Patterns:</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Clean architecture with separation of concerns</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Repository pattern for data access</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Soft delete implementation</li>
+                                <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Role-based authorization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-star me-2"></i>Key Features & Technical Solutions
+                    </h2>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-secondary mb-3">User Features:</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-heart text-danger me-2"></i>Pet creation and customization
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-controller text-info me-2"></i>Interactive mini-games (Petting & Ping Pong)
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-trophy text-warning me-2"></i>Real-time leaderboards
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-phone text-success me-2"></i>Responsive design
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-secondary mb-3">Admin Features:</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-shield-check text-primary me-2"></i>Comprehensive admin panel
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-database text-secondary me-2"></i>CRUD operations for all entities
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-people text-info me-2"></i>User management & role control
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-tools text-warning me-2"></i>Database administration
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-puzzle me-2"></i>Technical Challenges Solved
+                    </h2>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="challenge-item p-3 border rounded bg-light h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-lightning text-warning fs-4 me-3"></i>
+                                    <h5 class="mb-0">Concurrency Management</h5>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    Robust handling of simultaneous user interactions to prevent data conflicts during gaming sessions.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="challenge-item p-3 border rounded bg-light h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-code-slash text-info fs-4 me-3"></i>
+                                    <h5 class="mb-0">JavaScript Interoperability</h5>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    Seamless integration between C# server-side logic and JavaScript for smooth gaming experiences.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="challenge-item p-3 border rounded bg-light h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-trash text-danger fs-4 me-3"></i>
+                                    <h5 class="mb-0">Data Integrity</h5>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    Comprehensive soft delete system maintaining relationships while preserving referential integrity.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="challenge-item p-3 border rounded bg-light h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-shield-lock text-success fs-4 me-3"></i>
+                                    <h5 class="mb-0">Security Implementation</h5>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    Complete authentication and role-based authorization with admin privilege management.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-award me-2"></i>Project Significance
+                    </h2>
+                    <p class="card-text mb-4">
+                        PetQuest demonstrates comprehensive .NET development practices, combining user engagement
+                        with technical complexity to create a production-ready gaming platform.
+                    </p>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <i class="bi bi-people text-primary fs-2 mb-2 d-block"></i>
+                                <h6>Multi-User Platform</h6>
+                                <small class="text-muted">Concurrent sessions with real-time interactions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <i class="bi bi-shield-check text-success fs-2 mb-2 d-block"></i>
+                                <h6>Enterprise Security</h6>
+                                <small class="text-muted">Role-based access control and authentication</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <i class="bi bi-graph-up text-info fs-2 mb-2 d-block"></i>
+                                <h6>Scalable Architecture</h6>
+                                <small class="text-muted">Clean separation and optimized performance</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <h2 class="card-title text-primary mb-3">
+                        <i class="bi bi-code-square me-2"></i>Explore the Project
+                    </h2>
+                    <p class="card-text mb-4">
+                        View the complete source code to see implementation details and technical solutions.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="https://github.com/MattiasGijsels" class="btn btn-outline-dark" target="_blank">
+                            <i class="bi bi-github me-2"></i>GitHub Profile
+                        </a>
+                        <a href="https://github.com/MattiasGijsels/PetQuestV1" class="btn btn-primary" target="_blank">
+                            <i class="bi bi-code-square me-2"></i>Project Repository
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

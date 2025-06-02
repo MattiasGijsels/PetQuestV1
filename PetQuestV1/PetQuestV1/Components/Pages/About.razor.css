@@ -1,0 +1,55 @@
+﻿.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+.challenge-item {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+    .challenge-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+.list-group-item {
+    transition: background-color 0.2s ease;
+}
+
+    .list-group-item:hover {
+        background-color: var(--bs-light);
+    }
+
+/* Custom style for the "About PetQuest" heading */
+.text-center .display-4 {
+    color: #1F5D9D !important; /* Using !important to override Bootstrap's text-primary */
+}
+
+/* Apply custom primary blue to elements with text-primary class */
+.text-primary {
+    color: #1F5D9D !important;
+}
+
+/* Apply custom primary blue to icon and text where previous primary blue was used */
+.list-unstyled .text-primary {
+    color: #1F5D9D !important;
+}
+
+/* For the border on the last card */
+.card.border-primary {
+    border-color: #1F5D9D !important;
+}
+
+/* For the primary button */
+.btn-primary {
+    background-color: #1F5D9D !important;
+    border-color: #1F5D9D !important;
+}
+
+/* For the primary icon in the Project Impact Card */
+.bi-people.text-primary {
+    color: #1F5D9D !important;
+}
