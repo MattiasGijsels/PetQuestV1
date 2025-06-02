@@ -16,7 +16,7 @@ namespace PetQuestV1.Components.Pages
         public List<Pet>? DisplayedPets { get; set; } // Pets for the current page
 
         public int CurrentPage { get; set; } = 1;
-        private const int PageSize = 15; // Number of pets per page
+        private const int PageSize = 10; // Number of pets per page
         public int TotalPages { get; set; }
 
         protected override async Task OnInitializedAsync()
