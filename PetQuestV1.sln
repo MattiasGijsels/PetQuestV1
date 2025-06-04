@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetQuestV1", "PetQuestV1\Pe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetQuestV1.Client", "PetQuestV1\PetQuestV1.Client\PetQuestV1.Client.csproj", "{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLIDatabaseSetupTool", "CLIDatabaseSetupTool\CLIDatabaseSetupTool.csproj", "{3D933341-F7DE-4421-B769-10965C293B32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLIDatabaseSetupTool", "D:\CLIDatabaseSetupTool\CLIDatabaseSetupTool.csproj", "{5C150280-8311-4E09-BD4F-94D88CC54807}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B7E9EBB-6DA6-405A-A7F0-021DAD2BB02A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D933341-F7DE-4421-B769-10965C293B32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D933341-F7DE-4421-B769-10965C293B32}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D933341-F7DE-4421-B769-10965C293B32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D933341-F7DE-4421-B769-10965C293B32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C150280-8311-4E09-BD4F-94D88CC54807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C150280-8311-4E09-BD4F-94D88CC54807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C150280-8311-4E09-BD4F-94D88CC54807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C150280-8311-4E09-BD4F-94D88CC54807}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
