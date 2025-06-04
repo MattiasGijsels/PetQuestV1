@@ -55,6 +55,7 @@ namespace PetQuestV1.Components.Pong
 
         private static readonly Random rand = new Random();
 
+        // NEW: Flag to ensure computer hits first ball
         private bool ComputerMustHitBall = false;
 
         protected override async Task OnInitializedAsync()
