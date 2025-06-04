@@ -2,6 +2,7 @@
 using PetQuestV1.Data.Defines;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
+using PetQuestV1.Contracts.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

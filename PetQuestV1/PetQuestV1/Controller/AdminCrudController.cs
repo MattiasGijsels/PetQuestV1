@@ -4,7 +4,6 @@ using PetQuestV1.Services;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
 using PetQuestV1.Contracts.Models; // Needed for Species and SpeciesWithBreedCountDto
-using PetQuestV1.Contracts.DTOs.Pets; // Needed for PetFormDto
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Controllers

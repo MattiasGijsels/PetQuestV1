@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Enums;
-using PetQuestV1.Contracts.DTOs.Pets;
+using PetQuestV1.Contracts.DTOs;
 using PetQuestV1.Data;
 using Microsoft.EntityFrameworkCore;
 using System;

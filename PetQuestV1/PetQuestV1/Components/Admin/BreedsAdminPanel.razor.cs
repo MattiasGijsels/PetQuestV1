@@ -2,6 +2,7 @@
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Enums;
+using PetQuestV1.Contracts.DTOs;
 
 namespace PetQuestV1.Components.Admin
 {

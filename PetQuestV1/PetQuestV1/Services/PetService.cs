@@ -1,7 +1,7 @@
 ﻿// Services/PetService.cs
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts.DTOs.Pets;
+using PetQuestV1.Contracts.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Data.Defines;
@@ -196,6 +196,22 @@ namespace PetQuestV1.Services
                 Advantage = pet.Advantage,
                 ImagePath = pet.ImagePath
             };
+        }
+
+        public async Task<List<PetViewerDto>> GetAllPetsForAnalystAsync()
+        {
+            var pets = await _petRepository.GetAllPetsWithDetailsAsync(); // assumes includes navigation properties
+            return pets.Select(p => new PetViewerDto
+            {
+                Id = p.Id,
+                PetName = p.PetName,
+                SpeciesName = p.Species?.SpeciesName ?? "N/A",
+                BreedName = p.Breed?.BreedName ?? "N/A",
+                OwnerName = p.Owner?.UserName ?? "N/A",
+                Age = p.Age,
+                Advantage = p.Advantage,
+                ImagePath = p.ImagePath
+            }).ToList();
         }
         public Task<Species?> GetSpeciesByNameAsync(string name)
         {

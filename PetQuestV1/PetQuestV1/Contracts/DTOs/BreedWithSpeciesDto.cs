@@ -1,4 +1,4 @@
-﻿namespace PetQuestV1.Contracts.Models
+﻿namespace PetQuestV1.Contracts.DTOs
 {
     public class BreedWithSpeciesDto
     {

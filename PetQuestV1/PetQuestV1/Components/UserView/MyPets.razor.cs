@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
-using PetQuestV1.Contracts.DTOs.Pets;
+using PetQuestV1.Contracts.DTOs;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;

@@ -1,7 +1,7 @@
 ﻿// Contracts/DTOs/Pets/PetFormDto.cs
 using System.ComponentModel.DataAnnotations;
 
-namespace PetQuestV1.Contracts.DTOs.Pets
+namespace PetQuestV1.Contracts.DTOs
 {
     public class PetFormDto
     {

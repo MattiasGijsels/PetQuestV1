@@ -1,9 +1,9 @@
 ﻿// Contracts/Defines/IPetService.cs
+using Microsoft.AspNetCore.Components.Forms; // Required for IBrowserFile
+using PetQuestV1.Contracts.DTOs;
+using PetQuestV1.Contracts.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PetQuestV1.Contracts.Models;
-using PetQuestV1.Contracts.DTOs.Pets;
-using Microsoft.AspNetCore.Components.Forms; // Required for IBrowserFile
 
 namespace PetQuestV1.Contracts.Defines
 {
@@ -31,6 +31,7 @@ namespace PetQuestV1.Contracts.Defines
         Task<bool> DeletePetImageAsync(string petId);
         Task<List<PetFormDto>> GetAllPetsFormDtoAsync();
         Task<PetFormDto?> GetPetFormDtoByIdAsync(string id);
+        Task<List<PetViewerDto>> GetAllPetsForAnalystAsync();
 
     }
 }

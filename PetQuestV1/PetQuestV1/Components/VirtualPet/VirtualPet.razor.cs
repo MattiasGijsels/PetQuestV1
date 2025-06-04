@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
-using PetQuestV1.Contracts.DTOs.Pets;
+using PetQuestV1.Contracts.DTOs;
 using System.Security.Claims;
 
 namespace PetQuestV1.Components.VirtualPet
