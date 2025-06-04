@@ -123,6 +123,7 @@ namespace PetQuestV1.Data.Repository
             return await _context.Pets
                                  .Include(p => p.Species) // Assuming you have navigation properties
                                  .Include(p => p.Breed)   // Assuming you have navigation properties
+                                 .Include(p => p.Owner) // Include Owner if needed
                                  .Where(p => !p.IsDeleted)
                                  .ToListAsync();
         }

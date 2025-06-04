@@ -1,0 +1,38 @@
+[
+  {
+    "Name": "Goldfish",
+    "SpeciesName": "Fish"
+  },
+  {
+    "Name": "Parrot",
+    "SpeciesName": "Bird"
+  },
+  {
+    "Name": "Betta",
+    "SpeciesName": "Fish"
+  },
+  {
+    "Name": "German Shepherd",
+    "SpeciesName": "Dog"
+  },
+  {
+    "Name": "Canary",
+    "SpeciesName": "Bird"
+  },
+  {
+    "Name": "Persian",
+    "SpeciesName": "Cat"
+  },
+  {
+    "Name": "Labrador Retriever",
+    "SpeciesName": "Dog"
+  },
+  {
+    "Name": "Siamese",
+    "SpeciesName": "Cat"
+  },
+  {
+    "Name": "Poodle",
+    "SpeciesName": "Dog"
+  }
+]
