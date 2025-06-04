@@ -92,7 +92,7 @@ namespace PetQuestV1.Components.VirtualPet
             }
 
             UpdateGameDisplay();
-            await Task.CompletedTask; // Satisfy async method requirement
+            await Task.CompletedTask;
         }
 
         private void ResetGameStats()
@@ -205,7 +205,8 @@ namespace PetQuestV1.Components.VirtualPet
 
             try
             {
-                // Create a DTO with updated advantage
+                var newAdvantageForDb = SelectedPet.Advantage + 1;
+
                 var petDto = new PetFormDto
                 {
                     Id = SelectedPet.Id,
@@ -214,17 +215,30 @@ namespace PetQuestV1.Components.VirtualPet
                     BreedId = SelectedPet.BreedId,
                     OwnerId = SelectedPet.OwnerId,
                     Age = SelectedPet.Age,
-                    Advantage = SelectedPet.Advantage + 1,
+                    Advantage = newAdvantageForDb,
                     ImagePath = SelectedPet.ImagePath
                 };
 
                 await PetService.UpdatePetAsync(petDto);
 
-                // Update local pet object
-                SelectedPet.Advantage += 1;
+                // IMPORTANT: Reload the SelectedPet from the database to ensure it reflects the true state
+                // This will fetch the pet with its new Advantage value (which should be 6, if it was 5 initially)
+                SelectedPet = await PetService.GetByIdAsync(SelectedPet.Id);
+
+                // Add a null check here for SelectedPet after the potential reload
+                if (SelectedPet == null)
+                {
+                    StatusMessage = "Error: Pet not found after saving progress.";
+                    ShowSuccessModal = false; // Hide modal if pet is null
+                    IsGameDisabled = false;   // Re-enable game if pet is null
+                    StartDecayTimer();        // Restart timer if appropriate
+                    StateHasChanged();
+                    return; // Exit the method
+                }
 
                 ShowSuccessModal = false;
                 ResetGameStats();
+                // Now, SelectedPet is guaranteed not to be null here
                 StatusMessage = $"Great job! {SelectedPet.PetName} gained +1 Advantage! Current Advantage: {SelectedPet.Advantage}";
 
                 StateHasChanged();
