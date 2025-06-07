@@ -23,7 +23,30 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             // 1. Setup Host for Dependency Injection and Configuration
             var host = CreateHostBuilder(args).Build();
 
-            // 2. Resolve necessary services from the service provider
+            // 2. Validate connection string before proceeding
+            using (var scope = host.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var configuration = services.GetRequiredService<IConfiguration>();
+
+                if (!ValidateConnectionString(configuration))
+                {
+                    Console.WriteLine("Press any key to exit...");
+                    Console.ReadKey();
+                    return; // Exit the application
+                }
+            }
+
+            // 3. Ask for user confirmation before proceeding with destructive operations
+            if (!GetUserConfirmation())
+            {
+                Console.WriteLine("Operation cancelled by user.");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                return; // Exit the application
+            }
+
+            // 4. Resolve necessary services from the service provider
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -54,6 +77,105 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             }
 
             Console.WriteLine("PetQuestV1 CLI Tool finished.");
+        }
+
+        // Gets user confirmation before proceeding with destructive database operations
+        private static bool GetUserConfirmation()
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("!! WARNING: This tool will perform the following operations:");
+            Console.WriteLine();
+            Console.WriteLine("   1. DELETE the entire existing database (if it exists)");
+            Console.WriteLine("   2. CREATE a new database with fresh schema");
+            Console.WriteLine("   3. SEED the database with initial data");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("!! THIS WILL PERMANENTLY DELETE ALL EXISTING DATA !!");
+            Console.WriteLine();
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("** If you have important data, consider making a backup first **");
+            Console.WriteLine();
+            Console.ResetColor();
+
+            while (true)
+            {
+                Console.Write("Do you want to continue? (y/n): ");
+                var input = Console.ReadKey();
+                Console.WriteLine(); // Move to next line
+
+                switch (input.Key)
+                {
+                    case ConsoleKey.Y:
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("✓ Proceeding with database operations...");
+                        Console.ResetColor();
+                        Console.WriteLine();
+                        return true;
+
+                    case ConsoleKey.N:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Operation cancelled. No changes were made to your database.");
+                        Console.ResetColor();
+                        return false;
+
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Please press 'y' for Yes or 'n' for No.");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+
+        // Validates the connection string configuration
+        private static bool ValidateConnectionString(IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("ERROR: You have no connection string configured in appsettings.json!");
+                Console.WriteLine();
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Please add a ConnectionStrings section to your appsettings.json file.");
+                Console.WriteLine("Example of a correct connection string configuration:");
+                Console.WriteLine();
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(@"{
+  ""ConnectionStrings"": {
+    ""DefaultConnection"": ""Server=(localdb)\\mssqllocaldb;Database=PetQuestV1Identity;Trusted_Connection=True;TrustServerCertificate=True;""
+  }
+}");
+                Console.WriteLine();
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("Alternative connection string examples:");
+                Console.WriteLine();
+                Console.WriteLine("For SQL Server Express:");
+                Console.WriteLine(@"""Server=.\\SQLEXPRESS;Database=PetQuestV1Identity;Trusted_Connection=True;TrustServerCertificate=True;""");
+                Console.WriteLine();
+                Console.WriteLine("For SQL Server with credentials:");
+                Console.WriteLine(@"""Server=localhost;Database=PetQuestV1Identity;User Id=your_username;Password=your_password;TrustServerCertificate=True;""");
+                Console.WriteLine();
+                Console.ResetColor();
+
+                return false;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"✓ Connection string found: {connectionString}");
+            Console.ResetColor();
+            Console.WriteLine();
+
+            return true;
         }
 
         // Configures the host, services, and reads configuration
