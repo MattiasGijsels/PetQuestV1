@@ -2,59 +2,164 @@
 
 <PageTitle>PetQuest</PageTitle>
 
-<div class="petquest-container">
-    <img src="HomeImage/PetQuestLogoOnly.jpg" alt="PetQuest" class="petquest-image" />
+<div class="petquest-homepage">
 
-    <div class="button-container">
-        <a href="Account/Register" class="pet-button">Register</a>
+    <!-- Main content container -->
+    <div class="main-content">
+        <!-- Login form on the left -->
+        <div class="login-section">
+            <div class="login-card">
+                <form method="post" action="/Account/Login">
+                    <h2 class="login-title">Log in</h2>
+                    <hr />
+
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" name="Email" placeholder="name@example.com" required />
+                        <label for="email" class="form-label">Email</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" name="Password" placeholder="password" required />
+                        <label for="password" class="form-label">Password</label>
+                    </div>
+
+                    <div class="checkbox mb-3">
+                        <label class="form-label">
+                            <input type="checkbox" class="form-check-input" name="RememberMe" />
+                            Remember me
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary w-100 login-btn">Log in</button>
+                    </div>
+
+                    <div class="login-links">
+                        <p><a href="Account/ForgotPassword">Forgot your password?</a></p>
+                        <p><a href="Account/Register">Register as a new user</a></p>
+                        <p><a href="Account/ResendEmailConfirmation">Resend email confirmation</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cat image on the right -->
+        <div class="cat-section">
+            <img src="images/PetQuestLogoOnlySmall.jpg" alt="PetQuest Cat" class="cat-image" />
+        </div>
     </div>
 </div>
 
 <style>
-    .petquest-container {
+    .petquest-homepage {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding: 2rem 0;
         display: flex;
-        flex-direction: column;
+        justify-content: center;
         align-items: center;
-        justify-content: center; /* Center vertically instead of flex-start */
-        min-height: 60vh; /* Reduced height to move content up */
-        background-color: #FFFFFF;
-        padding: 2rem;
-        margin-top: -3rem; /* Move entire container up */
     }
 
-    .petquest-image {
-        max-width: 180%;
-        height: auto;
-        max-height: 800px;
-    }
-
-    .button-container {
+    .main-content {
         display: flex;
-        gap: 1rem;
-        margin-top: -3rem; /* Reduced from 2rem to move buttons up */
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
 
-    .pet-button {
+    .login-card {
+        background: white;
+        border: 2px solid #1f5d9f;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .card-content {
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .login-section {
+        flex: 1;
+        min-width: 350px;
+    }
+
+    .login-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .login-btn {
         background-color: #1f5d9f;
-        color: white;
-        padding: 0.9rem 1.8rem; /* Increased by 20% (0.75*1.2 = 0.9, 1.5*1.2 = 1.8) */
-        border-radius: 8px;
-        text-decoration: none;
+        border-color: #1f5d9f;
         font-weight: 500;
-        font-size: 1.1rem; /* Slightly larger text to match bigger buttons */
+        padding: 0.75rem;
+        border-radius: 6px;
         transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
     }
 
-        .pet-button:hover {
+        .login-btn:hover {
             background-color: #174a82;
+            border-color: #174a82;
             transform: translateY(-1px);
-            text-decoration: none;
-            color: white;
         }
 
-        .pet-button:active {
-            transform: translateY(0);
+    .login-links {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+        .login-links a {
+            color: #1f5d9f;
+            text-decoration: none;
         }
+
+            .login-links a:hover {
+                color: #174a82;
+                text-decoration: underline;
+            }
+
+    .cat-section {
+        flex: 0 0 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cat-image {
+        max-width: 100%;
+        height: auto;
+        max-height: 300px;
+        border-radius: 8px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .card-content {
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .login-section {
+            min-width: auto;
+            width: 100%;
+        }
+
+        .cat-section {
+            flex: none;
+        }
+
+        .main-content {
+            padding: 0 1rem;
+        }
+    }
 </style>
