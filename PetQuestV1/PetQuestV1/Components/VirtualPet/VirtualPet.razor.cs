@@ -15,9 +15,11 @@ namespace PetQuestV1.Components.VirtualPet
         protected string PetEmoji = "🐶";
         protected string StatusMessage = "Select a pet to start playing!";
         protected string PetStyle = "font-size: 5rem;";
-        protected string EmojiAnimation = "";
-        protected string EmojiLeft = "0px";
-        protected string EmojiTop = "0px";
+
+        // Individual emoji animations for each button
+        protected string FeedEmojiAnimation = "";
+        protected string PlayEmojiAnimation = "";
+        protected string SleepEmojiAnimation = "";
 
         protected List<Pet>? UserPets;
         protected Pet? SelectedPet;
@@ -138,7 +140,7 @@ namespace PetQuestV1.Components.VirtualPet
                 Happiness = Math.Min(Happiness + 1, 10);
                 Alertness = Math.Max(Alertness - 1, 0);
                 Satiety = Math.Min(Satiety + 3, 10);
-                AnimateEmoji("🍖");
+                AnimateButtonEmoji("feed", "🍖");
             }
             else
             {
@@ -157,7 +159,7 @@ namespace PetQuestV1.Components.VirtualPet
                 Happiness = Math.Min(Happiness + 3, 10);
                 Alertness = Math.Max(Alertness - 2, 0);
                 Satiety = Math.Max(Satiety - 2, 0);
-                AnimateEmoji("⚽");
+                AnimateButtonEmoji("play", "⚽");
             }
             else if (Alertness <= 2)
             {
@@ -178,7 +180,7 @@ namespace PetQuestV1.Components.VirtualPet
             Happiness = Math.Max(Happiness - 1, 0);
             Alertness = Math.Min(Alertness + 5, 10);
             Satiety = Math.Max(Satiety - 2, 0);
-            AnimateEmoji("💤");
+            AnimateButtonEmoji("sleep", "💤");
             UpdateGameDisplay();
             CheckForAdvantageGain();
         }
@@ -310,19 +312,41 @@ namespace PetQuestV1.Components.VirtualPet
             StateHasChanged();
         }
 
-        protected void AnimateEmoji(string emoji)
+        protected void AnimateButtonEmoji(string buttonType, string emoji)
         {
-            EmojiAnimation = emoji;
-            EmojiLeft = "50%";
-            EmojiTop = "150px";
-
-            _ = Task.Delay(1000).ContinueWith(_ =>
+            // Set the emoji for the specific button
+            switch (buttonType)
             {
-                EmojiAnimation = "";
-                InvokeAsync(StateHasChanged);
-            });
+                case "feed":
+                    FeedEmojiAnimation = emoji;
+                    break;
+                case "play":
+                    PlayEmojiAnimation = emoji;
+                    break;
+                case "sleep":
+                    SleepEmojiAnimation = emoji;
+                    break;
+            }
 
             StateHasChanged();
+
+            // Clear the emoji after animation duration
+            _ = Task.Delay(1500).ContinueWith(_ =>
+            {
+                switch (buttonType)
+                {
+                    case "feed":
+                        FeedEmojiAnimation = "";
+                        break;
+                    case "play":
+                        PlayEmojiAnimation = "";
+                        break;
+                    case "sleep":
+                        SleepEmojiAnimation = "";
+                        break;
+                }
+                InvokeAsync(StateHasChanged);
+            });
         }
 
         public void Dispose()

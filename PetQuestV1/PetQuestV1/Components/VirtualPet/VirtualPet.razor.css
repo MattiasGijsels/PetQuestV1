@@ -65,6 +65,11 @@
     margin-bottom: 2rem;
 }
 
+.button-container {
+    position: relative;
+    display: inline-block;
+}
+
 .action-button {
     padding: 0.6rem 1.2rem;
     border: none;
@@ -84,6 +89,34 @@
         background-color: #ccc;
         cursor: not-allowed;
     }
+
+.button-emoji-animation {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    animation: floatUp 1.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1.3);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(1);
+    }
+}
 
 .progress-container {
     display: flex;
@@ -209,6 +242,7 @@
         background-color: #5a6268;
     }
 
+/* Legacy emoji animation class (can be removed if not used elsewhere) */
 .emoji-animation {
     position: absolute;
     font-size: 2rem;

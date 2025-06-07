@@ -1,5 +1,18 @@
 ﻿@page "/"
 
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
+@using PetQuestV1.Data
+@using PetQuestV1.Components.Account
+@using PetQuestV1.Components.Account.Shared
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Home> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
 <PageTitle>PetQuest</PageTitle>
 
 <div class="petquest-homepage">
@@ -11,23 +24,28 @@
             <div class="card-content">
                 <!-- Login form on the left -->
                 <div class="login-section">
-                    <form method="post" action="/Account/Login">
+                    <StatusMessage Message="@errorMessage" />
+                    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="home-login">
+                        <DataAnnotationsValidator />
                         <h2 class="login-title">Log in</h2>
                         <hr />
+                        <ValidationSummary class="text-danger" role="alert" />
 
                         <div class="form-floating mb-3">
-                            <input type="email" class="form-control" name="Email" placeholder="name@example.com" required />
+                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                             <label for="email" class="form-label">Email</label>
+                            <ValidationMessage For="() => Input.Email" class="text-danger" />
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input type="password" class="form-control" name="Password" placeholder="password" required />
+                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
                             <label for="password" class="form-label">Password</label>
+                            <ValidationMessage For="() => Input.Password" class="text-danger" />
                         </div>
 
                         <div class="checkbox mb-3">
                             <label class="form-label">
-                                <input type="checkbox" class="form-check-input" name="RememberMe" />
+                                <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
                                 Remember me
                             </label>
                         </div>
@@ -38,10 +56,10 @@
 
                         <div class="login-links">
                             <p><a href="Account/ForgotPassword">Forgot your password?</a></p>
-                            <p><a href="Account/Register">Register as a new user</a></p>
+                            <p><a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a></p>
                             <p><a href="Account/ResendEmailConfirmation">Resend email confirmation</a></p>
                         </div>
-                    </form>
+                    </EditForm>
                 </div>
 
                 <!-- Cat image on the right inside the card -->
@@ -87,7 +105,7 @@
     .card-content {
         display: flex;
         gap: 2rem;
-        align-items: center; 
+        align-items: center;
         padding-top: 1rem;
     }
 
@@ -188,26 +206,112 @@
 
     /* Responsive design */
     @@media (max-width: 768px) {
-        .card-content {
-            flex-direction: column;
-            gap: 2rem;
-        }
+        .card-content
 
-        .login-section {
-            min-width: auto;
-            width: 100%;
-        }
+    {
+        flex-direction: column;
+        gap: 2rem;
+    }
 
-        .cat-section {
-            flex: none;
-        }
+    .login-section {
+        min-width: auto;
+        width: 100%;
+    }
 
-        .main-content {
-            padding: 0 1rem;
-        }
+    .cat-section {
+        flex: none;
+    }
 
-        .cat-image {
-            max-height: 150px;
-        }
+    .main-content {
+        padding: 0 1rem;
+    }
+
+    .cat-image {
+        max-height: 150px;
+    }
+
     }
 </style>
+
+@code {
+    private string? errorMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser()
+    {
+        // This doesn't count login failures towards account lockout
+        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+
+            // Check if ReturnUrl is set and if it's a local URL
+            if (!string.IsNullOrEmpty(ReturnUrl) && IsLocalUrl(ReturnUrl))
+            {
+                RedirectManager.RedirectTo(ReturnUrl);
+            }
+            else
+            {
+                RedirectManager.RedirectTo("/mypets"); // Redirect to /mypets by default
+            }
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo(
+              "Account/LoginWith2fa",
+              new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            RedirectManager.RedirectTo("Account/Lockout");
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+        }
+    }
+
+    // Helper method to check if a URL is local
+    private bool IsLocalUrl(string? url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+        return (url.StartsWith("/") && !url.StartsWith("//")) ||
+               (url.StartsWith(NavigationManager.BaseUri) && !url.Contains("://"));
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

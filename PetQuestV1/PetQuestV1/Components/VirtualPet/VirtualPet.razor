@@ -30,9 +30,29 @@
             <div class="status-message">@StatusMessage</div>
 
             <div class="button-group">
-                <button class="action-button" @onclick="FeedPet" disabled="@IsGameDisabled">Feed</button>
-                <button class="action-button" @onclick="PlayWithPet" disabled="@IsGameDisabled">Play</button>
-                <button class="action-button" @onclick="PutPetToSleep" disabled="@IsGameDisabled">Sleep</button>
+                <div class="button-container">
+                    <button class="action-button" @onclick="FeedPet" disabled="@IsGameDisabled">Feed</button>
+                    @if (!string.IsNullOrEmpty(FeedEmojiAnimation))
+                    {
+                        <div class="button-emoji-animation">@FeedEmojiAnimation</div>
+                    }
+                </div>
+
+                <div class="button-container">
+                    <button class="action-button" @onclick="PlayWithPet" disabled="@IsGameDisabled">Play</button>
+                    @if (!string.IsNullOrEmpty(PlayEmojiAnimation))
+                    {
+                        <div class="button-emoji-animation">@PlayEmojiAnimation</div>
+                    }
+                </div>
+
+                <div class="button-container">
+                    <button class="action-button" @onclick="PutPetToSleep" disabled="@IsGameDisabled">Sleep</button>
+                    @if (!string.IsNullOrEmpty(SleepEmojiAnimation))
+                    {
+                        <div class="button-emoji-animation">@SleepEmojiAnimation</div>
+                    }
+                </div>
             </div>
 
             <div class="progress-container">
@@ -51,11 +71,6 @@
             <div class="total-stats">
                 <strong>Total Stats: @GetTotalStats()</strong>
             </div>
-
-            @if (!string.IsNullOrEmpty(EmojiAnimation))
-            {
-                <div class="emoji-animation" style="left:@EmojiLeft; top:@EmojiTop;">@EmojiAnimation</div>
-            }
         </div>
     }
     else if (UserPets?.Any() != true)
