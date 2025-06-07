@@ -56,7 +56,7 @@
 
     "Password": "Password005-",
 
-    "Roles": [ "User" ]
+    "Roles": [ "SuperUser" ]
 
   }
 
