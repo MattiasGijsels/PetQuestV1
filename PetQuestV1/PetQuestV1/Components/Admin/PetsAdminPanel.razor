@@ -178,7 +178,10 @@
                     @for (int i = 1; i <= PetsTotalPages; i++)
                     {
                         <li class="page-item @(PetsCurrentPage == i ? "active" : string.Empty)">
-                            <a class="page-link" @onclick="() => ChangePetsPage(i)">@i</a>
+                            @{
+                                int i1 = i;
+                            }
+                            <a class="page-link" @onclick="() => ChangePetsPage(i1)">@i</a>
                         </li>
                     }
                     <li class="page-item @(PetsCurrentPage == PetsTotalPages ? "disabled" : string.Empty)">
