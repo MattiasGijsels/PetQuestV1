@@ -2,6 +2,9 @@
 @inherits BusinessAnalystPetViewerBase
 @rendermode InteractiveServer
 
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin,SuperUser")]
+
 @using PetQuestV1.Contracts.DTOs
 
 <div class="card mb-4">
