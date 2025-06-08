@@ -74,7 +74,10 @@
             @for (int i = 1; i <= TotalPages; i++)
             {
                 <li class="page-item @(i == CurrentPage ? "active" : "")">
-                    <a class="page-link" @onclick="@(() => ChangePage(i))">@i</a>
+                    @{
+                        int pageNumber = i;
+                    }
+                    <a class="page-link" @onclick="@(() => ChangePage(pageNumber))">@pageNumber</a>
                 </li>
             }
             <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">

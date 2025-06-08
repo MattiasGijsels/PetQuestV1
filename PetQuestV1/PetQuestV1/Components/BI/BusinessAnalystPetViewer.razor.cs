@@ -20,7 +20,7 @@ namespace PetQuestV1.Components.BI
 
         protected string SearchTerm = string.Empty;
         protected int CurrentPage = 1;
-        protected int PageSize = 20;
+        protected int PageSize = 12;
         protected int TotalPages => (int)Math.Ceiling((double)FilteredPets.Count / PageSize);
 
         protected override async Task OnInitializedAsync()
