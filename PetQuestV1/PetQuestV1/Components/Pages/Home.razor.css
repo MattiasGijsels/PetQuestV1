@@ -45,9 +45,8 @@
 .login-section {
     flex: 1;
     min-width: 200px;
-    /* Added to narrow the section and center it */
-    max-width: 300px; /* Adjust this value as needed */
-    margin: 0 auto; /* Centers the section if it's narrower than its container */
+    max-width: 300px; 
+    margin: 0 auto;
 }
 
 .login-title {
