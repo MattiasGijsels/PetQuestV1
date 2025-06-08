@@ -30,7 +30,7 @@
 
 .card-content {
     display: flex;
-    gap: 2rem;
+    gap: 8rem;
     align-items: center;
     padding-top: 1rem;
 }
@@ -44,7 +44,10 @@
 
 .login-section {
     flex: 1;
-    min-width: 350px;
+    min-width: 200px;
+    /* Added to narrow the section and center it */
+    max-width: 300px; /* Adjust this value as needed */
+    margin: 0 auto; /* Centers the section if it's narrower than its container */
 }
 
 .login-title {
