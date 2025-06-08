@@ -1,6 +1,10 @@
 ﻿@page "/admin-control-panel-component"
+
 @inherits PetQuestV1.Components.Pages.AdminControlPanelBase
 @rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 
 <h3 class="mb-4">Admin Control Panel</h3>
 
