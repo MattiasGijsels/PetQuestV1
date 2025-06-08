@@ -103,6 +103,9 @@
                     @for (int i = 1; i <= BreedTotalPages; i++)
                     {
                         <li class="page-item @(BreedCurrentPage == i ? "active" : string.Empty)">
+                            @{
+                                int i1 = i;
+                            }
                             <a class="page-link" href="#" @onclick="() => ChangeBreedPage(i)">@i</a>
                         </li>
                     }

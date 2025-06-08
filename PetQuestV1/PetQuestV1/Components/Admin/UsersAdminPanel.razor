@@ -120,6 +120,9 @@
                         @for (int i = 1; i <= UsersTotalPages; i++)
                         {
                             <li class="page-item @(UsersCurrentPage == i ? "active" : string.Empty)">
+                                @{
+                                    int i1 = i;
+                                }
                                 <a class="page-link" @onclick="() => ChangeUsersPage(i)">@i</a>
                             </li>
                         }
