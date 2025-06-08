@@ -11,8 +11,8 @@ a, .btn-link {
 /* Primary Button styles (if not purely Bootstrap default) */
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #1f5d9f;
+    border-color: #1f5d9f;
 }
 
 /* Focus states for interactive elements */

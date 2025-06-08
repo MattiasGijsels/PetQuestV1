@@ -68,7 +68,7 @@
     padding: 0.6rem 1.2rem;
     border: none; /* Remove default button border */
     border-radius: 2rem; /* Rounded like action buttons */
-    background-color: #007bff; /* Primary button color */
+    background-color: #1f5d9f; /* Primary button color */
     color: white;
     font-size: 1rem;
     cursor: pointer;
@@ -78,11 +78,11 @@
 }
 
     .page-link:hover:not(:disabled) {
-        background-color: #0056b3; /* Darker blue on hover */
+        background-color: #547eab; /* Darker blue on hover */
     }
 
 .page-item.active .page-link {
-    background-color: #28a745; /* Green for active page, similar to save-button */
+    background-color: #547eab; /* Green for active page, similar to save-button */
     font-weight: bold;
 }
 
