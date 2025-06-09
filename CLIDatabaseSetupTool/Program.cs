@@ -4,15 +4,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using PetQuestV1.Contracts.Models; // Assuming Pet, Species, Breed are here
-using PetQuestV1.Data; // Assuming ApplicationDbContext, ApplicationUser are here
+using PetQuestV1.Contracts.Models;
+using PetQuestV1.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CLIDatabaseSetupTool // This namespace should match your project's root folder name
+namespace CLIDatabaseSetupTool 
 {
     public class Program
     {
@@ -20,10 +20,10 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
         {
             Console.WriteLine("Starting PetQuestV1 CLI Tool...");
 
-            // 1. Setup Host for Dependency Injection and Configuration
+            
             var host = CreateHostBuilder(args).Build();
 
-            // 2. Validate connection string before proceeding
+
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -33,34 +33,31 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                 {
                     Console.WriteLine("Press any key to exit...");
                     Console.ReadKey();
-                    return; // Exit the application
+                    return; 
                 }
             }
 
-            // 3. Ask for user confirmation before proceeding with destructive operations
             if (!GetUserConfirmation())
             {
                 Console.WriteLine("Operation cancelled by user.");
                 Console.WriteLine("Press any key to exit...");
                 Console.ReadKey();
-                return; // Exit the application
+                return; 
             }
 
-            // 4. Resolve necessary services from the service provider
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
-                    // Ensure the Identity services are correctly resolved
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
                     Console.WriteLine("Attempting to delete and recreate database...");
-                    await context.Database.EnsureDeletedAsync(); // Deletes the existing database
+                    await context.Database.EnsureDeletedAsync(); 
                     Console.WriteLine("Database deleted. Applying migrations...");
-                    await context.Database.MigrateAsync();      // Applies all pending migrations, creating the schema
+                    await context.Database.MigrateAsync();     
                     Console.WriteLine("Database migrations applied.");
 
                     Console.WriteLine("Seeding initial data...");
@@ -71,7 +68,7 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"An error occurred during database operations: {ex.Message}");
-                    Console.WriteLine(ex.ToString()); // Print full stack trace for debugging
+                    Console.WriteLine(ex.ToString());
                     Console.ResetColor();
                 }
             }
@@ -79,7 +76,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             Console.WriteLine("PetQuestV1 CLI Tool finished.");
         }
 
-        // Gets user confirmation before proceeding with destructive database operations
         private static bool GetUserConfirmation()
         {
             Console.WriteLine();
@@ -103,7 +99,7 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             {
                 Console.Write("Do you want to continue? (y/n): ");
                 var input = Console.ReadKey();
-                Console.WriteLine(); // Move to next line
+                Console.WriteLine(); 
 
                 switch (input.Key)
                 {
@@ -129,7 +125,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             }
         }
 
-        // Validates the connection string configuration
         private static bool ValidateConnectionString(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -178,7 +173,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             return true;
         }
 
-        // Configures the host, services, and reads configuration
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
@@ -187,35 +181,31 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    // Add ApplicationDbContext
+
                     services.AddDbContext<ApplicationDbContext>(options =>
                         options.UseSqlServer(hostContext.Configuration.GetConnectionString("DefaultConnection")));
 
-                    // Corrected Identity services configuration for a console app
                     services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                     {
-                        options.SignIn.RequireConfirmedAccount = false; // For seeding, we don't need confirmed accounts
+                        options.SignIn.RequireConfirmedAccount = false; 
                         options.Password.RequireDigit = false;
                         options.Password.RequireLowercase = false;
                         options.Password.RequireNonAlphanumeric = false;
                         options.Password.RequireUppercase = false;
-                        options.Password.RequiredLength = 6; // Set a minimum length consistent with your new passwords
+                        options.Password.RequiredLength = 6; 
                     })
                     .AddEntityFrameworkStores<ApplicationDbContext>()
                     .AddDefaultTokenProviders(); // Required for password reset/email confirmation tokens
                 });
 
-        // The core method to seed the database
         private static async Task SeedData(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Seed Roles
             Console.WriteLine("Seeding roles...");
-            var userSeeds = ReadJsonFile<List<UserSeedData>>("users.json"); // Read user data once
+            var userSeeds = ReadJsonFile<List<UserSeedData>>("users.json"); 
 
-            // Get all unique roles from the user seed data
             var rolesToSeed = userSeeds
-                                .SelectMany(u => u.Roles) // Flatten all roles from all users
-                                .Distinct()               // Get only unique role names
+                                .SelectMany(u => u.Roles) 
+                                .Distinct()               
                                 .ToList();
 
             foreach (var roleName in rolesToSeed)
@@ -228,7 +218,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             }
             Console.WriteLine("Roles seeded.");
 
-            // Seed Users
             Console.WriteLine("Seeding users...");
             foreach (var userSeed in userSeeds)
             {
@@ -239,14 +228,13 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                     {
                         UserName = userSeed.Email,
                         Email = userSeed.Email,
-                        EmailConfirmed = true, // Confirm email for easier login
-                        IsDeleted = false // Ensure user is not soft-deleted
+                        EmailConfirmed = true,
+                        IsDeleted = false 
                     };
                     var result = await userManager.CreateAsync(user, userSeed.Password);
                     if (result.Succeeded)
                     {
                         Console.WriteLine($"  Created user: {user.Email}");
-                        // Assign roles
                         foreach (var role in userSeed.Roles)
                         {
                             if (!await userManager.IsInRoleAsync(user, role))
@@ -264,15 +252,14 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             }
             Console.WriteLine("Users seeded.");
 
-            // Seed Species
             Console.WriteLine("Seeding species...");
             var speciesSeeds = ReadJsonFile<List<SpeciesSeedData>>("species.json");
             foreach (var speciesSeed in speciesSeeds)
             {
-                // CORRECTED: Accessing 'Name' property on the Species entity
+                
                 if (!context.Species.Any(s => s.SpeciesName == speciesSeed.Name && !s.IsDeleted))
                 {
-                    // CORRECTED: Setting 'Name' property when creating new Species
+
                     context.Species.Add(new Species { SpeciesName = speciesSeed.Name });
                     Console.WriteLine($"  Added species: {speciesSeed.Name}");
                 }
@@ -280,19 +267,17 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             await context.SaveChangesAsync();
             Console.WriteLine("Species seeded.");
 
-            // Seed Breeds
+
             Console.WriteLine("Seeding breeds...");
             var breedSeeds = ReadJsonFile<List<BreedSeedData>>("breeds.json");
             foreach (var breedSeed in breedSeeds)
             {
-                // CORRECTED: Accessing 'Name' property on the Breed entity
+
                 if (!context.Breeds.Any(b => b.BreedName == breedSeed.Name && !b.IsDeleted))
                 {
-                    // CORRECTED: Accessing 'Name' property on the Species entity
                     var species = await context.Species.FirstOrDefaultAsync(s => s.SpeciesName == breedSeed.SpeciesName && !s.IsDeleted);
                     if (species != null)
                     {
-                        // CORRECTED: Setting 'Name' property when creating new Breed
                         context.Breeds.Add(new Breed { BreedName = breedSeed.Name, SpeciesId = species.Id });
                         Console.WriteLine($"  Added breed: {breedSeed.Name} for species {breedSeed.SpeciesName}");
                     }
@@ -305,9 +290,8 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             await context.SaveChangesAsync();
             Console.WriteLine("Breeds seeded.");
 
-            // Seed Pets
             Console.WriteLine("Seeding pets...");
-            var petSeeds = ReadJsonFile<List<PetSeedData>>("PetData_20250604203239.json"); // Your original pet data
+            var petSeeds = ReadJsonFile<List<PetSeedData>>("PetData_20250604203239.json"); 
             foreach (var petSeed in petSeeds)
             {
                 // To avoid duplicates if the script is run multiple times without EnsureDeleted
@@ -317,11 +301,9 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                     continue;
                 }
 
-                // CORRECTED: Accessing 'Name' property on the Species entity
                 var species = await context.Species.FirstOrDefaultAsync(s => s.SpeciesName == petSeed.SpeciesName && !s.IsDeleted);
-                // CORRECTED: Accessing 'Name' property on the Breed entity
                 var breed = await context.Breeds.FirstOrDefaultAsync(b => b.BreedName == petSeed.BreedName && !b.IsDeleted);
-                var owner = await userManager.FindByEmailAsync(petSeed.OwnerName); // OwnerName in your JSON is actually the Email
+                var owner = await userManager.FindByEmailAsync(petSeed.OwnerName); 
 
                 if (species == null)
                 {
@@ -333,7 +315,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
                     Console.Error.WriteLine($"  Warning: Breed '{petSeed.BreedName}' not found for pet '{petSeed.PetName}'. Skipping pet.");
                     continue;
                 }
-                // Handle N/A owner: If owner is "N/A" it's fine, otherwise if a named owner is not found, warn.
                 if (owner == null && petSeed.OwnerName != "N/A")
                 {
                     Console.Error.WriteLine($"  Warning: Owner '{petSeed.OwnerName}' not found for pet '{petSeed.PetName}'. Skipping pet.");
@@ -342,11 +323,11 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
 
                 var pet = new Pet
                 {
-                    Id = Guid.TryParse(petSeed.Id, out Guid petId) ? petId.ToString() : Guid.NewGuid().ToString(), // Use existing Id or generate new
+                    Id = Guid.TryParse(petSeed.Id, out Guid petId) ? petId.ToString() : Guid.NewGuid().ToString(),
                     PetName = petSeed.PetName,
                     SpeciesId = species.Id,
                     BreedId = breed.Id,
-                    OwnerId = owner?.Id, // OwnerId will be null if owner is "N/A" or not found
+                    OwnerId = owner?.Id,
                     Age = petSeed.Age,
                     Advantage = petSeed.Advantage,
                     ImagePath = petSeed.ImagePath,
@@ -359,10 +340,8 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             Console.WriteLine("Pets seeded.");
         }
 
-        // Helper to read and deserialize JSON files
         private static T ReadJsonFile<T>(string fileName)
         {
-            // For a console application, files copied to output directory are typically in the same directory as the executable.
             var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
             if (!File.Exists(filePath))
             {
@@ -372,10 +351,6 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
             return JsonConvert.DeserializeObject<T>(jsonString) ?? throw new InvalidOperationException($"Could not deserialize {fileName}. Check JSON format.");
         }
     }
-
-    // --- Data Transfer Objects (DTOs) for JSON Deserialization ---
-    // These classes represent the structure of your JSON files
-    // They should be placed in the PetQuestV1.CLIDatabaseSetupTool project (e.g., directly in Program.cs or a new folder like "Models")
 
     public class UserSeedData
     {
@@ -392,17 +367,16 @@ namespace CLIDatabaseSetupTool // This namespace should match your project's roo
     public class BreedSeedData
     {
         public string Name { get; set; } = default!;
-        public string SpeciesName { get; set; } = default!; // Used to link to species by name
+        public string SpeciesName { get; set; } = default!;
     }
 
-    // Matches the structure of your original PetData_20250604203239.json
     public class PetSeedData
     {
         public string Id { get; set; } = default!;
         public string PetName { get; set; } = default!;
-        public string SpeciesName { get; set; } = default!; // Used to lookup SpeciesId
-        public string BreedName { get; set; } = default!;   // Used to lookup BreedId
-        public string OwnerName { get; set; } = default!;   // Used to lookup OwnerId (this is the email)
+        public string SpeciesName { get; set; } = default!; 
+        public string BreedName { get; set; } = default!; 
+        public string OwnerName { get; set; } = default!;
         public double Age { get; set; }
         public int Advantage { get; set; }
         public string? ImagePath { get; set; }
