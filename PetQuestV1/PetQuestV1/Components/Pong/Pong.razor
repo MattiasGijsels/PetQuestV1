@@ -1,8 +1,12 @@
 ﻿@page "/pong"
 @using Microsoft.AspNetCore.Components.Web
 @using PetQuestV1.Components.Pong
+@using Microsoft.AspNetCore.Authorization
+
 @rendermode InteractiveServer
 @inherits PongBase
+
+@attribute [Authorize(Roles = "Admin,SuperUser,user")]
 
 <div class="game-container" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @onkeyup="HandleKeyUp" @onkeyup:preventDefault="true" @ref="gameContainer">
     <div class="game-header">

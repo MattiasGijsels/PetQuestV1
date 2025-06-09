@@ -1,8 +1,11 @@
 ﻿@page "/ranking"
 @using PetQuestV1.Contracts.DTOs
 @using PetQuestV1.Contracts.Models
+@using Microsoft.AspNetCore.Authorization
 @inject PetQuestV1.Contracts.Defines.IPetService PetService
 @rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin,SuperUser,user")]
 
 <div class="ranking-container">
     @* New container for overall styling *@

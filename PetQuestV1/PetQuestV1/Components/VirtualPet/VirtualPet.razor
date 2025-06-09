@@ -1,6 +1,9 @@
 ﻿@page "/virtualpet"
+@using Microsoft.AspNetCore.Authorization
 @inherits VirtualPetBase
 @rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin,SuperUser,user")]
 
 <div class="pet-container">
     <h1 class="pet-title">Virtual Pet</h1>

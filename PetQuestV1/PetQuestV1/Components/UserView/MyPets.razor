@@ -9,7 +9,8 @@
 
 @rendermode InteractiveServer
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,SuperUser,user")]
+
 <PageTitle>My Pets</PageTitle>
 
 <div class="container my-5">
