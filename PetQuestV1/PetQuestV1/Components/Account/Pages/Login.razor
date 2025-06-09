@@ -87,7 +87,6 @@
         {
             Logger.LogInformation("User logged in.");
 
-            // Check if ReturnUrl is set and if it's a local URL
             if (!string.IsNullOrEmpty(ReturnUrl) && IsLocalUrl(ReturnUrl))
             {
                 RedirectManager.RedirectTo(ReturnUrl);
