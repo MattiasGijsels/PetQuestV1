@@ -132,7 +132,7 @@
         transform: translateY(-1px);
     }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
     .card-content {
         flex-direction: column;

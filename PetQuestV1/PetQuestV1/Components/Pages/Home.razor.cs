@@ -31,7 +31,6 @@ namespace PetQuestV1.Components.Pages
 
         [SupplyParameterFromQuery]
         protected string? ReturnUrl { get; set; }
-
         protected string? errorMessage;
 
         public bool IsAuthenticated { get; set; }

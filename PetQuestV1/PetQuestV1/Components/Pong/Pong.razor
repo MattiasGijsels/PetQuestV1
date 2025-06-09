@@ -49,16 +49,10 @@
     @if (SelectedPet != null)
     {
         <div class="game-area" @ref="gameArea">
-            <!-- Player Paddle -->
             <div class="paddle player-paddle" style="top: @(PlayerPaddleY)px; height: @(PlayerPaddleHeight)px;"></div>
-
-            <!-- Computer Paddle -->
             <div class="paddle computer-paddle" style="top: @(ComputerPaddleY)px;"></div>
-
-            <!-- Ball -->
             <div class="ball" style="left: @(BallX)px; top: @(BallY)px;"></div>
 
-            <!-- Game Over Screen -->
             @if (GameOver)
             {
                 <div class="game-over">
@@ -68,7 +62,6 @@
                 </div>
             }
 
-            <!-- Start Screen -->
             @if (!GameStarted && !GameOver)
             {
                 <div class="start-screen">

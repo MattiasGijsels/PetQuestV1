@@ -23,33 +23,29 @@
         background-color: var(--bs-light);
     }
 
-/* Custom style for the "About PetQuest" heading */
+
 .text-center .display-4 {
-    color: #1F5D9D !important; /* Using !important to override Bootstrap's text-primary */
+    color: #1F5D9D !important; 
 }
 
-/* Apply custom primary blue to elements with text-primary class */
+
 .text-primary {
     color: #1F5D9D !important;
 }
 
-/* Apply custom primary blue to icon and text where previous primary blue was used */
 .list-unstyled .text-primary {
     color: #1F5D9D !important;
 }
 
-/* For the border on the last card */
 .card.border-primary {
     border-color: #1F5D9D !important;
 }
 
-/* For the primary button */
 .btn-primary {
     background-color: #1F5D9D !important;
     border-color: #1F5D9D !important;
 }
 
-/* For the primary icon in the Project Impact Card */
 .bi-people.text-primary {
     color: #1F5D9D !important;
 }

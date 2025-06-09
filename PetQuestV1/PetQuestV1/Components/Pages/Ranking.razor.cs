@@ -1,8 +1,7 @@
-﻿// Pages/Ranking.razor.cs
-using Microsoft.AspNetCore.Components;
-using PetQuestV1.Contracts.Defines; // Keep this for IPetService
-using PetQuestV1.Contracts.Models; // Keep this for Pet
-using System; // Added for Math.Ceiling
+﻿using Microsoft.AspNetCore.Components;
+using PetQuestV1.Contracts.Defines; 
+using PetQuestV1.Contracts.Models; 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,16 +11,14 @@ namespace PetQuestV1.Components.Pages
     public partial class Ranking : ComponentBase
     {
 
-        private List<Pet>? _allPets; // Store all pets initially
-        public List<Pet>? DisplayedPets { get; set; } // Pets for the current page
-
+        private List<Pet>? _allPets;
+        public List<Pet>? DisplayedPets { get; set; }
         public int CurrentPage { get; set; } = 1;
-        private const int PageSize = 10; // Number of pets per page
+        private const int PageSize = 10; 
         public int TotalPages { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            // PetService is directly accessible here without explicit declaration in this file
             _allPets = await PetService.GetAllAsync();
             _allPets = _allPets.OrderByDescending(p => p.Advantage).ToList();
 

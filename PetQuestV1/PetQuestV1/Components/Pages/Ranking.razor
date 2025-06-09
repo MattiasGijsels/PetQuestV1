@@ -8,8 +8,7 @@
 @attribute [Authorize(Roles = "Admin,SuperUser,user")]
 
 <div class="ranking-container">
-    @* New container for overall styling *@
-    <h3 class="ranking-title">Pet Rankings</h3> @* Applied title style *@
+    <h3 class="ranking-title">Pet Rankings</h3> 
 
     @if (DisplayedPets == null)
     {
@@ -17,12 +16,11 @@
     }
     else if (!DisplayedPets.Any())
     {
-        <div class="no-pets-message">No pets to display.</div> @* Used existing style for no pets *@
+        <div class="no-pets-message">No pets to display.</div> 
     }
     else
     {
         <table class="table table-striped">
-            @* Used table classes for styling *@
             <thead>
                 <tr>
                     <th>Rank</th>
@@ -43,13 +41,11 @@
                         <td>@pet.Species?.SpeciesName</td>
                         <td>@pet.Breed?.BreedName</td>
                         <td>@(pet.Age.HasValue? pet.Age.Value.ToString("F1") : "N/A")</td>
-                        <td class="advantage-score">@pet.Advantage</td> @* Applied new class for Advantage color *@
+                        <td class="advantage-score">@pet.Advantage</td> 
                     </tr>
                 }
             </tbody>
         </table>
-
-        @* Pagination Controls - classes updated to match VirtualPet button styles *@
         <nav>
             <ul class="pagination">
                 <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
