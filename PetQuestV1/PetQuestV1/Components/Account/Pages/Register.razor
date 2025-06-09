@@ -7,14 +7,8 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using PetQuestV1.Contracts
 @using PetQuestV1.Data
-
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
-@inject ILogger<Register> Logger
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+@using Microsoft.AspNetCore.Components.Forms // Necessary for EditContext
+@using System.Collections.Generic // Necessary for Dictionary
 
 <PageTitle>Register</PageTitle>
 
@@ -60,6 +54,25 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
+    // All service injections are now explicitly declared here
+    // Add '!' at the end of each non-nullable injected property
+    [Inject]
+    private UserManager<ApplicationUser> UserManager { get; set; } = default!; // Added = default!
+    [Inject]
+    private IUserStore<ApplicationUser> UserStore { get; set; } = default!; // Added = default!
+    [Inject]
+    private SignInManager<ApplicationUser> SignInManager { get; set; } = default!; // Added = default!
+    [Inject]
+    private IEmailSender<ApplicationUser> EmailSender { get; set; } = default!; // Added = default!
+    [Inject]
+    private ILogger<Register> Logger { get; set; } = default!; // Added = default!
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!; // Added = default!
+    [Inject]
+    private IdentityRedirectManager RedirectManager { get; set; } = default!; // Added = default!
+    [Inject]
+    private RoleManager<IdentityRole> RoleManager { get; set; } = default!; // Added = default!
+
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
@@ -77,6 +90,35 @@
 
         Logger.LogInformation("User created a new account with password.");
 
+        // --- START OF NEW ROLE ASSIGNMENT CODE ---
+        const string defaultRole = "User"; // Define the role name
+
+        // Check if the role exists, create it if not
+        if (!await RoleManager.RoleExistsAsync(defaultRole))
+        {
+            Logger.LogInformation($"Role '{defaultRole}' does not exist. Creating it.");
+            var roleResult = await RoleManager.CreateAsync(new IdentityRole(defaultRole));
+            if (!roleResult.Succeeded)
+            {
+                Logger.LogError($"Failed to create role '{defaultRole}': {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+                identityErrors = roleResult.Errors;
+                await UserManager.DeleteAsync(user); // Optionally delete the user if role assignment is critical
+                return;
+            }
+        }
+
+        // Assign the "User" role to the newly created user
+        var addToRoleResult = await UserManager.AddToRoleAsync(user, defaultRole);
+
+        if (!addToRoleResult.Succeeded)
+        {
+            Logger.LogError($"Failed to add user {user.UserName} to role {defaultRole}: {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+            identityErrors = addToRoleResult.Errors; // Display role assignment errors
+            return;
+        }
+        // --- END OF NEW ROLE ASSIGNMENT CODE ---
+
+
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -92,9 +134,11 @@
                 "Account/RegisterConfirmation",
                 new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
         }
-
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        else
+        {
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            RedirectManager.RedirectTo(ReturnUrl);
+        }
     }
 
     private ApplicationUser CreateUser()
