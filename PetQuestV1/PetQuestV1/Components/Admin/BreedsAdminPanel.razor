@@ -98,7 +98,10 @@
             <nav class="p-2 border-top d-flex justify-content-center">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(BreedCurrentPage == 1 ? "disabled" : string.Empty)">
-                        <a class="page-link" href="#" @onclick="() => ChangeBreedPage(BreedCurrentPage - 1)">Prev</a>
+                        <button class="page-link"
+                                @onclick="() => ChangeBreedPage(BreedCurrentPage - 1)">
+                            Prev
+                        </button>
                     </li>
                     @for (int i = 1; i <= BreedTotalPages; i++)
                     {
@@ -106,11 +109,17 @@
                             @{
                                 int i1 = i;
                             }
-                            <a class="page-link" href="#" @onclick="() => ChangeBreedPage(i)">@i</a>
+                            <button class="page-link"
+                                    @onclick="() => ChangeBreedPage(i1)">
+                                @i
+                            </button>
                         </li>
                     }
                     <li class="page-item @(BreedCurrentPage == BreedTotalPages ? "disabled" : string.Empty)">
-                        <a class="page-link" href="#" @onclick="() => ChangeBreedPage(BreedCurrentPage + 1)">Next</a>
+                        <button class="page-link"
+                                @onclick="() => ChangeBreedPage(BreedCurrentPage + 1)">
+                            Next
+                        </button>
                     </li>
                 </ul>
             </nav>
