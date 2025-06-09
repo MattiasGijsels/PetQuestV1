@@ -16,7 +16,6 @@
 
 <div class="row">
     <div class="col-md-4 mx-auto">
-        @* Added mx-auto here to center the column *@
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
@@ -54,24 +53,23 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    // All service injections are now explicitly declared here
-    // Add '!' at the end of each non-nullable injected property
+
     [Inject]
-    private UserManager<ApplicationUser> UserManager { get; set; } = default!; // Added = default!
+    private UserManager<ApplicationUser> UserManager { get; set; } = default!; 
     [Inject]
-    private IUserStore<ApplicationUser> UserStore { get; set; } = default!; // Added = default!
+    private IUserStore<ApplicationUser> UserStore { get; set; } = default!; 
     [Inject]
-    private SignInManager<ApplicationUser> SignInManager { get; set; } = default!; // Added = default!
+    private SignInManager<ApplicationUser> SignInManager { get; set; } = default!; 
     [Inject]
-    private IEmailSender<ApplicationUser> EmailSender { get; set; } = default!; // Added = default!
+    private IEmailSender<ApplicationUser> EmailSender { get; set; } = default!; 
     [Inject]
-    private ILogger<Register> Logger { get; set; } = default!; // Added = default!
+    private ILogger<Register> Logger { get; set; } = default!; 
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!; // Added = default!
+    private NavigationManager NavigationManager { get; set; } = default!; 
     [Inject]
-    private IdentityRedirectManager RedirectManager { get; set; } = default!; // Added = default!
+    private IdentityRedirectManager RedirectManager { get; set; } = default!; 
     [Inject]
-    private RoleManager<IdentityRole> RoleManager { get; set; } = default!; // Added = default!
+    private RoleManager<IdentityRole> RoleManager { get; set; } = default!; 
 
     public async Task RegisterUser(EditContext editContext)
     {
@@ -90,10 +88,8 @@
 
         Logger.LogInformation("User created a new account with password.");
 
-        // --- START OF NEW ROLE ASSIGNMENT CODE ---
-        const string defaultRole = "User"; // Define the role name
+        const string defaultRole = "User"; 
 
-        // Check if the role exists, create it if not
         if (!await RoleManager.RoleExistsAsync(defaultRole))
         {
             Logger.LogInformation($"Role '{defaultRole}' does not exist. Creating it.");
@@ -102,22 +98,19 @@
             {
                 Logger.LogError($"Failed to create role '{defaultRole}': {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
                 identityErrors = roleResult.Errors;
-                await UserManager.DeleteAsync(user); // Optionally delete the user if role assignment is critical
+                await UserManager.DeleteAsync(user);
                 return;
             }
         }
 
-        // Assign the "User" role to the newly created user
         var addToRoleResult = await UserManager.AddToRoleAsync(user, defaultRole);
 
         if (!addToRoleResult.Succeeded)
         {
             Logger.LogError($"Failed to add user {user.UserName} to role {defaultRole}: {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
-            identityErrors = addToRoleResult.Errors; // Display role assignment errors
+            identityErrors = addToRoleResult.Errors; 
             return;
         }
-        // --- END OF NEW ROLE ASSIGNMENT CODE ---
-
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
