@@ -10,21 +10,12 @@ namespace PetQuestV1.Components.Admin
     {
         [Inject]
         private IServiceScopeFactory ScopeFactory { get; set; } = default!;
-
         protected List<SpeciesWithBreedCountDto> AllSpecies { get; set; } = new(); 
-
-        // --- Sorting Properties ---
-        protected string CurrentSortColumn { get; set; } = "SpeciesName"; // Default sort column
+        protected string CurrentSortColumn { get; set; } = "SpeciesName"; 
         protected SortDirection SortDirection { get; set; } = SortDirection.Ascending;
-
-        // --- Search Property ---
         protected string SearchTerm { get; set; } = string.Empty;
-
-        // Pagination properties
         protected int SpeciesCurrentPage { get; set; } = 1;
         protected int SpeciesPageSize { get; set; } = 10;
-
-        // Forms & UI state for species management
         protected Species SpeciesFormModel { get; set; } = new();
         protected bool IsSpeciesFormVisible { get; set; } = false;
         private bool IsEditing { get; set; } = false;
@@ -37,10 +28,8 @@ namespace PetQuestV1.Components.Admin
         {
             get
             {
-                // Filter out IsDeleted species first in the UI display.
                 var query = AllSpecies.Where(s => !s.IsDeleted).AsQueryable();
 
-                // Apply Search Filter
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     query = query.Where(s =>
@@ -48,12 +37,11 @@ namespace PetQuestV1.Components.Admin
                     );
                 }
 
-                // Apply Sorting
                 query = CurrentSortColumn switch
                 {
                     "SpeciesName" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.SpeciesName) : query.OrderByDescending(s => s.SpeciesName),
-                    "BreedCount" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.BreedCount) : query.OrderByDescending(s => s.BreedCount), // <--- NEW SORT OPTION
-                    _ => query.OrderBy(s => s.SpeciesName) // Default sort
+                    "BreedCount" => SortDirection == SortDirection.Ascending ? query.OrderBy(s => s.BreedCount) : query.OrderByDescending(s => s.BreedCount), 
+                    _ => query.OrderBy(s => s.SpeciesName) 
                 };
 
                 return query.ToList();
@@ -95,7 +83,6 @@ namespace PetQuestV1.Components.Admin
             using (var scope = ScopeFactory.CreateScope())
             {
                 var speciesService = scope.ServiceProvider.GetRequiredService<ISpeciesService>();
-                // Fetch the full Species object by ID for editing
                 SpeciesFormModel = await speciesService.GetByIdAsync(speciesDto.Id) ?? new Species();
             }
 
@@ -106,7 +93,6 @@ namespace PetQuestV1.Components.Admin
 
         protected async Task HandleSpeciesFormSubmit()
         {
-            // Maybe I should use DataAnnotationsValidator in the future?
             if (string.IsNullOrWhiteSpace(SpeciesFormModel.SpeciesName))
             {
                 Console.WriteLine("Species Name cannot be empty}");
@@ -130,8 +116,8 @@ namespace PetQuestV1.Components.Admin
                 }
 
                 IsSpeciesFormVisible = false;
-                SpeciesFormModel = new Species(); // Reset form model for next use
-                await LoadData(); // Reload all data after submit to reflect changes
+                SpeciesFormModel = new Species();
+                await LoadData(); 
             }
             catch (Exception ex)
             {
@@ -140,18 +126,17 @@ namespace PetQuestV1.Components.Admin
             }
             finally
             {
-                StateHasChanged(); // Ensure UI updates even if an error occurs
+                StateHasChanged(); 
             }
         }
 
         protected void CancelSpeciesForm()
         {
             IsSpeciesFormVisible = false;
-            SpeciesFormModel = new Species(); // Clear form
+            SpeciesFormModel = new Species();
             StateHasChanged();
         }
 
-        // SoftDelete will still use the original ID
         protected async Task SoftDeleteSpecies(string id)
         {
             using (var scope = ScopeFactory.CreateScope())
@@ -163,14 +148,12 @@ namespace PetQuestV1.Components.Admin
             StateHasChanged();
         }
 
-        // ---------- Pagination Handlers ----------
         protected void ChangeSpeciesPage(int page)
         {
             SpeciesCurrentPage = System.Math.Clamp(page, 1, SpeciesTotalPages);
             StateHasChanged();
         }
 
-        // ---------- Sorting Handlers ----------
         protected void SortBy(string columnName)
         {
             if (CurrentSortColumn == columnName)
@@ -180,9 +163,9 @@ namespace PetQuestV1.Components.Admin
             else
             {
                 CurrentSortColumn = columnName;
-                SortDirection = SortDirection.Ascending; // Default to ascending when changing column
+                SortDirection = SortDirection.Ascending; 
             }
-            SpeciesCurrentPage = 1; // Reset to first page on sort change
+            SpeciesCurrentPage = 1; 
             StateHasChanged();
         }
 
@@ -190,7 +173,7 @@ namespace PetQuestV1.Components.Admin
         {
             if (CurrentSortColumn != columnName)
             {
-                return "bi-arrows-alt"; // Neutral icon
+                return "bi-arrows-alt"; 
             }
             return SortDirection == SortDirection.Ascending ? "bi-caret-up-fill" : "bi-caret-down-fill";
         }
@@ -198,7 +181,7 @@ namespace PetQuestV1.Components.Admin
         protected void OnSearchInput(ChangeEventArgs e)
         {
             SearchTerm = e.Value?.ToString() ?? string.Empty;
-            SpeciesCurrentPage = 1; // Reset to first page on search
+            SpeciesCurrentPage = 1; 
             StateHasChanged();
         }
     }

@@ -2,7 +2,7 @@
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
 using PetQuestV1.Contracts.Enums;
-using Microsoft.AspNetCore.Identity; // For IdentityRole
+using Microsoft.AspNetCore.Identity;
 
 namespace PetQuestV1.Components.Admin
 {
@@ -12,13 +12,11 @@ namespace PetQuestV1.Components.Admin
         private IUserService UserService { get; set; } = default!;
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = default!;// used for reroute to Register
+        private NavigationManager NavigationManager { get; set; } = default!;
 
         protected List<UserListItemDto> AllUsers { get; set; } = new();
         protected List<IdentityRole> AvailableRoles { get; set; } = new();
         protected UserFormDto UserFormModel { get; set; } = new UserFormDto();
-
-        //For UI & state management 
         protected int UsersTotalPages => FilteredAndSortedUsers.Any() ? (int)System.Math.Ceiling((double)FilteredAndSortedUsers.Count() / UsersPageSize) : 1;
         protected IEnumerable<UserListItemDto> PagedUsers => FilteredAndSortedUsers .Skip((UsersCurrentPage - 1) * UsersPageSize).Take(UsersPageSize);
         protected string UsersSortColumn { get; set; } = "UserName";
@@ -48,7 +46,7 @@ namespace PetQuestV1.Components.Admin
                 {
                     "UserName" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.UserName) : query.OrderByDescending(u => u.UserName),
                     "PetCount" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.PetCount) : query.OrderByDescending(u => u.PetCount),
-                    "RoleName" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.RoleName) : query.OrderByDescending(u => u.RoleName), // Sort by role name
+                    "RoleName" => UsersSortDirection == SortDirection.Ascending ? query.OrderBy(u => u.RoleName) : query.OrderByDescending(u => u.RoleName), 
                     _ => query.OrderBy(u => u.UserName)
                 };
 
@@ -59,7 +57,7 @@ namespace PetQuestV1.Components.Admin
         protected override async Task OnInitializedAsync()
         {
             await LoadUsers();
-            AvailableRoles = await UserService.GetAllRolesAsync(); // Load roles for dropdown
+            AvailableRoles = await UserService.GetAllRolesAsync(); 
             UsersCurrentPage = System.Math.Clamp(UsersCurrentPage, 1, UsersTotalPages == 0 ? 1 : UsersTotalPages);
         }
 
@@ -129,7 +127,7 @@ namespace PetQuestV1.Components.Admin
                     Email = userDetail.Email,
                     PetCount = userDetail.PetCount,
                     IsDeleted = userDetail.IsDeleted,
-                    SelectedRoleId = userDetail.SelectedRoleId // Set the selected role ID
+                    SelectedRoleId = userDetail.SelectedRoleId 
                 };
                 IsUserFormVisible = true;
             }

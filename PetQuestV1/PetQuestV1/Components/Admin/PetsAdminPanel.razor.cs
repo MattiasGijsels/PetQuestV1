@@ -34,7 +34,6 @@ namespace PetQuestV1.Components.Admin
         private bool IsEditing { get; set; } = false;
         protected bool IsPetsSectionVisible { get; set; } = false;
 
-        // Filtered and Sorted Pets logic
         protected IEnumerable<Pet> PagedPets => FilteredAndSortedPets.Skip((PetsCurrentPage - 1) * PetsPageSize).Take(PetsPageSize);
         protected IEnumerable<Pet> FilteredAndSortedPets
         {
@@ -85,7 +84,6 @@ namespace PetQuestV1.Components.Admin
             }
         }
 
-        // --- Property to hold the selected file from InputFile ---
         private IBrowserFile? _selectedFile;
 
         protected override async Task OnInitializedAsync()
@@ -145,7 +143,7 @@ namespace PetQuestV1.Components.Admin
             IsEditing = false;
             IsPetFormVisible = true;
             AvailableBreeds = new List<Breed>();
-            _selectedFile = null; // Clear any previously selected file when adding a new pet
+            _selectedFile = null; 
             StateHasChanged();
         }
 
@@ -159,8 +157,8 @@ namespace PetQuestV1.Components.Admin
                 OwnerId = pet.OwnerId,
                 BreedId = pet.BreedId,
                 Age = pet.Age,
-                Advantage = pet.Advantage, // Added Advantage to the edit form
-                ImagePath = pet.ImagePath // Load the existing image path from the pet model
+                Advantage = pet.Advantage,
+                ImagePath = pet.ImagePath 
             };
             IsEditing = true;
             IsPetFormVisible = true;
@@ -181,16 +179,14 @@ namespace PetQuestV1.Components.Admin
             StateHasChanged();
         }
 
-        // --- Method to handle file input change ---
         protected void OnInputFileChange(InputFileChangeEventArgs e)
         {
             _selectedFile = e.File;
         }
 
-        // --- Method to handle image deletion ---
         protected async Task DeleteImage()
         {
-            if (PetFormModel.Id != null) // Only delete if it's an existing pet
+            if (PetFormModel.Id != null) 
             {
                 using (var scope = ScopeFactory.CreateScope())
                 {
@@ -198,7 +194,7 @@ namespace PetQuestV1.Components.Admin
                     bool success = await petService.DeletePetImageAsync(PetFormModel.Id);
                     if (success)
                     {
-                        PetFormModel.ImagePath = null; // Clear the image path from the form model
+                        PetFormModel.ImagePath = null; 
                         await LoadData(); // Reload data to ensure the table updates
                         StateHasChanged();
                     }
@@ -216,8 +212,6 @@ namespace PetQuestV1.Components.Admin
                 string.IsNullOrWhiteSpace(PetFormModel.SpeciesId) ||
                 string.IsNullOrWhiteSpace(PetFormModel.OwnerId))
             {
-                // Could maybe use DataAnnotationsValidator cuz it handles more,
-                // for now does not return any value, it simply stops execution 
                 return;
             }
 
@@ -227,42 +221,38 @@ namespace PetQuestV1.Components.Admin
 
                 if (IsEditing)
                 {
-                    // Update pet details
                     await petService.UpdatePetAsync(PetFormModel);
 
-                    // If a new file was selected during edit, upload it
                     if (_selectedFile != null && PetFormModel.Id != null)
                     {
                         var uploadedPath = await petService.UploadPetImageAsync(PetFormModel.Id, _selectedFile);
                         if (uploadedPath != null)
                         {
-                            PetFormModel.ImagePath = uploadedPath; // Update DTO with new path
+                            PetFormModel.ImagePath = uploadedPath; 
                         }
-                        _selectedFile = null; // Clear the selected file after upload
+                        _selectedFile = null; 
                     }
                 }
-                else // Adding a new pet
+                else 
                 {
 
-                    await petService.AddPetAsync(PetFormModel); // This will generate an ID if null
+                    await petService.AddPetAsync(PetFormModel); 
 
-                    // After adding, if an ID was assigned (which it is by PetRepository if null)
-                    // and a file was selected, upload the image.
                     if (_selectedFile != null && !string.IsNullOrEmpty(PetFormModel.Id))
                     {
                         var uploadedPath = await petService.UploadPetImageAsync(PetFormModel.Id, _selectedFile);
                         if (uploadedPath != null)
                         {
-                            PetFormModel.ImagePath = uploadedPath; // Update DTO with new path
+                            PetFormModel.ImagePath = uploadedPath; 
                         }
-                        _selectedFile = null; // Clear the selected file after upload
+                        _selectedFile = null;
                     }
                 }
             }
 
             IsPetFormVisible = false;
-            PetFormModel = new PetFormDto(); // Reset form model
-            await LoadData(); // Reload all pets including new image paths
+            PetFormModel = new PetFormDto(); 
+            await LoadData(); 
             StateHasChanged();
         }
 
@@ -270,7 +260,7 @@ namespace PetQuestV1.Components.Admin
         {
             IsPetFormVisible = false;
             PetFormModel = new PetFormDto();
-            _selectedFile = null; // Clear selected file on cancel
+            _selectedFile = null; 
             StateHasChanged();
         }
 
@@ -280,7 +270,6 @@ namespace PetQuestV1.Components.Admin
             {
                 var petService = scope.ServiceProvider.GetRequiredService<IPetService>();
                 await petService.SoftDeleteAsync(id);
-                // Maybe I should add a hard delete in the future if needed..
             }
             await LoadData();
             StateHasChanged();

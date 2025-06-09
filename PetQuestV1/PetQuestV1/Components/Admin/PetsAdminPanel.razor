@@ -73,7 +73,6 @@
                             <ValidationMessage For="@(() => PetFormModel.Advantage)" />
                         </div>
 
-                        @* --- Image Upload Field and Preview --- *@
                         <div class="col-sm-6">
                             <label class="form-label">Pet Image</label>
                             <InputFile class="form-control" OnChange="OnInputFileChange" />
@@ -94,7 +93,6 @@
                 </EditForm>
             }
 
-            @* --- Search Bar --- *@
             <div class="p-3">
                 <input type="text" class="form-control" placeholder="Search pets (name, species, breed, owner)"
                        @bind="SearchTerm" @oninput="OnSearchInput" />
@@ -153,7 +151,6 @@
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditPet(pet)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    @* Directly call SoftDeletePet without a pop-up *@
                                     <button class="btn btn-sm btn-outline-danger" @onclick="() => SoftDeletePet(pet.Id)">
                                         <i class="bi bi-trash"></i>
                                     </button>

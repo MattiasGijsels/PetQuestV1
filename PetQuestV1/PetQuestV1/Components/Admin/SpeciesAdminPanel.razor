@@ -39,7 +39,6 @@
                 </EditForm>
             }
 
-            @* --- Search Bar --- *@
             <div class="p-3">
                 <input type="text" class="form-control" placeholder="Search species by name"
                        @bind="SearchTerm" @oninput="OnSearchInput" />
@@ -69,7 +68,6 @@
                                     <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditSpecies(species)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    @* Directly call SoftDeleteSpecies *@
                                     <button class="btn btn-sm btn-outline-danger" @onclick="() => SoftDeleteSpecies(species.Id)">
                                         <i class="bi bi-trash"></i>
                                     </button>
