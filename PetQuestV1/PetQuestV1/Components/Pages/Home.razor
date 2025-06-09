@@ -15,44 +15,56 @@
     <div class="main-content">
         <div class="login-card">
             <div class="card-content">
-                <div class="login-section">
-                    <StatusMessage Message="@errorMessage" />
-                    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="home-login">
-                        <DataAnnotationsValidator />
-                        <h2 class="login-title">Log in</h2>
-                        <hr />
-                        <ValidationSummary class="text-danger" role="alert" />
 
-                        <div class="form-floating mb-3">
-                            <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                            <label for="email" class="form-label">Email</label>
-                            <ValidationMessage For="() => Input.Email" class="text-danger" />
-                        </div>
+                @if (IsAuthenticated)
+                {
+                    <div class="login-section">
+                        <h2 class="login-title">Welcome back!</h2>
+                        <p>You are logged in as <strong>@Username</strong>.</p>
+                        <p>Enjoy your pets and have fun playing the games!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="login-section">
+                        <StatusMessage Message="@errorMessage" />
+                        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="home-login">
+                            <DataAnnotationsValidator />
+                            <h2 class="login-title">Log in</h2>
+                            <hr />
+                            <ValidationSummary class="text-danger" role="alert" />
 
-                        <div class="form-floating mb-3">
-                            <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                            <label for="password" class="form-label">Password</label>
-                            <ValidationMessage For="() => Input.Password" class="text-danger" />
-                        </div>
+                            <div class="form-floating mb-3">
+                                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                <label for="email" class="form-label">Email</label>
+                                <ValidationMessage For="() => Input.Email" class="text-danger" />
+                            </div>
 
-                        <div class="checkbox mb-3">
-                            <label class="form-label">
-                                <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                                Remember me
-                            </label>
-                        </div>
+                            <div class="form-floating mb-3">
+                                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                                <label for="password" class="form-label">Password</label>
+                                <ValidationMessage For="() => Input.Password" class="text-danger" />
+                            </div>
 
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary w-100 login-btn">Log in</button>
-                        </div>
+                            <div class="checkbox mb-3">
+                                <label class="form-label">
+                                    <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+                                    Remember me
+                                </label>
+                            </div>
 
-                        <div class="login-links">
-                            <p><a href="Account/ForgotPassword">Forgot your password?</a></p>
-                            <p><a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a></p>
-                            <p><a href="Account/ResendEmailConfirmation">Resend email confirmation</a></p>
-                        </div>
-                    </EditForm>
-                </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary w-100 login-btn">Log in</button>
+                            </div>
+
+                            <div class="login-links">
+                                <p><a href="Account/ForgotPassword">Forgot your password?</a></p>
+                                <p><a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a></p>
+                                <p><a href="Account/ResendEmailConfirmation">Resend email confirmation</a></p>
+                            </div>
+                        </EditForm>
+                    </div>
+                }
 
                 <div class="cat-section">
                     <img src="images/PetQuestLogoOnlySmall.jpg" alt="PetQuest Cat" class="cat-image" />

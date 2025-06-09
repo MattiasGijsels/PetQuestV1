@@ -11,6 +11,8 @@
                     <img src="images/logo-white-small.png" alt="Logo">
                 </a>
             </div>
+             <AuthorizeView>
+                <Authorized>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="mypets">
                     <svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -72,6 +74,8 @@
                     <span class="ms-2">Pong</span>
                 </NavLink>
             </div>
+                </Authorized>
+            </AuthorizeView>
             <AuthorizeView Roles="Admin">
                 <Authorized>
                     <div class="nav-item px-3">
@@ -112,18 +116,6 @@
                         </form>
                     </div>
                 </Authorized>
-                <NotAuthorized>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Register">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Login">
-                            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                        </NavLink>
-                    </div>
-                </NotAuthorized>
             </AuthorizeView>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="about">

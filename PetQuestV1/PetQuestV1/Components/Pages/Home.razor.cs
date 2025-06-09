@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using PetQuestV1.Data;
 using PetQuestV1.Components.Account;
 using PetQuestV1.Components.Account.Shared;
 
-
 namespace PetQuestV1.Components.Pages
 {
-    // Make sure your namespace matches your project structure
     public class HomeBase : ComponentBase
     {
         [Inject]
@@ -20,9 +19,9 @@ namespace PetQuestV1.Components.Pages
         [Inject]
         protected NavigationManager NavigationManager { get; set; } = default!;
         [Inject]
-        private IdentityRedirectManager RedirectManager { get; set; } = default!; // Changed to private
-
-        protected string? errorMessage;
+        protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject]
+        private IdentityRedirectManager RedirectManager { get; set; } = default!;
 
         [CascadingParameter]
         protected HttpContext HttpContext { get; set; } = default!;
@@ -33,39 +32,51 @@ namespace PetQuestV1.Components.Pages
         [SupplyParameterFromQuery]
         protected string? ReturnUrl { get; set; }
 
+        protected string? errorMessage;
+
+        public bool IsAuthenticated { get; set; }
+        public string? Username { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
-            if (HttpMethods.IsGet(HttpContext.Request.Method))
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
+
+            if (IsAuthenticated)
             {
-                // Clear the existing external cookie to ensure a clean login process
+                Username = user.Identity?.Name;
+            }
+            else if (HttpMethods.IsGet(HttpContext.Request.Method))
+            {
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             }
         }
 
         public async Task LoginUser()
         {
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
                 Logger.LogInformation("User logged in.");
 
-                // Check if ReturnUrl is set and if it's a local URL
                 if (!string.IsNullOrEmpty(ReturnUrl) && IsLocalUrl(ReturnUrl))
                 {
                     RedirectManager.RedirectTo(ReturnUrl);
                 }
                 else
                 {
-                    RedirectManager.RedirectTo("/mypets"); // Redirect to /mypets by default
+                    RedirectManager.RedirectTo("/mypets");
                 }
             }
             else if (result.RequiresTwoFactor)
             {
-                RedirectManager.RedirectTo(
-                    "Account/LoginWith2fa",
-                    new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+                RedirectManager.RedirectTo("Account/LoginWith2fa", new()
+                {
+                    ["returnUrl"] = ReturnUrl,
+                    ["rememberMe"] = Input.RememberMe
+                });
             }
             else if (result.IsLockedOut)
             {
@@ -78,14 +89,13 @@ namespace PetQuestV1.Components.Pages
             }
         }
 
-        // Helper method to check if a URL is local
         private bool IsLocalUrl(string? url)
         {
             if (string.IsNullOrEmpty(url))
             {
                 return false;
             }
-            // Fix for CA1866: Changed "/" to '/'
+
             return (url.StartsWith('/') && !url.StartsWith("//")) ||
                    (url.StartsWith(NavigationManager.BaseUri) && !url.Contains("://"));
         }
