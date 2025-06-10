@@ -6,7 +6,7 @@
 @rendermode InteractiveServer
 @inherits PongBase
 
-@attribute [Authorize(Roles = "Admin,SuperUser,user")]
+@attribute [Authorize(Roles = "Admin,SuperUser,User")]
 
 <div class="game-container" tabindex="0" @onkeydown="HandleKeyDown" @onkeydown:preventDefault="true" @onkeyup="HandleKeyUp" @onkeyup:preventDefault="true" @ref="gameContainer">
     <div class="game-header">
