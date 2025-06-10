@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
+using Microsoft.AspNetCore.Components.Forms;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
@@ -19,12 +19,10 @@ namespace PetQuestV1.Components.UserView
         private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         [Inject]
-        private IServiceScopeFactory ScopeFactory { get; set; } = default!; // For scoped services in singleton component
+        private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
         protected List<Pet> UserPets { get; set; } = new List<Pet>();
         protected bool isLoading { get; set; } = true;
-
-        //Pet Modal properties
         protected bool showCreateModal { get; set; } = false;
         protected bool isCreating { get; set; } = false;
         protected bool showSuccessAlert { get; set; } = false;
@@ -49,7 +47,7 @@ namespace PetQuestV1.Components.UserView
                 if (_currentUserId != null)
                 {
                     await LoadUserPets();
-                    await LoadSpeciesData(); // Load species for the create form
+                    await LoadSpeciesData(); 
                 }
                 else
                 {
@@ -81,7 +79,7 @@ namespace PetQuestV1.Components.UserView
             }
         }
 
-        protected async Task HandleImageUploadRequest((string PetId, IBrowserFile ImageFile) args)// args = the bundle of PetId and ImageFile
+        protected async Task HandleImageUploadRequest((string PetId, IBrowserFile ImageFile) args)
         {
             using (var scope = ScopeFactory.CreateScope())
             {
@@ -90,7 +88,6 @@ namespace PetQuestV1.Components.UserView
 
                 if (uploadedPath != null)
                 {
-                    // Update the specific pet in the UserPets list
                     var petToUpdate = UserPets.FirstOrDefault(p => p.Id == args.PetId);
                     if (petToUpdate != null)
                     {
@@ -114,7 +111,6 @@ namespace PetQuestV1.Components.UserView
 
                 if (success)
                 {
-                    // Clear the image path for the specific pet in the list
                     var petToUpdate = UserPets.FirstOrDefault(p => p.Id == petId);
                     if (petToUpdate != null)
                     {
@@ -131,13 +127,11 @@ namespace PetQuestV1.Components.UserView
 
         protected void ShowCreatePetModal()
         {
-            // Reset the form and state
             newPetDto = new PetFormDto
             {
                 OwnerId = _currentUserId
-                // Advantage will default to 5 from the PetFormDto class
             };
-            availableBreeds = new List<Breed>(); // Reset breeds to empty list (not null)
+            availableBreeds = new List<Breed>(); 
             errorMessage = string.Empty;
             showCreateModal = true;
         }
@@ -152,7 +146,7 @@ namespace PetQuestV1.Components.UserView
         protected async Task OnSpeciesChangedAsync()
         {
             var selectedSpeciesId = newPetDto.SpeciesId;
-            newPetDto.BreedId = null; // Reset breed selection
+            newPetDto.BreedId = null; 
 
             if (!string.IsNullOrEmpty(selectedSpeciesId))
             {
@@ -164,7 +158,7 @@ namespace PetQuestV1.Components.UserView
             }
             else
             {
-                availableBreeds = new List<Breed>(); // Empty list instead of null
+                availableBreeds = new List<Breed>();
             }
 
             StateHasChanged();
@@ -183,7 +177,6 @@ namespace PetQuestV1.Components.UserView
 
             try
             {
-                // Ensure the OwnerId is set
                 newPetDto.OwnerId = _currentUserId;
 
                 using (var scope = ScopeFactory.CreateScope())
@@ -192,14 +185,10 @@ namespace PetQuestV1.Components.UserView
                     await petService.AddPetAsync(newPetDto);
                 }
 
-                // Reload the pets list to include the new pet
                 await LoadUserPets();
-
-                // Show success and hide modal
                 showSuccessAlert = true;
                 HideCreatePetModal();
 
-                // Auto-hide success alert after 5 seconds
                 _ = Task.Delay(5000).ContinueWith(_ =>
                 {
                     showSuccessAlert = false;
