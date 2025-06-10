@@ -1,10 +1,9 @@
-﻿// PetQuestV1/Services/SpeciesService.cs
-using PetQuestV1.Data.Defines;
+﻿using PetQuestV1.Data.Defines;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.DTOs;
 using System.Collections.Generic;
-using System.Linq; // Add this for LINQ methods like Select
+using System.Linq; 
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Services
@@ -18,29 +17,20 @@ namespace PetQuestV1.Services
             _speciesRepository = speciesRepository;
         }
 
-        // Implementation of the new DTO-returning method
-        public async Task<List<SpeciesWithBreedCountDto>> GetAllSpeciesForAdminAsync() // <--- MODIFIED METHOD
+        public async Task<List<SpeciesWithBreedCountDto>> GetAllSpeciesForAdminAsync() 
         {
-            // Use the repository method that includes breeds
             var speciesList = await _speciesRepository.GetAllSpeciesWithBreedsAsync();
-
-            // Map to DTO and calculate BreedCount
-            // Since Breed also has a global query filter for IsDeleted,
-            // s.Breeds will only contain non-deleted breeds.
             return speciesList.Select(s => new SpeciesWithBreedCountDto
             {
                 Id = s.Id,
                 SpeciesName = s.SpeciesName,
                 IsDeleted = s.IsDeleted,
-                BreedCount = s.Breeds?.Count ?? 0 // Safely count the included breeds
+                BreedCount = s.Breeds?.Count ?? 0 
             }).ToList();
         }
 
         public Task<Species?> GetByIdAsync(string id)
         {
-            // This still returns the full Species object, which is needed for the edit form.
-            // The repository's GetByIdAsync now also includes Breeds, which is fine but not strictly
-            // used by the current edit form logic for this property.
             return _speciesRepository.GetByIdAsync(id);
         }
 

@@ -1,8 +1,7 @@
-// PetQuestV1/Program.cs
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models; // Add this using directive
+using Microsoft.OpenApi.Models; 
 using PetQuestV1.Client.Pages;
 using PetQuestV1.Components;
 using PetQuestV1.Components.Account;
@@ -16,14 +15,14 @@ using PetQuestV1.Contracts.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddControllers(); // Add this line to enable API controllers
-builder.Services.AddEndpointsApiExplorer(); // Add this line
-builder.Services.AddSwaggerGen(c => // Add this block for Swagger generation
+builder.Services.AddControllers(); 
+builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddSwaggerGen(c => 
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PetQuestV1 API", Version = "v1" });
 });
@@ -42,9 +41,6 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// --- SINGLE DB CONTEXT REGISTRATION: Use AddDbContextFactory for everything ---
-// This registers IDbContextFactory<ApplicationDbContext> as a Singleton.
-// Its options will be configured here.
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
@@ -52,7 +48,6 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Register your repositories and services. They will now use the IDbContextFactory.
 builder.Services.AddScoped<IPetRepository, PetRepository>();
 builder.Services.AddScoped<ISpeciesRepository, SpeciesRepository>();
 builder.Services.AddScoped<IBreedRepository, BreedRepository>();
@@ -63,16 +58,12 @@ builder.Services.AddScoped<ISpeciesService, SpeciesService>();
 builder.Services.AddScoped<IBreedService, BreedService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-
-// --- IDENTITY SETUP ---
-// This ensures ApplicationDbContext is registered as Scoped, using the factory, for Identity's needs.
 builder.Services.AddScoped<ApplicationDbContext>(sp =>
     sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
-// This is the SINGLE and COMPLETE IdentityCore registration.
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>() // This correctly picks up the Scoped ApplicationDbContext
+    .AddEntityFrameworkStores<ApplicationDbContext>() 
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
@@ -85,8 +76,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
     app.UseMigrationsEndPoint();
-    app.UseSwagger(); // Add this line
-    app.UseSwaggerUI(c => // Add this block for Swagger UI
+    app.UseSwagger();
+    app.UseSwaggerUI(c => 
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "PetQuestV1 API V1");
     });
@@ -109,6 +100,6 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.MapControllers(); // Add this line to map API controllers
+app.MapControllers(); 
 
 app.Run();

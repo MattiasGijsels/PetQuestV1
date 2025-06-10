@@ -1,5 +1,4 @@
-﻿// PetQuestV1/Services/BreedService.cs
-using PetQuestV1.Data.Defines;
+﻿using PetQuestV1.Data.Defines;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.DTOs;
@@ -12,7 +11,7 @@ namespace PetQuestV1.Services
     public class BreedService : IBreedService
     {
         private readonly IBreedRepository _breedRepository;
-        private readonly ISpeciesRepository _speciesRepository; // Inject SpeciesRepository to get species for dropdown
+        private readonly ISpeciesRepository _speciesRepository;
 
         public BreedService(IBreedRepository breedRepository, ISpeciesRepository speciesRepository)
         {
@@ -28,7 +27,7 @@ namespace PetQuestV1.Services
                 Id = b.Id,
                 BreedName = b.BreedName,
                 SpeciesId = b.SpeciesId,
-                SpeciesName = b.Species?.SpeciesName ?? "N/A", // Safely get SpeciesName
+                SpeciesName = b.Species?.SpeciesName ?? "N/A", 
                 IsDeleted = b.IsDeleted
             }).ToList();
         }
@@ -55,10 +54,8 @@ namespace PetQuestV1.Services
 
         public async Task<List<Species>> GetAllSpeciesAsync()
         {
-            // Use GetAllSpeciesWithBreedsAsync, but we only need the Species objects
-            // The global query filter will ensure only non-deleted species are returned.
             var allSpecies = await _speciesRepository.GetAllSpeciesWithBreedsAsync();
-            return allSpecies.Where(s => !s.IsDeleted).ToList(); // Ensure only non-deleted species are returned
+            return allSpecies.Where(s => !s.IsDeleted).ToList(); 
         }
     }
 }

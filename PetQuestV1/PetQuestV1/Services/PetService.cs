@@ -1,5 +1,4 @@
-﻿// Services/PetService.cs
-using PetQuestV1.Contracts.Defines;
+﻿using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Contracts.DTOs;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using System;
-using System.Linq; // Added for Where if needed, though repository handles it
+using System.Linq; 
 
 namespace PetQuestV1.Services
 {
@@ -36,7 +35,6 @@ namespace PetQuestV1.Services
             return _petRepository.GetByIdAsync(id);
         }
 
-        // NEW METHOD IMPLEMENTATION
         public Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId)
         {
             return _petRepository.GetPetsByOwnerIdAsync(ownerId);
@@ -51,7 +49,7 @@ namespace PetQuestV1.Services
                 BreedId = petDto.BreedId,
                 OwnerId = petDto.OwnerId,
                 Age = petDto.Age,
-                Advantage = petDto.Advantage, // Ensure Advantage is mapped
+                Advantage = petDto.Advantage, 
                 IsDeleted = false
             };
             await _petRepository.AddAsync(pet);
@@ -68,8 +66,7 @@ namespace PetQuestV1.Services
                 petToUpdate.BreedId = petDto.BreedId;
                 petToUpdate.OwnerId = petDto.OwnerId;
                 petToUpdate.Age = petDto.Age;
-                petToUpdate.Advantage = petDto.Advantage; // Ensure Advantage is updated
-                // petToUpdate.ImagePath is updated via UploadPetImageAsync
+                petToUpdate.Advantage = petDto.Advantage; 
                 await _petRepository.UpdateAsync(petToUpdate);
             }
         }
@@ -94,7 +91,7 @@ namespace PetQuestV1.Services
             var pet = await _petRepository.GetByIdAsync(petId);
             if (pet == null)
             {
-                return null; // Pet not found
+                return null; 
             }
 
             var petImagesDirectoryPath = Path.Combine(_env.WebRootPath, ImagesFolderName, PetImagesSubfolderName);
@@ -164,7 +161,7 @@ namespace PetQuestV1.Services
 
         public async Task<List<PetFormDto>> GetAllPetsFormDtoAsync()
         {
-            var pets = await _petRepository.GetAllPetsWithDetailsAsync(); // Call the new repository method
+            var pets = await _petRepository.GetAllPetsWithDetailsAsync();
             return pets.Select(p => new PetFormDto
             {
                 Id = p.Id,
@@ -179,7 +176,7 @@ namespace PetQuestV1.Services
         }
         public async Task<PetFormDto?> GetPetFormDtoByIdAsync(string id)
         {
-            var pet = await _petRepository.GetPetWithDetailsByIdAsync(id); // Call the new repository method
+            var pet = await _petRepository.GetPetWithDetailsByIdAsync(id); 
             if (pet == null)
             {
                 return null;
@@ -200,7 +197,7 @@ namespace PetQuestV1.Services
 
         public async Task<List<PetViewerDto>> GetAllPetsForAnalystAsync()
         {
-            var pets = await _petRepository.GetAllPetsWithDetailsAsync(); // assumes includes navigation properties
+            var pets = await _petRepository.GetAllPetsWithDetailsAsync(); 
             return pets.Select(p => new PetViewerDto
             {
                 Id = p.Id,
