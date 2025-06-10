@@ -1,34 +1,27 @@
-/* NavMenu.razor.css */
-
-/* Top Navigation Bar Styles */
 .top-nav-container {
     display: flex;
     flex-direction: column;
 }
 
-/* Apply content-box to specific navigation elements */
 .top-row,
 .top-row .nav-scrollable,
 .top-row .nav-scrollable nav,
 .top-row .nav-scrollable .nav-item,
 .top-row .nav-scrollable .nav-item .navbar-brand,
 .top-row .nav-scrollable .nav-item .navbar-brand img,
-.top-row .nav-scrollable .nav-item ::deep .nav-link, /* Use ::deep for NavLink */
+.top-row .nav-scrollable .nav-item ::deep .nav-link,
 .top-row .nav-scrollable .nav-item form button.nav-link,
 .top-row .nav-scrollable .nav-item svg {
     box-sizing: content-box !important;
 }
 
-    /* Ensure the path elements inside the SVG also adhere if needed,
-   though usually, SVG internal elements behave differently. */
     .top-row .nav-scrollable .nav-item svg path {
         box-sizing: content-box !important;
     }
 
 
-/* Updated navbar-brand styles to work as a nav-link */
 .navbar-brand {
-    font-size: 0.8rem; /* Much smaller font */
+    font-size: 0.8rem;
     font-weight: bold;
     color: white !important;
     text-decoration: none;
@@ -36,12 +29,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem 0.4rem; /* Much smaller padding */
-    height: 2rem; /* Smaller height */
+    padding: 0.25rem 0.4rem; 
+    height: 2rem; 
     border-radius: 4px;
     transition: all 0.2s ease;
     min-width: fit-content;
-    flex-shrink: 0; /* Prevent shrinking */
+    flex-shrink: 0;
 }
 
     .navbar-brand:hover {
@@ -52,11 +45,10 @@
     }
 
     .navbar-brand img {
-        max-height: 8rem; /* Much smaller logo */
+        max-height: 8rem; 
         width: auto;
     }
 
-/* Mobile hamburger menu */
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
@@ -76,28 +68,26 @@
         background-color: rgba(255, 255, 255, 0.3);
     }
 
-/* Navigation container - Force single row */
+
 .nav-scrollable nav {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     justify-content: center;
     align-items: center;
-    gap: 0.25rem; /* Very small gap */
-    padding: 0.3rem 0.5rem; /* Minimal padding */
-    overflow-x: auto; /* Add horizontal scroll if needed */
-    scrollbar-width: none; /* Hide scrollbar in Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+    gap: 0.25rem; 
+    padding: 0.3rem 0.5rem; 
+    overflow-x: auto; 
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
     width: 100%;
     min-height: auto;
 }
 
-    /* Hide scrollbar in webkit browsers */
     .nav-scrollable nav::-webkit-scrollbar {
         display: none;
     }
 
-    /* Override the flex-column class that's applied in the Razor file */
     .nav-scrollable nav.flex-column {
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -106,7 +96,7 @@
 
 .nav-item {
     margin: 0;
-    flex-shrink: 0; /* Prevent items from shrinking */
+    flex-shrink: 0; 
 }
 
     .nav-item ::deep .nav-link {
@@ -114,37 +104,36 @@
         background: none;
         border: none;
         border-radius: 4px;
-        height: 2rem; /* Smaller height */
+        height: 2rem; 
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.25rem 0.4rem; /* Much smaller padding */
+        padding: 0.25rem 0.4rem; 
         white-space: nowrap;
-        font-size: 0.8rem; /* Smaller font size */
+        font-size: 0.8rem; 
         transition: all 0.2s ease;
         text-decoration: none;
         min-width: fit-content;
-        flex-shrink: 0; /* Prevent shrinking */
+        flex-shrink: 0; 
     }
 
-    /* Special styling for logout button to match nav-links */
     .nav-item form button.nav-link {
         color: #d7d7d7;
         background: none;
         border: none;
         border-radius: 4px;
-        height: 2rem; /* Smaller height */
+        height: 2rem; 
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.25rem 0.4rem; /* Much smaller padding */
+        padding: 0.25rem 0.4rem; 
         white-space: nowrap;
-        font-size: 0.8rem; /* Smaller font size */
+        font-size: 0.8rem; 
         transition: all 0.2s ease;
         text-decoration: none;
         cursor: pointer;
         min-width: fit-content;
-        flex-shrink: 0; /* Prevent shrinking */
+        flex-shrink: 0; 
     }
 
         .nav-item form button.nav-link:hover {
@@ -169,13 +158,12 @@
     width: fit-content;
 }
 
-/* Icon styles */
 .bi {
     display: inline-block;
     position: relative;
-    width: 0.75rem; /* Smaller icons */
+    width: 0.75rem;
     height: 0.75rem;
-    margin-right: 0.25rem; /* Smaller margin */
+    margin-right: 0.25rem; 
     background-size: cover;
     flex-shrink: 0;
 }
@@ -204,7 +192,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-arrow-bar-left' viewBox='0 0 16 16'%3E%3Cpath d='M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5ZM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5Z'/%3E%3C/svg%3E");
 }
 
-/* Mobile collapsible menu */
 .nav-scrollable {
     display: none;
 }
@@ -217,20 +204,19 @@
     width: fit-content;
 }
 
-/* Mobile styles */
+
 @media (max-width: 768px) {
     .navbar-toggler {
         display: block;
     }
 
-    /* On mobile, keep horizontal layout but allow slight wrapping if absolutely necessary */
     .nav-scrollable nav,
     .nav-scrollable nav.flex-column {
         flex-direction: row !important;
         justify-content: center;
         align-items: center;
         padding: 0.75rem 0.5rem;
-        gap: 0.3rem; /* Even smaller gap on mobile */
+        gap: 0.3rem;
         background-color: rgba(0,0,0,0.1);
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         flex-wrap: nowrap;
@@ -240,13 +226,13 @@
     .nav-item ::deep .nav-link,
     .navbar-brand {
         justify-content: center;
-        padding: 0.4rem 0.5rem; /* Smaller padding on mobile */
+        padding: 0.4rem 0.5rem; 
         min-width: auto;
-        font-size: 0.85rem; /* Smaller font on mobile */
+        font-size: 0.85rem; 
     }
 
         .navbar-brand img {
-            max-height: 1.5rem; /* Smaller logo on mobile */
+            max-height: 1.5rem; 
         }
 
     .bi {
@@ -256,7 +242,6 @@
     }
 }
 
-/* Desktop styles */
 @media (min-width: 769px) {
     .navbar-toggler {
         display: none;
@@ -266,15 +251,14 @@
         display: block !important;
     }
 
-        /* Ensure horizontal layout on desktop with no wrapping */
         .nav-scrollable nav,
         .nav-scrollable nav.flex-column {
             flex-direction: row !important;
             justify-content: center;
             flex-wrap: nowrap !important;
-            max-width: none; /* Remove max-width restriction */
+            max-width: none;
             margin: 0 auto;
-            gap: 0.3rem; /* Small gap */
+            gap: 0.3rem; 
             padding: 0.3rem 0.5rem;
             width: 100%;
         }
@@ -294,7 +278,6 @@
     }
 }
 
-/* Large desktop screens - more space available */
 @media (min-width: 1200px) {
     .nav-scrollable nav,
     .nav-scrollable nav.flex-column {

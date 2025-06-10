@@ -5,7 +5,6 @@
     min-height: 100vh;
 }
 
-/* Top Navigation Header */
 .top-nav-header {
     background-image: linear-gradient(0deg, rgb(5, 39, 103) 0%, #1F5D9D 100%);
     width: 100%;
@@ -15,7 +14,6 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Main content area */
 .main-content {
     flex: 1;
     display: flex;
@@ -48,13 +46,11 @@
             text-overflow: ellipsis;
         }
 
-/* Content area */
 .content {
     flex: 1;
     padding: 1.5rem 2rem;
 }
 
-/* Mobile adjustments */
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
@@ -71,7 +67,7 @@
     }
 }
 
-/* Desktop adjustments */
+
 @media (min-width: 641px) {
     .top-row.auth ::deep a:first-child {
         flex: 1;
