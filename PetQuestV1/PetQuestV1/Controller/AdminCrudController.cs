@@ -1,9 +1,8 @@
-﻿// Controllers/AdminCrudController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PetQuestV1.Services;
 using PetQuestV1.Contracts.Defines;
 using PetQuestV1.Contracts.DTOs;
-using PetQuestV1.Contracts.Models; // Needed for Species and SpeciesWithBreedCountDto
+using PetQuestV1.Contracts.Models; 
 using System.Threading.Tasks;
 
 namespace PetQuestV1.Controllers
@@ -29,8 +28,6 @@ namespace PetQuestV1.Controllers
             _petService = petService;
         }
 
-        // --- USER CRUD (No changes here) ---
-
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers() =>
             Ok(await _userService.GetAllUsersWithPetCountsAsync());
@@ -54,19 +51,14 @@ namespace PetQuestV1.Controllers
             return NoContent();
         }
 
-        // --- SPECIES CRUD (Changes applied here) ---
-
         [HttpGet("species")]
         public async Task<IActionResult> GetSpecies() =>
-            // Now calls the service method which returns List<SpeciesWithBreedCountDto>
             Ok(await _speciesService.GetAllSpeciesForAdminAsync());
 
         [HttpGet("species/{id}")]
         public async Task<IActionResult> GetSpeciesById(string id) =>
-            // Now calls the service method which returns SpeciesWithBreedCountDto
-            Ok(await _speciesService.GetByIdAsync(id));
+           Ok(await _speciesService.GetByIdAsync(id));
 
-        // Keep these as they are, as they accept and update the full Species model (for creation/updates)
         [HttpPost("species")]
         public async Task<IActionResult> AddSpecies([FromBody] Species species)
         {
@@ -88,8 +80,6 @@ namespace PetQuestV1.Controllers
             await _speciesService.SoftDeleteAsync(id);
             return NoContent();
         }
-
-        // --- BREED CRUD (No changes here, already using DTOs for output) ---
 
         [HttpGet("breeds")]
         public async Task<IActionResult> GetBreeds() =>
@@ -120,8 +110,6 @@ namespace PetQuestV1.Controllers
             await _breedService.SoftDeleteAsync(id);
             return NoContent();
         }
-
-        // --- PET CRUD (No changes here, already using DTOs for input/output) ---
 
         [HttpGet("pets")]
         public async Task<IActionResult> GetAllPetsAPI() =>

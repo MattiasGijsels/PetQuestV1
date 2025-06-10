@@ -11,10 +11,10 @@ namespace PetQuestV1.Contracts.Models
         public string BreedName { get; set; } = default!;
 
         [Required]
-        public string SpeciesId { get; set; } = default!; // FK to Species
+        public string SpeciesId { get; set; } = default!; 
 
         [ForeignKey("SpeciesId")]
-        public Species? Species { get; set; } // Navigation property
+        public Species? Species { get; set; } 
 
         public Breed() : base() { }
     }

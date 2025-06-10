@@ -1,5 +1,4 @@
-﻿// Repositories/PetRepository.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
 using PetQuestV1.Data.Defines;
@@ -32,11 +31,8 @@ namespace PetQuestV1.Data.Repository
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // NEW METHOD IMPLEMENTATION
         public async Task<List<Pet>> GetPetsByOwnerIdAsync(string ownerId)
         {
-            // Global query filter handles IsDeleted.
-            // Eagerly load related entities for display in IdentityCard.
             return await _context.Pets
                 .Where(p => p.OwnerId == ownerId)
                 .Include(p => p.Owner)
@@ -67,7 +63,7 @@ namespace PetQuestV1.Data.Repository
                 existingPet.Age = pet.Age;
                 existingPet.OwnerId = pet.OwnerId;
                 existingPet.ImagePath = pet.ImagePath;
-                existingPet.Advantage = pet.Advantage; // Make sure Advantage is updated
+                existingPet.Advantage = pet.Advantage;
                 existingPet.IsDeleted = pet.IsDeleted;
 
                 _context.Pets.Update(existingPet);
@@ -118,12 +114,10 @@ namespace PetQuestV1.Data.Repository
         }
         public async Task<List<Pet>> GetAllPetsWithDetailsAsync()
         {
-            // Include Species and Breed if you need this data for display in my DTO later
-            // Otherwise, just .Where(p => !p.IsDeleted).ToListAsync(); is sufficient.
             return await _context.Pets
-                                 .Include(p => p.Species) // Assuming you have navigation properties
-                                 .Include(p => p.Breed)   // Assuming you have navigation properties
-                                 .Include(p => p.Owner) // Include Owner if needed
+                                 .Include(p => p.Species) 
+                                 .Include(p => p.Breed)  
+                                 .Include(p => p.Owner) 
                                  .Where(p => !p.IsDeleted)
                                  .ToListAsync();
         }

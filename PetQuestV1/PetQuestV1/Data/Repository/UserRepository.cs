@@ -1,12 +1,11 @@
-﻿// PetQuestV1.Data.Repository/UserRepository.cs (or PetQuestV1.Repositories/UserRepository.cs)
-using Microsoft.EntityFrameworkCore;
-using PetQuestV1.Data; // For ApplicationUser and ApplicationDbContext
-using PetQuestV1.Data.Defines; // For IUserRepository
+﻿using Microsoft.EntityFrameworkCore;
+using PetQuestV1.Data; 
+using PetQuestV1.Data.Defines; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository implementations
+namespace PetQuestV1.Data.Repository 
 {
     public class UserRepository : IUserRepository
     {
@@ -21,7 +20,7 @@ namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository 
         {
             using var _dbContext = _dbContextFactory.CreateDbContext();
             return await _dbContext.Users
-                                    .Include(u => u.Pets) // Include Pets if you need pet counts in service layer
+                                    .Include(u => u.Pets) 
                                     .ToListAsync();
         }
 
@@ -29,7 +28,7 @@ namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository 
         {
             using var _dbContext = _dbContextFactory.CreateDbContext();
             return await _dbContext.Users
-                                    .Include(u => u.Pets) // Include Pets if you need pet counts in service layer
+                                    .Include(u => u.Pets) 
                                     .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
@@ -49,8 +48,6 @@ namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository 
         public async Task UpdateAsync(ApplicationUser user)
         {
             using var _dbContext = _dbContextFactory.CreateDbContext();
-            // Attach the entity if it's detached (e.g., if it came from a DTO and was newed up)
-            // Or use Update directly if it's already being tracked or has its properties set on an existing entity
             _dbContext.Users.Update(user);
             await _dbContext.SaveChangesAsync();
         }
@@ -73,7 +70,7 @@ namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository 
             if (user != null)
             {
                 user.IsDeleted = true;
-                _dbContext.Users.Update(user); // Mark as modified
+                _dbContext.Users.Update(user); 
                 await _dbContext.SaveChangesAsync();
             }
         }
@@ -85,7 +82,7 @@ namespace PetQuestV1.Data.Repository // Or your chosen namespace for repository 
             if (user != null)
             {
                 user.IsDeleted = false;
-                _dbContext.Users.Update(user); // Mark as modified
+                _dbContext.Users.Update(user); 
                 await _dbContext.SaveChangesAsync();
             }
         }

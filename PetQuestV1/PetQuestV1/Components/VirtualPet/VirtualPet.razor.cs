@@ -15,8 +15,6 @@ namespace PetQuestV1.Components.VirtualPet
         protected string PetEmoji = "🐶";
         protected string StatusMessage = "Select a pet to start playing!";
         protected string PetStyle = "font-size: 5rem;";
-
-        // Individual emoji animations for each button
         protected string FeedEmojiAnimation = "";
         protected string PlayEmojiAnimation = "";
         protected string SleepEmojiAnimation = "";
@@ -222,25 +220,20 @@ namespace PetQuestV1.Components.VirtualPet
                 };
 
                 await PetService.UpdatePetAsync(petDto);
-
-                // IMPORTANT: Reload the SelectedPet from the database to ensure it reflects the true state
-                // This will fetch the pet with its new Advantage value (which should be 6, if it was 5 initially)
                 SelectedPet = await PetService.GetByIdAsync(SelectedPet.Id);
 
-                // Add a null check here for SelectedPet after the potential reload
                 if (SelectedPet == null)
                 {
                     StatusMessage = "Error: Pet not found after saving progress.";
-                    ShowSuccessModal = false; // Hide modal if pet is null
-                    IsGameDisabled = false;   // Re-enable game if pet is null
-                    StartDecayTimer();        // Restart timer if appropriate
+                    ShowSuccessModal = false; 
+                    IsGameDisabled = false;   
+                    StartDecayTimer();        
                     StateHasChanged();
-                    return; // Exit the method
+                    return; 
                 }
 
                 ShowSuccessModal = false;
                 ResetGameStats();
-                // Now, SelectedPet is guaranteed not to be null here
                 StatusMessage = $"Great job! {SelectedPet.PetName} gained +1 Advantage! Current Advantage: {SelectedPet.Advantage}";
 
                 StateHasChanged();
@@ -314,7 +307,6 @@ namespace PetQuestV1.Components.VirtualPet
 
         protected void AnimateButtonEmoji(string buttonType, string emoji)
         {
-            // Set the emoji for the specific button
             switch (buttonType)
             {
                 case "feed":
@@ -330,7 +322,6 @@ namespace PetQuestV1.Components.VirtualPet
 
             StateHasChanged();
 
-            // Clear the emoji after animation duration
             _ = Task.Delay(1500).ContinueWith(_ =>
             {
                 switch (buttonType)
@@ -348,7 +339,6 @@ namespace PetQuestV1.Components.VirtualPet
                 InvokeAsync(StateHasChanged);
             });
         }
-
         public void Dispose()
         {
             StopDecayTimer();

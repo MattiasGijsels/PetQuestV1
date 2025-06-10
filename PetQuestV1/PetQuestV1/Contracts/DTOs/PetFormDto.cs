@@ -1,5 +1,4 @@
-﻿// Contracts/DTOs/Pets/PetFormDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PetQuestV1.Contracts.DTOs
 {
@@ -14,7 +13,7 @@ namespace PetQuestV1.Contracts.DTOs
         [Required(ErrorMessage = "Species is required.")]
         public string? SpeciesId { get; set; }
 
-        public int Advantage { get; set; } = 5;// Every pet starts out with 5 Advantage
+        public int Advantage { get; set; } = 5;
 
         public string? BreedId { get; set; }
 
@@ -22,9 +21,8 @@ namespace PetQuestV1.Contracts.DTOs
         public string? OwnerId { get; set; }
 
         [Range(0.0, 30.0, ErrorMessage = "Age must be between 0.0 and 30.0.")]
-        public double? Age { get; set; } // Made a nullable double because the int would let me display a placeholder in the UI
+        public double? Age { get; set; }
 
-        // --- NEW PROPERTY FOR IMAGE PATH ---
-        public string? ImagePath { get; set; } // Stores the public URL of the pet's image
+        public string? ImagePath { get; set; } 
     }
 }

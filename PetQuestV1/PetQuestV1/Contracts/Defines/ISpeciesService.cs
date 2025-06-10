@@ -8,7 +8,7 @@ namespace PetQuestV1.Contracts.Defines
     public interface ISpeciesService
     {
         Task<List<SpeciesWithBreedCountDto>> GetAllSpeciesForAdminAsync();
-        Task<Species?> GetByIdAsync(string id); //for fetching the full Species object for editing
+        Task<Species?> GetByIdAsync(string id); 
         Task AddAsync(Species species);
         Task UpdateAsync(Species species);
         Task SoftDeleteAsync(string id);

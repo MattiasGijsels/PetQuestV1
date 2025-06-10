@@ -1,5 +1,4 @@
-﻿// Contracts/IPetRepository.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using PetQuestV1.Contracts.Models;
 
@@ -16,8 +15,8 @@ namespace PetQuestV1.Data.Defines
         Task<Species?> GetSpeciesByNameAsync(string name); 
         Task<List<Species>> GetAllSpeciesAsync();
         Task<List<Breed>> GetBreedsBySpeciesIdAsync(string speciesId);
-        Task<List<Breed>> GetAllBreedsAsync(); // Optional: if I need a list of ALL breeds
-        Task<Breed?> GetBreedByIdAsync(string id); // Optional: if I need to fetch a single breed
+        Task<List<Breed>> GetAllBreedsAsync(); 
+        Task<Breed?> GetBreedByIdAsync(string id); 
         Task<List<Pet>> GetAllPetsWithDetailsAsync();
         Task<Pet?> GetPetWithDetailsByIdAsync(string id);
     }

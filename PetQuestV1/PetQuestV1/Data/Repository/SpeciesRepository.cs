@@ -1,5 +1,4 @@
-﻿// PetQuestV1/Data/Repository/SpeciesRepository.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Data.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
@@ -19,15 +18,12 @@ namespace PetQuestV1.Data.Repository
             _contextFactory = contextFactory;
         }
 
-        // Renamed/Modified method to include breeds
-        public async Task<List<Species>> GetAllSpeciesWithBreedsAsync() // <--- MODIFIED METHOD NAME
+        public async Task<List<Species>> GetAllSpeciesWithBreedsAsync() 
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                // The global query filter will automatically exclude IsDeleted species AND breeds.
-                // So, s.Breeds will only contain non-deleted breeds.
                 return await _context.Species
-                                     .Include(s => s.Breeds) // Include the navigation property
+                                     .Include(s => s.Breeds) 
                                      .ToListAsync();
             }
         }
@@ -36,9 +32,8 @@ namespace PetQuestV1.Data.Repository
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                // Include breeds here too if you need them when fetching a single species
                 return await _context.Species
-                                     //.Include(s => s.Breeds) // Include breeds
+
                                      .FirstOrDefaultAsync(s => s.Id == id);
             }
         }

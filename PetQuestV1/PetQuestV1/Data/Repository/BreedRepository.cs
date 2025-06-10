@@ -1,5 +1,4 @@
-﻿// PetQuestV1/Data/Repository/BreedRepository.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PetQuestV1.Data.Defines;
 using PetQuestV1.Contracts.Models;
 using PetQuestV1.Data;
@@ -23,10 +22,8 @@ namespace PetQuestV1.Data.Repository
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                // Global query filter on Breed will exclude IsDeleted breeds.
-                // Global query filter on Species will exclude IsDeleted species from the Include.
                 return await _context.Breeds
-                                     .Include(b => b.Species) // Include the Species navigation property
+                                     .Include(b => b.Species) 
                                      .ToListAsync();
             }
         }
@@ -36,7 +33,7 @@ namespace PetQuestV1.Data.Repository
             using (var _context = _contextFactory.CreateDbContext())
             {
                 return await _context.Breeds
-                                     //.Include(b => b.Species) // Include Species when fetching by ID for potential display/editing
+
                                      .FirstOrDefaultAsync(b => b.Id == id);
             }
         }
@@ -63,8 +60,7 @@ namespace PetQuestV1.Data.Repository
                 if (existingBreed != null)
                 {
                     existingBreed.BreedName = breed.BreedName;
-                    existingBreed.SpeciesId = breed.SpeciesId; // Update SpeciesId
-                    // Don't update IsDeleted here, that's handled by SoftDeleteAsync
+                    existingBreed.SpeciesId = breed.SpeciesId; 
                     _context.Breeds.Update(existingBreed);
                     await _context.SaveChangesAsync();
                 }
