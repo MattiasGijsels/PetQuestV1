@@ -9,11 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetQuestV1.Client", "PetQue
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLIDatabaseSetupTool", "CLIDatabaseSetupTool\CLIDatabaseSetupTool.csproj", "{8F1AD99E-7DC1-43BA-8985-17F8B3985B34}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Documentation", "!Documentation", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\Desktop\PetQuestV1 Project Documentation.docx = ..\..\..\Desktop\PetQuestV1 Project Documentation.docx
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
